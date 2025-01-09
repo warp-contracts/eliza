@@ -26,6 +26,7 @@
         "@elizaos/adapter-qdrant": "workspace:*",
         "@elizaos/adapter-mongodb": "workspace:*",
         "@elizaos/client-auto": "workspace:*",
+        "@elizaos/client-ao": "workspace:*",
         "@elizaos/client-direct": "workspace:*",
         "@elizaos/client-discord": "workspace:*",
         "@elizaos/client-farcaster": "workspace:*",
