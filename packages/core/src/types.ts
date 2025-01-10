@@ -617,6 +617,7 @@ export type Plugin = {
  * Available client platforms
  */
 export enum Clients {
+    AO = "ao",
     DISCORD = "discord",
     DIRECT = "direct",
     TWITTER = "twitter",

@@ -70,6 +70,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import yargs from "yargs";
 import net from "net";
+import AoTheComputerClientInterface from "@elizaos/client-ao";
 
 const __filename = fileURLToPath(import.meta.url); // get the resolved path to the file
 const __dirname = path.dirname(__filename); // get the name of the directory
@@ -402,6 +403,11 @@ export async function initializeClients(
         if (autoClient) clients.auto = autoClient;
     }
 
+    if (clientTypes.includes(Clients.AO)) {
+        const aoTheComputer = await AoTheComputerClientInterface.start(runtime);
+        if (aoTheComputer) clients.aoTheComputer = aoTheComputer;
+    }
+
     if (clientTypes.includes(Clients.DISCORD)) {
         const discordClient = await DiscordClientInterface.start(runtime);
         if (discordClient) clients.discord = discordClient;
@@ -706,6 +712,7 @@ async function startAgent(
 
         // start services/plugins/process knowledge
         await runtime.initialize();
+        console.log(`runtime.initialized`);
 
         // start assigned clients
         runtime.clients = await initializeClients(character, runtime);
@@ -718,6 +725,7 @@ async function startAgent(
 
         return runtime;
     } catch (error) {
+        console.log(error);
         elizaLogger.error(
             `Error starting agent for character ${character.name}:`,
             error

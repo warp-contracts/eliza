@@ -42,16 +42,16 @@ Your response should not contain any questions. Brief, concise statements only. 
 
 ` + messageCompletionFooter;
 
-export class TwitterSearchClient {
+export class AoSearchClient {
     client: ClientBase;
     runtime: IAgentRuntime;
-    twitterUsername: string;
-    private respondedTweets: Set<string> = new Set();
+    aoUsername: string;
+    private respondedMessages: Set<string> = new Set();
 
     constructor(client: ClientBase, runtime: IAgentRuntime) {
         this.client = client;
         this.runtime = runtime;
-        this.twitterUsername = this.client.twitterConfig.TWITTER_USERNAME;
+        this.aoUsername = this.client.aoConfig.AO_USERNAME;
     }
 
     async start() {
@@ -78,22 +78,22 @@ export class TwitterSearchClient {
             console.log("Fetching search tweets");
             // TODO: we wait 5 seconds here to avoid getting rate limited on startup, but we should queue
             await new Promise((resolve) => setTimeout(resolve, 5000));
-            const recentTweets = await this.client.fetchSearchTweets(
+            const recentTweets = await this.client.fetchSearchMessages(
                 searchTerm,
                 20,
                 SearchMode.Top
             );
             console.log("Search tweets fetched");
 
-            const homeTimeline = await this.client.fetchHomeTimeline(50);
+            const homeTimeline = await this.client.fetchIncomingMessages(50);
 
             await this.client.cacheTimeline(homeTimeline);
 
             const formattedHomeTimeline =
                 `# ${this.runtime.character.name}'s Home Timeline\n\n` +
                 homeTimeline
-                    .map((tweet) => {
-                        return `ID: ${tweet.id}\nFrom: ${tweet.name} (@${tweet.username})${tweet.inReplyToStatusId ? ` In reply to: ${tweet.inReplyToStatusId}` : ""}\nText: ${tweet.text}\n---\n`;
+                    .map((m) => {
+                        return `ID: ${m.id}\nFrom: ${m.owner} \nText: ${m.data}\n---\n`;
                     })
                     .join("\n");
 
@@ -118,7 +118,7 @@ export class TwitterSearchClient {
           // ignore tweets where any of the thread tweets contain a tweet by the bot
           const thread = tweet.thread;
           const botTweet = thread.find(
-              (t) => t.username === this.twitterUsername
+              (t) => t.username === this.aoUsername
           );
           return !botTweet;
       })
@@ -159,7 +159,7 @@ export class TwitterSearchClient {
 
             console.log("Selected tweet to reply to:", selectedTweet?.text);
 
-            if (selectedTweet.username === this.twitterUsername) {
+            if (selectedTweet.username === this.aoUsername) {
                 console.log("Skipping tweet from bot itself");
                 return;
             }
@@ -209,14 +209,14 @@ export class TwitterSearchClient {
             // Fetch replies and retweets
             const replies = selectedTweet.thread;
             const replyContext = replies
-                .filter((reply) => reply.username !== this.twitterUsername)
+                .filter((reply) => reply.username !== this.aoUsername)
                 .map((reply) => `@${reply.username}: ${reply.text}`)
                 .join("\n");
 
             let tweetBackground = "";
             if (selectedTweet.isRetweet) {
                 const originalTweet = await this.client.requestQueue.add(() =>
-                    this.client.twitterClient.getTweet(selectedTweet.id)
+                    this.client.aoClient.getMessage(selectedTweet.id)
                 );
                 tweetBackground = `Retweeting @${originalTweet.username}: ${originalTweet.text}`;
             }
@@ -233,8 +233,8 @@ export class TwitterSearchClient {
             }
 
             let state = await this.runtime.composeState(message, {
-                twitterClient: this.client.twitterClient,
-                twitterUserName: this.twitterUsername,
+                twitterClient: this.client.aoClient,
+                twitterUserName: this.aoUsername,
                 timeline: formattedHomeTimeline,
                 tweetContext: `${tweetBackground}
 
@@ -279,7 +279,7 @@ export class TwitterSearchClient {
                         this.client,
                         response,
                         message.roomId,
-                        this.twitterUsername,
+                        this.aoUsername,
                         tweetId
                     );
                     return memories;
@@ -307,7 +307,7 @@ export class TwitterSearchClient {
                     callback
                 );
 
-                this.respondedTweets.add(selectedTweet.id);
+                this.respondedMessages.add(selectedTweet.id);
                 const responseInfo = `Context:\n\n${context}\n\nSelected Post: ${selectedTweet.id} - ${selectedTweet.username}: ${selectedTweet.text}\nAgent's Output:\n${response.text}`;
 
                 await this.runtime.cacheManager.set(

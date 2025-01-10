@@ -65,7 +65,7 @@ Tweet:
 # Respond with qualifying action tags only. Default to NO action unless extremely confident of relevance.` + postActionResponseFooter;
 
 /**
- * Truncate text to fit within the Twitter character limit, ensuring it ends at a complete sentence.
+ * Truncate text to fit within the AoTheComputer character limit, ensuring it ends at a complete sentence.
  */
 function truncateToCompleteSentence(
     text: string,
@@ -98,10 +98,10 @@ function truncateToCompleteSentence(
     return hardTruncated + "...";
 }
 
-export class TwitterPostClient {
+export class AoTheComputerPostClient {
     client: ClientBase;
     runtime: IAgentRuntime;
-    twitterUsername: string;
+    aoUsername: string;
     private isProcessing: boolean = false;
     private lastProcessTime: number = 0;
     private stopProcessingActions: boolean = false;
@@ -110,39 +110,34 @@ export class TwitterPostClient {
     constructor(client: ClientBase, runtime: IAgentRuntime) {
         this.client = client;
         this.runtime = runtime;
-        this.twitterUsername = this.client.twitterConfig.TWITTER_USERNAME;
-        this.isDryRun = this.client.twitterConfig.TWITTER_DRY_RUN
+        this.aoUsername = this.client.aoConfig.AO_USERNAME;
+        this.isDryRun = this.client.aoConfig.TWITTER_DRY_RUN
 
         // Log configuration on initialization
-        elizaLogger.log("Twitter Client Configuration:");
-        elizaLogger.log(`- Username: ${this.twitterUsername}`);
+        elizaLogger.log("AoTheComputer Client Configuration:");
+        elizaLogger.log(`- Username: ${this.aoUsername}`);
         elizaLogger.log(
             `- Dry Run Mode: ${this.isDryRun ? "enabled" : "disabled"}`
         );
         elizaLogger.log(
-            `- Post Interval: ${this.client.twitterConfig.POST_INTERVAL_MIN}-${this.client.twitterConfig.POST_INTERVAL_MAX} minutes`
+            `- Post Interval: ${this.client.aoConfig.POST_INTERVAL_MIN}-${this.client.aoConfig.POST_INTERVAL_MAX} minutes`
         );
         elizaLogger.log(
-            `- Action Processing: ${this.client.twitterConfig.ENABLE_ACTION_PROCESSING ? "enabled" : "disabled"}`
+            `- Action Processing: ${this.client.aoConfig.ENABLE_ACTION_PROCESSING ? "enabled" : "disabled"}`
         );
         elizaLogger.log(
-            `- Action Interval: ${this.client.twitterConfig.ACTION_INTERVAL} minutes`
+            `- Action Interval: ${this.client.aoConfig.ACTION_INTERVAL} minutes`
         );
         elizaLogger.log(
-            `- Post Immediately: ${this.client.twitterConfig.POST_IMMEDIATELY ? "enabled" : "disabled"}`
+            `- Post Immediately: ${this.client.aoConfig.POST_IMMEDIATELY ? "enabled" : "disabled"}`
         );
         elizaLogger.log(
-            `- Search Enabled: ${this.client.twitterConfig.TWITTER_SEARCH_ENABLE ? "enabled" : "disabled"}`
+            `- Search Enabled: ${this.client.aoConfig.AO_SEARCH_ENABLE ? "enabled" : "disabled"}`
         );
-
-        const targetUsers = this.client.twitterConfig.TWITTER_TARGET_USERS;
-        if (targetUsers) {
-            elizaLogger.log(`- Target Users: ${targetUsers}`);
-        }
 
         if (this.isDryRun) {
             elizaLogger.log(
-                "Twitter client initialized in dry run mode - no actual tweets should be posted"
+                "AoTheComputer client initialized in dry run mode - no actual tweets should be posted"
             );
         }
     }
@@ -155,11 +150,11 @@ export class TwitterPostClient {
         const generateNewTweetLoop = async () => {
             const lastPost = await this.runtime.cacheManager.get<{
                 timestamp: number;
-            }>("twitter/" + this.twitterUsername + "/lastPost");
+            }>("twitter/" + this.aoUsername + "/lastPost");
 
             const lastPostTimestamp = lastPost?.timestamp ?? 0;
-            const minMinutes = this.client.twitterConfig.POST_INTERVAL_MIN;
-            const maxMinutes = this.client.twitterConfig.POST_INTERVAL_MAX;
+            const minMinutes = this.client.aoConfig.POST_INTERVAL_MIN;
+            const maxMinutes = this.client.aoConfig.POST_INTERVAL_MAX;
             const randomMinutes =
                 Math.floor(Math.random() * (maxMinutes - minMinutes + 1)) +
                 minMinutes;
@@ -177,7 +172,7 @@ export class TwitterPostClient {
         };
 
         const processActionsLoop = async () => {
-            const actionInterval = this.client.twitterConfig.ACTION_INTERVAL; // Defaults to 5 minutes
+            const actionInterval = this.client.aoConfig.ACTION_INTERVAL; // Defaults to 5 minutes
 
             while (!this.stopProcessingActions) {
                 try {
@@ -203,7 +198,7 @@ export class TwitterPostClient {
             }
         };
 
-        if (this.client.twitterConfig.POST_IMMEDIATELY) {
+        if (this.client.aoConfig.POST_IMMEDIATELY) {
             await this.generateNewTweet();
         }
 
@@ -215,7 +210,7 @@ export class TwitterPostClient {
             elizaLogger.log("Tweet generation loop disabled (dry run mode)");
         }
 
-        if (this.client.twitterConfig.ENABLE_ACTION_PROCESSING && !this.isDryRun) {
+        if (this.client.aoConfig.ENABLE_ACTION_PROCESSING && !this.isDryRun) {
             processActionsLoop().catch((error) => {
                 elizaLogger.error(
                     "Fatal error in process actions loop:",
@@ -250,7 +245,7 @@ export class TwitterPostClient {
             timestamp: new Date(tweetResult.legacy.created_at).getTime(),
             userId: client.profile.id,
             inReplyToStatusId: tweetResult.legacy.in_reply_to_status_id_str,
-            permanentUrl: `https://twitter.com/${twitterUsername}/status/${tweetResult.rest_id}`,
+            permanentUrl: `https://ao.link/${twitterUsername}/status/${tweetResult.rest_id}`,
             hashtags: [],
             mentions: [],
             photos: [],
@@ -277,7 +272,7 @@ export class TwitterPostClient {
         );
 
         // Cache the tweet
-        await client.cacheTweet(tweet);
+        await client.cacheMessage(tweet);
 
         // Log the posted tweet
         elizaLogger.log(`Tweet posted:\n ${tweet.permanentUrl}`);
@@ -311,14 +306,14 @@ export class TwitterPostClient {
         try {
             const noteTweetResult = await client.requestQueue.add(
                 async () =>
-                    await client.twitterClient.sendNoteTweet(content, tweetId)
+                    await client.aoClient.sendNoteTweet(content, tweetId)
             );
 
             if (noteTweetResult.errors && noteTweetResult.errors.length > 0) {
                 // Note Tweet failed due to authorization. Falling back to standard Tweet.
                 const truncateContent = truncateToCompleteSentence(
                     content,
-                    this.client.twitterConfig.MAX_TWEET_LENGTH
+                    this.client.aoConfig.MAX_TWEET_LENGTH
                 );
                 return await this.sendStandardTweet(
                     client,
@@ -342,7 +337,7 @@ export class TwitterPostClient {
         try {
             const standardTweetResult = await client.requestQueue.add(
                 async () =>
-                    await client.twitterClient.sendTweet(content, tweetId)
+                    await client.aoClient.sendTweet(content, tweetId)
             );
             const body = await standardTweetResult.json();
             if (!body?.data?.create_tweet?.tweet_results?.result) {
@@ -480,7 +475,7 @@ export class TwitterPostClient {
             }
 
             // Truncate the content to the maximum tweet length specified in the environment settings, ensuring the truncation respects sentence boundaries.
-            const maxTweetLength = this.client.twitterConfig.MAX_TWEET_LENGTH
+            const maxTweetLength = this.client.aoConfig.MAX_TWEET_LENGTH
             if (maxTweetLength) {
                 cleanedContent = truncateToCompleteSentence(
                     cleanedContent,
@@ -511,7 +506,7 @@ export class TwitterPostClient {
                     cleanedContent,
                     roomId,
                     newTweetContent,
-                    this.twitterUsername
+                    this.aoUsername
                 );
             } catch (error) {
                 elizaLogger.error("Error sending tweet:", error);
@@ -615,7 +610,7 @@ export class TwitterPostClient {
 
             await this.runtime.ensureUserExists(
                 this.runtime.agentId,
-                this.twitterUsername,
+                this.aoUsername,
                 this.runtime.character.name,
                 "twitter"
             );
@@ -649,7 +644,7 @@ export class TwitterPostClient {
                             content: { text: "", action: "" },
                         },
                         {
-                            twitterUserName: this.twitterUsername,
+                            twitterUserName: this.aoUsername,
                             currentTweet: `ID: ${tweet.id}\nFrom: ${tweet.name} (@${tweet.username})\nText: ${tweet.text}`,
                         }
                     );
@@ -686,7 +681,7 @@ export class TwitterPostClient {
                                 );
                                 executedActions.push("like (dry run)");
                             } else {
-                                await this.client.twitterClient.likeTweet(
+                                await this.client.aoClient.likeTweet(
                                     tweet.id
                                 );
                                 executedActions.push("like");
@@ -708,7 +703,7 @@ export class TwitterPostClient {
                                 );
                                 executedActions.push("retweet (dry run)");
                             } else {
-                                await this.client.twitterClient.retweet(
+                                await this.client.aoClient.retweet(
                                     tweet.id
                                 );
                                 executedActions.push("retweet");
@@ -766,7 +761,7 @@ export class TwitterPostClient {
                             if (tweet.quotedStatusId) {
                                 try {
                                     const quotedTweet =
-                                        await this.client.twitterClient.getTweet(
+                                        await this.client.aoClient.getMessage(
                                             tweet.quotedStatusId
                                         );
                                     if (quotedTweet) {
@@ -797,7 +792,7 @@ export class TwitterPostClient {
                                         },
                                     },
                                     {
-                                        twitterUserName: this.twitterUsername,
+                                        twitterUserName: this.aoUsername,
                                         currentPost: `From @${tweet.username}: ${tweet.text}`,
                                         formattedConversation,
                                         imageContext:
@@ -831,7 +826,7 @@ export class TwitterPostClient {
                             // Send the tweet through request queue
                             const result = await this.client.requestQueue.add(
                                 async () =>
-                                    await this.client.twitterClient.sendQuoteTweet(
+                                    await this.client.aoClient.sendQuoteTweet(
                                         quoteContent,
                                         tweet.id
                                     )
@@ -971,7 +966,7 @@ export class TwitterPostClient {
             if (tweet.quotedStatusId) {
                 try {
                     const quotedTweet =
-                        await this.client.twitterClient.getTweet(
+                        await this.client.aoClient.getMessage(
                             tweet.quotedStatusId
                         );
                     if (quotedTweet) {
@@ -993,7 +988,7 @@ export class TwitterPostClient {
                     content: { text: tweet.text, action: "" },
                 },
                 {
-                    twitterUserName: this.twitterUsername,
+                    twitterUserName: this.aoUsername,
                     currentPost: `From @${tweet.username}: ${tweet.text}`,
                     formattedConversation,
                     imageContext:

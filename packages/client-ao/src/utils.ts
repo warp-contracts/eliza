@@ -14,21 +14,6 @@ export const wait = (minTime: number = 1000, maxTime: number = 3000) => {
     return new Promise((resolve) => setTimeout(resolve, waitTime));
 };
 
-export const isValidTweet = (tweet: Tweet): boolean => {
-    // Filter out tweets with too many hashtags, @s, or $ signs, probably spam or garbage
-    const hashtagCount = (tweet.text?.match(/#/g) || []).length;
-    const atCount = (tweet.text?.match(/@/g) || []).length;
-    const dollarSignCount = (tweet.text?.match(/\$/g) || []).length;
-    const totalCount = hashtagCount + atCount + dollarSignCount;
-
-    return (
-        hashtagCount <= 1 &&
-        atCount <= 2 &&
-        dollarSignCount <= 1 &&
-        totalCount <= 3
-    );
-};
-
 export async function buildConversationThread(
     tweet: Tweet,
     client: ClientBase,
@@ -121,7 +106,7 @@ export async function buildConversationThread(
                 currentTweet.inReplyToStatusId
             );
             try {
-                const parentTweet = await client.twitterClient.getTweet(
+                const parentTweet = await client.aoClient.getMessage(
                     currentTweet.inReplyToStatusId
                 );
 
@@ -171,8 +156,7 @@ export async function sendTweet(
     twitterUsername: string,
     inReplyTo: string
 ): Promise<Memory[]> {
-    const maxTweetLength = client.twitterConfig.MAX_TWEET_LENGTH;
-    const isLongTweet = maxTweetLength > 280;
+    const maxTweetLength = client.aoConfig.MAX_TWEET_LENGTH;
 
     const tweetChunks = splitTweetContent(content.text, maxTweetLength);
     const sentTweets: Tweet[] = [];
@@ -212,16 +196,10 @@ export async function sendTweet(
                 })
             );
         }
-        const result = await client.requestQueue.add(async () =>
-            isLongTweet
-                ? client.twitterClient.sendLongTweet(chunk.trim(), previousTweetId, mediaData)
-                : client.twitterClient.sendTweet(chunk.trim(), previousTweetId, mediaData)
-        );
+        const result = await client.requestQueue.add(async () => client.aoClient.sendTweet(chunk.trim(), previousTweetId, mediaData));
 
         const body = await result.json();
-        const tweetResult = isLongTweet
-            ? body.data.notetweet_create.tweet_results.result
-            : body.data.create_tweet.tweet_results.result;
+        const tweetResult = body.data.create_tweet.tweet_results.result;
 
         // if we have a response
         if (tweetResult) {
@@ -234,7 +212,7 @@ export async function sendTweet(
                     new Date(tweetResult.legacy.created_at).getTime() / 1000,
                 userId: tweetResult.legacy.user_id_str,
                 inReplyToStatusId: tweetResult.legacy.in_reply_to_status_id_str,
-                permanentUrl: `https://twitter.com/${twitterUsername}/status/${tweetResult.rest_id}`,
+                permanentUrl: `https://ao.link/${twitterUsername}/status/${tweetResult.rest_id}`,
                 hashtags: [],
                 mentions: [],
                 photos: [],
