@@ -13,20 +13,17 @@ const aoTheComputerUsernameSchema = z
     );
 
 /**
- * This schema defines all required/optional environment settings,
- * including new fields like TWITTER_SPACES_ENABLE.
+ * This schema defines all required/optional environment settings
  */
 export const aoTheComputerEnvSchema = z.object({
     TWITTER_DRY_RUN: z.boolean(),
-    TWITTER_USERNAME: z.string().min(1, "X/AoTheComputer username is required"),
-    TWITTER_PASSWORD: z.string().min(1, "X/AoTheComputer password is required"),
-    TWITTER_EMAIL: z.string().email("Valid X/AoTheComputer email is required"),
+    AO_USERNAME: z.string().min(1, "AoTheComputer username is required"),
+    AO_PROFILE_CONTRACT: z.string().min(1, "AoTheComputer profile contract is required"),
+    AO_ROUTING_CONTRACT: z.string().min(1, "Valid Ao routing contract is required"),
     MAX_TWEET_LENGTH: z.number().int().default(DEFAULT_MAX_TWEET_LENGTH),
-    TWITTER_SEARCH_ENABLE: z.boolean().default(false),
-    TWITTER_2FA_SECRET: z.string(),
+    AO_SEARCH_ENABLE: z.boolean().default(false),
     TWITTER_RETRY_LIMIT: z.number().int(),
     TWITTER_POLL_INTERVAL: z.number().int(),
-    TWITTER_TARGET_USERS: z.array(aoTheComputerUsernameSchema).default([]),
     // I guess it's possible to do the transformation with zod
     // not sure it's preferable, maybe a readability issue
     // since more people will know js/ts than zod
@@ -60,7 +57,6 @@ export const aoTheComputerEnvSchema = z.object({
     ENABLE_ACTION_PROCESSING: z.boolean(),
     ACTION_INTERVAL: z.number().int(),
     POST_IMMEDIATELY: z.boolean(),
-    TWITTER_SPACES_ENABLE: z.boolean().default(false),
 });
 
 export type AoTheComputerConfig = z.infer<typeof aoTheComputerEnvSchema>;
@@ -108,17 +104,17 @@ export async function validateAoTheComputerConfig(
                         process.env.TWITTER_DRY_RUN
                 ) ?? false, // parseBooleanFromText return null if "", map "" to false
 
-            TWITTER_USERNAME:
-                runtime.getSetting("TWITTER_USERNAME") ||
-                process.env.TWITTER_USERNAME,
+            AO_USERNAME:
+                runtime.getSetting("AO_USERNAME") ||
+                process.env.AO_USERNAME,
 
-            TWITTER_PASSWORD:
-                runtime.getSetting("TWITTER_PASSWORD") ||
-                process.env.TWITTER_PASSWORD,
+            AO_PROFILE_CONTRACT:
+                runtime.getSetting("AO_PROFILE_CONTRACT") ||
+                process.env.AO_PROFILE_CONTRACT,
 
-            TWITTER_EMAIL:
-                runtime.getSetting("TWITTER_EMAIL") ||
-                process.env.TWITTER_EMAIL,
+            AO_ROUTING_CONTRACT:
+                runtime.getSetting("AO_ROUTING_CONTRACT") ||
+                process.env.AO_ROUTING_CONTRACT,
 
             // number as string?
             MAX_TWEET_LENGTH: safeParseInt(
@@ -127,17 +123,11 @@ export async function validateAoTheComputerConfig(
                 DEFAULT_MAX_TWEET_LENGTH
             ),
 
-            TWITTER_SEARCH_ENABLE:
+            AO_SEARCH_ENABLE:
                 parseBooleanFromText(
-                    runtime.getSetting("TWITTER_SEARCH_ENABLE") ||
-                        process.env.TWITTER_SEARCH_ENABLE
+                    runtime.getSetting("AO_SEARCH_ENABLE") ||
+                        process.env.AO_SEARCH_ENABLE
                 ) ?? false,
-
-            // string passthru
-            TWITTER_2FA_SECRET:
-                runtime.getSetting("TWITTER_2FA_SECRET") ||
-                process.env.TWITTER_2FA_SECRET ||
-                "",
 
             // int
             TWITTER_RETRY_LIMIT: safeParseInt(
@@ -151,12 +141,6 @@ export async function validateAoTheComputerConfig(
                 runtime.getSetting("TWITTER_POLL_INTERVAL") ||
                     process.env.TWITTER_POLL_INTERVAL,
                 120 // 2m
-            ),
-
-            // comma separated string
-            TWITTER_TARGET_USERS: parseTargetUsers(
-                runtime.getSetting("TWITTER_TARGET_USERS") ||
-                    process.env.TWITTER_TARGET_USERS
             ),
 
             // int in minutes
@@ -193,13 +177,9 @@ export async function validateAoTheComputerConfig(
                     runtime.getSetting("POST_IMMEDIATELY") ||
                         process.env.POST_IMMEDIATELY
                 ) ?? false,
-
-            TWITTER_SPACES_ENABLE:
-                parseBooleanFromText(
-                    runtime.getSetting("TWITTER_SPACES_ENABLE") ||
-                        process.env.TWITTER_SPACES_ENABLE
-                ) ?? false,
         };
+
+        console.log(`----- AO CONFIG`, aoTheComputerConfig)
 
         return aoTheComputerEnvSchema.parse(aoTheComputerConfig);
     } catch (error) {

@@ -157,6 +157,7 @@ import { ankrPlugin } from "@elizaos/plugin-ankr";
 import { formPlugin } from "@elizaos/plugin-form";
 import { MongoClient } from "mongodb";
 import { quickIntelPlugin } from "@elizaos/plugin-quick-intel";
+import AoTheComputerClientInterface from "@elizaos/client-ao";
 
 import { trikonPlugin } from "@elizaos/plugin-trikon";
 import arbitragePlugin from "@elizaos/plugin-arbitrage";
@@ -812,6 +813,11 @@ export async function initializeClients(
         if (xmtpClient) clients.xmtp = xmtpClient;
     }
 
+    if (clientTypes.includes(Clients.AO)) {
+        const aoTheComputer = await AoTheComputerClientInterface.start(runtime);
+        if (aoTheComputer) clients.aoTheComputer = aoTheComputer;
+    }
+
     if (clientTypes.includes(Clients.DISCORD)) {
         const discordClient = await DiscordClientInterface.start(runtime);
         if (discordClient) clients.discord = discordClient;
@@ -1423,6 +1429,7 @@ async function startAgent(
 
         // start services/plugins/process knowledge
         await runtime.initialize();
+        console.log(`runtime.initialized`);
 
         // start assigned clients
         runtime.clients = await initializeClients(character, runtime);
@@ -1435,6 +1442,7 @@ async function startAgent(
 
         return runtime;
     } catch (error) {
+        console.log(error);
         elizaLogger.error(
             `Error starting agent for character ${character.name}:`,
             error
