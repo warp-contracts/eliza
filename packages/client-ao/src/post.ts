@@ -14,7 +14,7 @@ import { postActionResponseFooter } from "@elizaos/core";
 import { generateTweetActions } from "@elizaos/core";
 import { IImageDescriptionService, ServiceType } from "@elizaos/core";
 import { buildConversationThread } from "./utils.ts";
-import { aoTheComputerMessageHandlerTemplate } from "./interactions.ts";
+import { aoMessageHandlerTemplate } from "./interactions.ts";
 import { NodeType } from "./ao_types.ts";
 
 const aoMessageTemplate = `
@@ -111,7 +111,7 @@ export class AoTheComputerPostClient {
     constructor(client: ClientBase, runtime: IAgentRuntime) {
         this.client = client;
         this.runtime = runtime;
-        this.aoUsername = this.client.profile.Profile.UserName;
+        this.aoUsername = this.client.aoConfig.AO_USERNAME;
         this.isDryRun = this.client.aoConfig.AO_DRY_RUN;
 
         // Log configuration on initialization
@@ -813,7 +813,7 @@ export class AoTheComputerPostClient {
                                     template:
                                         this.runtime.character.templates
                                             ?.twitterMessageHandlerTemplate ||
-                                        aoTheComputerMessageHandlerTemplate,
+                                        aoMessageHandlerTemplate,
                                 });
 
                             if (!quoteContent) {
@@ -1008,7 +1008,7 @@ export class AoTheComputerPostClient {
                 template:
                     this.runtime.character.templates
                         ?.twitterMessageHandlerTemplate ||
-                    aoTheComputerMessageHandlerTemplate,
+                    aoMessageHandlerTemplate,
             });
 
             if (!replyText) {

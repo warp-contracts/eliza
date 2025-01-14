@@ -4,8 +4,8 @@ import {
     IAgentRuntime,
 } from "@elizaos/core";
 import { ClientBase } from "./base.ts";
-import { validateAoTheComputerConfig, AoTheComputerConfig } from "./environment.ts";
-import { AoTheComputerInteractionClient } from "./interactions.ts";
+import { validateAoConfig, AoConfig } from "./environment.ts";
+import { AoInteractionClient } from "./interactions.ts";
 import { AoTheComputerPostClient } from "./post.ts";
 import { AoSearchClient } from "./search.ts";
 
@@ -16,13 +16,13 @@ import { AoSearchClient } from "./search.ts";
  * - search: searching tweets / replying logic
  * - interaction: handling mentions, replies
  */
-class AoTheComputerManager {
+class AoManager {
     client: ClientBase;
     post: AoTheComputerPostClient;
     search: AoSearchClient;
-    interaction: AoTheComputerInteractionClient;
+    interaction: AoInteractionClient;
 
-    constructor(runtime: IAgentRuntime, aoConfig: AoTheComputerConfig) {
+    constructor(runtime: IAgentRuntime, aoConfig: AoConfig) {
         // Pass aoConfig to the base client
         this.client = new ClientBase(runtime, aoConfig);
 
@@ -40,17 +40,17 @@ class AoTheComputerManager {
         }
 
         // Mentions and interactions
-        this.interaction = new AoTheComputerInteractionClient(this.client, runtime);
+        this.interaction = new AoInteractionClient(this.client, runtime);
     }
 }
 
 export const AoTheComputerClientInterface: Client = {
     async start(runtime: IAgentRuntime) {
-        const aoTheComputerConfig: AoTheComputerConfig = await validateAoTheComputerConfig(runtime);
+        const aoTheComputerConfig: AoConfig = await validateAoConfig(runtime);
 
         elizaLogger.log("===== AoTheComputer client started");
 
-        const manager = new AoTheComputerManager(runtime, aoTheComputerConfig);
+        const manager = new AoManager(runtime, aoTheComputerConfig);
 
         // Initialize login/session
         await manager.client.init();
