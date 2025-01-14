@@ -11,15 +11,10 @@ import {
 } from "@elizaos/core";
 import { SearchMode } from "agent-twitter-client";
 import { EventEmitter } from "events";
-import { AoTheComputerConfig } from "./environment.ts";
+import { AoConfig } from "./environment.ts";
 import { AoClient, AoFetchProfileResult } from "./AoClient.ts";
 import { NodeType } from "./ao_types.ts";
 
-export function extractAnswer(text: string): string {
-    const startIndex = text.indexOf("Answer: ") + 8;
-    const endIndex = text.indexOf("<|endoftext|>", 11);
-    return text.slice(startIndex, endIndex);
-}
 
 interface AoProfile extends AoFetchProfileResult {
     contractId: string;
@@ -79,7 +74,7 @@ export class ClientBase extends EventEmitter {
     static _aoClients: { [accountIdentifier: string]: AoClient } = {};
     aoClient: AoClient;
     runtime: IAgentRuntime;
-    aoConfig: AoTheComputerConfig;
+    aoConfig: AoConfig;
     directions: string;
     lastCheckedMessageId: bigint | null = null;
     imageDescriptionService: IImageDescriptionService;
@@ -129,7 +124,7 @@ export class ClientBase extends EventEmitter {
         );
     }
 
-    constructor(runtime: IAgentRuntime, aoConfig: AoTheComputerConfig) {
+    constructor(runtime: IAgentRuntime, aoConfig: AoConfig) {
         super();
         console.log(`===== Base constructor`);
         this.runtime = runtime;

@@ -1,6 +1,7 @@
 import { SearchMode } from "agent-twitter-client";
 import { createDataItemSigner, dryrun, message } from "@permaweb/aoconnect";
-import { AoSigner, GQL_TXS_QUERY, NodeType } from "./ao_types.ts";
+import { AoSigner, NodeType } from "./ao_types.ts";
+import {GQL_TX_QUERY, GQL_TXS_QUERY} from "./ao_graphql_query.ts";
 
 export class AoClient {
     profileContractId: string;
@@ -10,13 +11,42 @@ export class AoClient {
         this.profileContractId = profileContractId;
     }
 
-    getMessage(messageId: string): Promise<NodeType> {
-        console.log(`===== AoScraper getTweet`, messageId);
-        return Promise.resolve(undefined);
+    async getMessage(messageId: string): Promise<NodeType> {
+        console.log(`===== AO == getMessage`, messageId);
+        const messageRes = await fetch(
+            "https://arweave-search.goldsky.com/graphql",
+            {
+                method: "POST",
+                headers: {
+                    Accept: "application/json",
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    query: GQL_TX_QUERY,
+                    variables: {
+                        id: messageId
+                    },
+                }),
+            }
+        ).then((res) => res.json());
+
+        const message = messageRes.data.transaction;
+        message.data.value = await this.getMessageData(messageId);
+
+        console.log(`===== AO == message`, message);
+        return message;
+    }
+
+    async getMessageData(messageId: string): Promise<string> {
+        console.log(`===== AO == getMessageData`, messageId);
+        const message = await fetch(`https://arweave.net/${messageId}`)
+            .then((res) => res.text())
+        console.log(`===== AO == message data`, message);
+        return message;
     }
 
     async fetchIncomingMessages(count: number): Promise<NodeType[]> {
-        console.log("fetching home timeline", this.profileContractId, count);
+        console.log(`===== AO == getMessages`, this.profileContractId, count);
         const reqBody = {
             query: GQL_TXS_QUERY,
             variables: {
@@ -39,7 +69,12 @@ export class AoClient {
             }
         ).then((res) => res.json());
 
-        return messageResponse.data.transactions.edges.map((e) => e.node);
+        return messageResponse.data.transactions.edges
+            .map((e) => e.node)
+            .map((m) => {
+                m.data.value = this.getMessageData(m.id);
+                return m;
+        });
     }
 
     fetchSearchMessages(

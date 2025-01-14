@@ -3,38 +3,27 @@ import { z, ZodError } from "zod";
 
 export const AO_DEFAULT_MAX_MESSAGE_LENGTH = 280;
 
-const aoTheComputerUsernameSchema = z
-    .string()
-    .min(1, "An X/AoTheComputer Username must be at least 1 characters long")
-    .max(15, "An X/AoTheComputer Username cannot exceed 15 characters")
-    .regex(
-        /^[A-Za-z0-9_]*$/,
-        "An X Username can only contain letters, numbers, and underscores"
-    );
 
 /**
  * This schema defines all required/optional environment settings
  */
-export const aoTheComputerEnvSchema = z.object({
+export const aoEnvSchema = z.object({
     AO_DRY_RUN: z.boolean(),
-    AO_USERNAME: z.string().min(1, "AoTheComputer username is required"),
-    AO_WALLET: z.string().min(1, "AoTheComputer wallet is required"),
+    AO_USERNAME: z.string().min(1, "AO username is required"),
+    AO_WALLET: z.string().min(1, "AO wallet is required"),
     AO_MESSAGE_PROTOCOL_ID: z
         .string()
-        .min(1, "AoTheComputer message protocol id is required"),
+        .min(1, "AO message protocol id is required"),
     AO_PROFILE_CONTRACT: z
         .string()
-        .min(1, "AoTheComputer profile contract is required"),
-    AO_ROUTING_CONTRACT: z
-        .string()
-        .min(1, "Valid Ao routing contract is required"),
+        .min(1, "AO profile contract is required"),
     AO_MAX_MESSAGE_LENGTH: z
         .number()
         .int()
         .default(AO_DEFAULT_MAX_MESSAGE_LENGTH),
     AO_SEARCH_ENABLE: z.boolean().default(false),
-    TWITTER_RETRY_LIMIT: z.number().int(),
-    TWITTER_POLL_INTERVAL: z.number().int(),
+    AO_RETRY_LIMIT: z.number().int(),
+    AO_POLL_INTERVAL: z.number().int(),
     // I guess it's possible to do the transformation with zod
     // not sure it's preferable, maybe a readability issue
     // since more people will know js/ts than zod
@@ -54,7 +43,7 @@ export const aoTheComputerEnvSchema = z.object({
                             .max(15)
                             .regex(
                                 /^[A-Za-z][A-Za-z0-9_]*[A-Za-z0-9]$|^[A-Za-z]$/,
-                                'Invalid AoTheComputer username format'
+                                'Invalid AO username format'
                             )
                     )
                 )
@@ -70,21 +59,7 @@ export const aoTheComputerEnvSchema = z.object({
     AO_MESSAGE_IMMEDIATELY: z.boolean(),
 });
 
-export type AoTheComputerConfig = z.infer<typeof aoTheComputerEnvSchema>;
-
-/**
- * Helper to parse a comma-separated list of AoTheComputer usernames
- * (already present in your code).
- */
-function parseTargetUsers(targetUsersStr?: string | null): string[] {
-    if (!targetUsersStr?.trim()) {
-        return [];
-    }
-    return targetUsersStr
-        .split(",")
-        .map((user) => user.trim())
-        .filter(Boolean);
-}
+export type AoConfig = z.infer<typeof aoEnvSchema>;
 
 function safeParseInt(
     value: string | undefined | null,
@@ -96,7 +71,7 @@ function safeParseInt(
 }
 
 /**
- * Validates or constructs a AoTheComputerConfig object using zod,
+ * Validates or constructs AO config object using zod,
  * taking values from the IAgentRuntime or process.env as needed.
  */
 // This also is organized to serve as a point of documentation for the client
@@ -104,27 +79,30 @@ function safeParseInt(
 
 // we also do a lot of typing/parsing here
 // so we can do it once and only once per character
-export async function validateAoTheComputerConfig(
+export async function validateAoConfig(
     runtime: IAgentRuntime
-): Promise<AoTheComputerConfig> {
+): Promise<AoConfig> {
     try {
-        const aoTheComputerConfig = {
-            TWITTER_DRY_RUN:
+        const aoConfig = {
+            AO_DRY_RUN:
                 parseBooleanFromText(
-                    runtime.getSetting("TWITTER_DRY_RUN") ||
-                        process.env.TWITTER_DRY_RUN
+                    runtime.getSetting("AO_DRY_RUN") ||
+                        process.env.AO_DRY_RUN
                 ) ?? false, // parseBooleanFromText return null if "", map "" to false
 
             AO_USERNAME:
                 runtime.getSetting("AO_USERNAME") || process.env.AO_USERNAME,
 
+            AO_WALLET:
+                runtime.getSetting("AO_WALLET") || process.env.AO_WALLET,
+
             AO_PROFILE_CONTRACT:
                 runtime.getSetting("AO_PROFILE_CONTRACT") ||
                 process.env.AO_PROFILE_CONTRACT,
 
-            AO_ROUTING_CONTRACT:
-                runtime.getSetting("AO_ROUTING_CONTRACT") ||
-                process.env.AO_ROUTING_CONTRACT,
+            AO_MESSAGE_PROTOCOL_ID:
+                runtime.getSetting("AO_MESSAGE_PROTOCOL_ID") ||
+                process.env.AO_MESSAGE_PROTOCOL_ID,
 
             // number as string?
             AO_MAX_MESSAGE_LENGTH: safeParseInt(
@@ -140,16 +118,16 @@ export async function validateAoTheComputerConfig(
                 ) ?? false,
 
             // int
-            TWITTER_RETRY_LIMIT: safeParseInt(
-                runtime.getSetting("TWITTER_RETRY_LIMIT") ||
-                    process.env.TWITTER_RETRY_LIMIT,
+            AO_RETRY_LIMIT: safeParseInt(
+                runtime.getSetting("AO_RETRY_LIMIT") ||
+                    process.env.AO_RETRY_LIMIT,
                 5
             ),
 
             // int in seconds
-            TWITTER_POLL_INTERVAL: safeParseInt(
-                runtime.getSetting("TWITTER_POLL_INTERVAL") ||
-                    process.env.TWITTER_POLL_INTERVAL,
+            AO_POLL_INTERVAL: safeParseInt(
+                runtime.getSetting("AO_POLL_INTERVAL") ||
+                    process.env.AO_POLL_INTERVAL,
                 120 // 2m
             ),
 
@@ -174,6 +152,13 @@ export async function validateAoTheComputerConfig(
                         process.env.AO_MESSAGE_IMMEDIATELY
                 ) ?? false,
 
+            // init in minutes (min 1m)
+            AO_ACTION_INTERVAL: safeParseInt(
+                runtime.getSetting("AO_ACTION_INTERVAL") ||
+                process.env.AO_ACTION_INTERVAL,
+                5 // 5 minutes
+            ),
+
             // bool
             AO_ENABLE_ACTION_PROCESSING:
                 parseBooleanFromText(
@@ -182,16 +167,16 @@ export async function validateAoTheComputerConfig(
                 ) ?? false,
         };
 
-        console.log(`----- AO CONFIG`, aoTheComputerConfig);
+        console.log(`----- AO CONFIG`, aoConfig);
 
-        return aoTheComputerEnvSchema.parse(aoTheComputerConfig);
+        return aoEnvSchema.parse(aoConfig);
     } catch (error) {
         if (error instanceof ZodError) {
             const errorMessages = error.errors
                 .map((err) => `${err.path.join(".")}: ${err.message}`)
                 .join("\n");
             throw new Error(
-                `X/AoTheComputer configuration validation failed:\n${errorMessages}`
+                `X/AO configuration validation failed:\n${errorMessages}`
             );
         }
         throw error;

@@ -709,6 +709,8 @@ export type Character = {
         twitterShouldRespondTemplate?: string;
         aoMessageTemplate?: string;
         aoActionTemplate?: string;
+        aoMessageHandlerTemplate?: string;
+        aoShouldRespondTemplate?: string;
         farcasterPostTemplate?: string;
         lensPostTemplate?: string;
         farcasterMessageHandlerTemplate?: string;

@@ -1,4 +1,4 @@
-import { SearchMode, Tweet } from "agent-twitter-client";
+import { Tweet } from "agent-twitter-client";
 import {
     composeContext,
     generateMessageResponse,
@@ -18,12 +18,12 @@ import {
 import { ClientBase } from "./base";
 import { buildConversationThread, sendTweet, wait } from "./utils.ts";
 
-export const aoTheComputerMessageHandlerTemplate =
+export const aoMessageHandlerTemplate =
     `
 # Areas of Expertise
 {{knowledge}}
 
-# About {{agentName}} (@{{twitterUserName}}):
+# About {{agentName}} (@{{aoUserName}}):
 {{bio}}
 {{lore}}
 {{topics}}
@@ -39,15 +39,15 @@ Recent interactions between {{agentName}} and other users:
 
 {{recentPosts}}
 
-# TASK: Generate a post/reply in the voice, style and perspective of {{agentName}} (@{{twitterUserName}}) while using the thread of tweets as additional context:
+# TASK: Generate a post/reply in the voice, style and perspective of {{agentName}} (@{{aoUserName}}) while using the thread of messages as additional context:
 
 Current Post:
 {{currentPost}}
 
-Thread of Tweets You Are Replying To:
+Thread of Messages You Are Replying To:
 {{formattedConversation}}
 
-# INSTRUCTIONS: Generate a post in the voice, style and perspective of {{agentName}} (@{{twitterUserName}}). You MUST include an action if the current post text includes a prompt that is similar to one of the available actions mentioned here:
+# INSTRUCTIONS: Generate a post in the voice, style and perspective of {{agentName}} (@{{aoUserName}}). You MUST include an action if the current post text includes a prompt that is similar to one of the available actions mentioned here:
 {{actionNames}}
 {{actions}}
 
@@ -55,8 +55,8 @@ Here is the current post text again. Remember to include an action if the curren
 {{currentPost}}
 ` + messageCompletionFooter;
 
-export const twitterShouldRespondTemplate = (targetUsersStr: string) =>
-    `# INSTRUCTIONS: Determine if {{agentName}} (@{{twitterUserName}}) should respond to the message and participate in the conversation. Do not comment. Just respond with "true" or "false".
+export const aoShouldRespondTemplate = (targetUsersStr: string) =>
+    `# INSTRUCTIONS: Determine if {{agentName}} (@{{aoUserName}}) should respond to the message and participate in the conversation. Do not comment. Just respond with "true" or "false".
 
 Response options are RESPOND, IGNORE and STOP.
 
@@ -72,8 +72,8 @@ For other users:
 - {{agentName}} is in a room with other users and wants to be conversational, but not annoying.
 
 IMPORTANT:
-- {{agentName}} (aka @{{twitterUserName}}) is particularly sensitive about being annoying, so if there is any doubt, it is better to IGNORE than to RESPOND.
-- For users not in the priority list, {{agentName}} (@{{twitterUserName}}) should err on the side of IGNORE rather than RESPOND if in doubt.
+- {{agentName}} (aka @{{aoUserName}}) is particularly sensitive about being annoying, so if there is any doubt, it is better to IGNORE than to RESPOND.
+- For users not in the priority list, {{agentName}} (@{{aoUserName}}) should err on the side of IGNORE rather than RESPOND if in doubt.
 
 Recent Posts:
 {{recentPosts}}
@@ -87,7 +87,7 @@ Thread of Tweets You Are Replying To:
 # INSTRUCTIONS: Respond with [RESPOND] if {{agentName}} should respond, or [IGNORE] if {{agentName}} should not respond to the last message and [STOP] if {{agentName}} should stop participating in the conversation.
 ` + shouldRespondFooter;
 
-export class AoTheComputerInteractionClient {
+export class AoInteractionClient {
     client: ClientBase;
     runtime: IAgentRuntime;
     constructor(client: ClientBase, runtime: IAgentRuntime) {
@@ -96,40 +96,31 @@ export class AoTheComputerInteractionClient {
     }
 
     async start() {
-        const handleAoTheComputerInteractionsLoop = () => {
-            this.handleAoTheComputerInteractions();
+        const handleAoInteractionsLoop = () => {
+            this.handleAoInteractions();
             setTimeout(
-                handleAoTheComputerInteractionsLoop,
+                handleAoInteractionsLoop,
                 // Defaults to 2 minutes
-                this.client.aoConfig.TWITTER_POLL_INTERVAL * 1000
+                this.client.aoConfig.AO_POLL_INTERVAL * 1000
             );
         };
-        handleAoTheComputerInteractionsLoop();
+        handleAoInteractionsLoop();
     }
 
-    async handleAoTheComputerInteractions() {
-        elizaLogger.log("Checking AoTheComputer interactions");
+    async handleAoInteractions() {
+        elizaLogger.log("Checking AO interactions");
 
-        const twitterUsername = this.client.profile.username;
         try {
-            // Check for mentions
-            const mentionCandidates = (
-                await this.client.fetchSearchTweets(
-                    `@${twitterUsername}`,
-                    20,
-                    SearchMode.Latest
-                )
-            ).tweets;
+            const messages = await this.client.fetchIncomingMessages(20);
 
             elizaLogger.log(
                 "Completed checking mentioned tweets:",
-                mentionCandidates.length
+                messages.length
             );
-            let uniqueTweetCandidates = [...mentionCandidates];
 
             // Sort tweet candidates by ID in ascending order
-            uniqueTweetCandidates
-                .sort((a, b) => a.id.localeCompare(b.id))
+            messages
+                .sort((a, b) => a.timestamp - b.timestamp)
                 .filter((tweet) => tweet.userId !== this.client.profile.id);
 
             // for each tweet candidate, handle the tweet
@@ -171,7 +162,7 @@ export class AoTheComputerInteractionClient {
                         roomId,
                         tweet.username,
                         tweet.name,
-                        "twitter"
+                        "ao"
                     );
 
                     const thread = await buildConversationThread(
@@ -200,9 +191,10 @@ export class AoTheComputerInteractionClient {
             // Save the latest checked tweet ID to the file
             await this.client.cacheLatestCheckedMessageId();
 
-            elizaLogger.log("Finished checking AoTheComputer interactions");
+            elizaLogger.log("Finished checking AO interactions");
         } catch (error) {
-            elizaLogger.error("Error handling AoTheComputer interactions:", error);
+            console.log(error);
+            elizaLogger.error("Error handling AO interactions:", error);
         }
     }
 
@@ -252,8 +244,8 @@ export class AoTheComputerInteractionClient {
         elizaLogger.debug("formattedConversation: ", formattedConversation);
 
         let state = await this.runtime.composeState(message, {
-            twitterClient: this.client.aoClient,
-            twitterUserName: this.client.aoConfig.AO_USERNAME,
+            aoClient: this.client.aoClient,
+            aoUserName: this.client.aoConfig.AO_USERNAME,
             currentPost,
             formattedConversation,
         });
@@ -293,7 +285,7 @@ export class AoTheComputerInteractionClient {
             state,
             template:
                 this.runtime.character.templates
-                    ?.twitterShouldRespondTemplate ||
+                    ?.aoShouldRespondTemplate ||
                 this.runtime.character?.templates?.shouldRespondTemplate
         });
 
@@ -313,9 +305,9 @@ export class AoTheComputerInteractionClient {
             state,
             template:
                 this.runtime.character.templates
-                    ?.twitterMessageHandlerTemplate ||
+                    ?.aoMessageHandlerTemplate ||
                 this.runtime.character?.templates?.messageHandlerTemplate ||
-                aoTheComputerMessageHandlerTemplate,
+                aoMessageHandlerTemplate,
         });
 
         elizaLogger.debug("Interactions prompt:\n" + context);
@@ -378,7 +370,7 @@ export class AoTheComputerInteractionClient {
                 const responseInfo = `Context:\n\n${context}\n\nSelected Post: ${tweet.id} - ${tweet.username}: ${tweet.text}\nAgent's Output:\n${response.text}`;
 
                 await this.runtime.cacheManager.set(
-                    `twitter/tweet_generation_${tweet.id}.txt`,
+                    `ao/tweet_generation_${tweet.id}.txt`,
                     responseInfo
                 );
                 await wait();
@@ -427,7 +419,7 @@ export class AoTheComputerInteractionClient {
                     roomId,
                     currentTweet.username,
                     currentTweet.name,
-                    "twitter"
+                    "ao"
                 );
 
                 this.runtime.messageManager.createMemory({
@@ -437,7 +429,7 @@ export class AoTheComputerInteractionClient {
                     agentId: this.runtime.agentId,
                     content: {
                         text: currentTweet.text,
-                        source: "twitter",
+                        source: "ao",
                         url: currentTweet.permanentUrl,
                         inReplyTo: currentTweet.inReplyToStatusId
                             ? stringToUuid(
@@ -450,7 +442,7 @@ export class AoTheComputerInteractionClient {
                     createdAt: currentTweet.timestamp * 1000,
                     roomId,
                     userId:
-                        currentTweet.userId === this.twitterUserId
+                        currentTweet.userId === this.aoUserId
                             ? this.runtime.agentId
                             : stringToUuid(currentTweet.userId),
                     embedding: getEmbeddingZeroVector(),
@@ -477,7 +469,7 @@ export class AoTheComputerInteractionClient {
                     currentTweet.inReplyToStatusId
                 );
                 try {
-                    const parentTweet = await this.twitterClient.getTweet(
+                    const parentTweet = await this.aoClient.getTweet(
                         currentTweet.inReplyToStatusId
                     );
 
