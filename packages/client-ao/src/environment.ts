@@ -1,7 +1,7 @@
 import { parseBooleanFromText, IAgentRuntime } from "@elizaos/core";
 import { z, ZodError } from "zod";
 
-export const DEFAULT_MAX_TWEET_LENGTH = 280;
+export const AO_DEFAULT_MAX_MESSAGE_LENGTH = 280;
 
 const aoTheComputerUsernameSchema = z
     .string()
@@ -16,11 +16,22 @@ const aoTheComputerUsernameSchema = z
  * This schema defines all required/optional environment settings
  */
 export const aoTheComputerEnvSchema = z.object({
-    TWITTER_DRY_RUN: z.boolean(),
+    AO_DRY_RUN: z.boolean(),
     AO_USERNAME: z.string().min(1, "AoTheComputer username is required"),
-    AO_PROFILE_CONTRACT: z.string().min(1, "AoTheComputer profile contract is required"),
-    AO_ROUTING_CONTRACT: z.string().min(1, "Valid Ao routing contract is required"),
-    MAX_TWEET_LENGTH: z.number().int().default(DEFAULT_MAX_TWEET_LENGTH),
+    AO_WALLET: z.string().min(1, "AoTheComputer wallet is required"),
+    AO_MESSAGE_PROTOCOL_ID: z
+        .string()
+        .min(1, "AoTheComputer message protocol id is required"),
+    AO_PROFILE_CONTRACT: z
+        .string()
+        .min(1, "AoTheComputer profile contract is required"),
+    AO_ROUTING_CONTRACT: z
+        .string()
+        .min(1, "Valid Ao routing contract is required"),
+    AO_MAX_MESSAGE_LENGTH: z
+        .number()
+        .int()
+        .default(AO_DEFAULT_MAX_MESSAGE_LENGTH),
     AO_SEARCH_ENABLE: z.boolean().default(false),
     TWITTER_RETRY_LIMIT: z.number().int(),
     TWITTER_POLL_INTERVAL: z.number().int(),
@@ -52,11 +63,11 @@ export const aoTheComputerEnvSchema = z.object({
         .optional()
         .default(''),
     */
-    POST_INTERVAL_MIN: z.number().int(),
-    POST_INTERVAL_MAX: z.number().int(),
-    ENABLE_ACTION_PROCESSING: z.boolean(),
-    ACTION_INTERVAL: z.number().int(),
-    POST_IMMEDIATELY: z.boolean(),
+    AO_MESSAGE_INTERVAL_MIN: z.number().int(),
+    AO_MESSAGE_INTERVAL_MAX: z.number().int(),
+    AO_ENABLE_ACTION_PROCESSING: z.boolean(),
+    AO_ACTION_INTERVAL: z.number().int(),
+    AO_MESSAGE_IMMEDIATELY: z.boolean(),
 });
 
 export type AoTheComputerConfig = z.infer<typeof aoTheComputerEnvSchema>;
@@ -105,8 +116,7 @@ export async function validateAoTheComputerConfig(
                 ) ?? false, // parseBooleanFromText return null if "", map "" to false
 
             AO_USERNAME:
-                runtime.getSetting("AO_USERNAME") ||
-                process.env.AO_USERNAME,
+                runtime.getSetting("AO_USERNAME") || process.env.AO_USERNAME,
 
             AO_PROFILE_CONTRACT:
                 runtime.getSetting("AO_PROFILE_CONTRACT") ||
@@ -117,10 +127,10 @@ export async function validateAoTheComputerConfig(
                 process.env.AO_ROUTING_CONTRACT,
 
             // number as string?
-            MAX_TWEET_LENGTH: safeParseInt(
-                runtime.getSetting("MAX_TWEET_LENGTH") ||
-                    process.env.MAX_TWEET_LENGTH,
-                DEFAULT_MAX_TWEET_LENGTH
+            AO_MAX_MESSAGE_LENGTH: safeParseInt(
+                runtime.getSetting("AO_MAX_MESSAGE_LENGTH") ||
+                    process.env.AO_MAX_MESSAGE_LENGTH,
+                AO_DEFAULT_MAX_MESSAGE_LENGTH
             ),
 
             AO_SEARCH_ENABLE:
@@ -144,42 +154,35 @@ export async function validateAoTheComputerConfig(
             ),
 
             // int in minutes
-            POST_INTERVAL_MIN: safeParseInt(
-                runtime.getSetting("POST_INTERVAL_MIN") ||
-                    process.env.POST_INTERVAL_MIN,
+            AO_MESSAGE_INTERVAL_MIN: safeParseInt(
+                runtime.getSetting("AO_MESSAGE_INTERVAL_MIN") ||
+                    process.env.AO_MESSAGE_INTERVAL_MIN,
                 90 // 1.5 hours
             ),
 
             // int in minutes
-            POST_INTERVAL_MAX: safeParseInt(
-                runtime.getSetting("POST_INTERVAL_MAX") ||
-                    process.env.POST_INTERVAL_MAX,
+            AO_MESSAGE_INTERVAL_MAX: safeParseInt(
+                runtime.getSetting("AO_MESSAGE_INTERVAL_MAX") ||
+                    process.env.AO_MESSAGE_INTERVAL_MAX,
                 180 // 3 hours
             ),
 
             // bool
-            ENABLE_ACTION_PROCESSING:
+            AO_MESSAGE_IMMEDIATELY:
                 parseBooleanFromText(
-                    runtime.getSetting("ENABLE_ACTION_PROCESSING") ||
-                        process.env.ENABLE_ACTION_PROCESSING
+                    runtime.getSetting("AO_MESSAGE_IMMEDIATELY") ||
+                        process.env.AO_MESSAGE_IMMEDIATELY
                 ) ?? false,
 
-            // init in minutes (min 1m)
-            ACTION_INTERVAL: safeParseInt(
-                runtime.getSetting("ACTION_INTERVAL") ||
-                    process.env.ACTION_INTERVAL,
-                5 // 5 minutes
-            ),
-
             // bool
-            POST_IMMEDIATELY:
+            AO_ENABLE_ACTION_PROCESSING:
                 parseBooleanFromText(
-                    runtime.getSetting("POST_IMMEDIATELY") ||
-                        process.env.POST_IMMEDIATELY
+                    runtime.getSetting("AO_ENABLE_ACTION_PROCESSING") ||
+                        process.env.AO_ENABLE_ACTION_PROCESSING
                 ) ?? false,
         };
 
-        console.log(`----- AO CONFIG`, aoTheComputerConfig)
+        console.log(`----- AO CONFIG`, aoTheComputerConfig);
 
         return aoTheComputerEnvSchema.parse(aoTheComputerConfig);
     } catch (error) {

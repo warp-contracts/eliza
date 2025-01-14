@@ -1,3 +1,14 @@
+export type AoSigner = {
+    (
+        args_0: {
+            data?: any;
+            tags?: { value?: string; name?: string }[];
+            anchor?: string;
+            target?: string;
+        },
+        ...args: unknown[]
+    ): Promise<{ id?: string; raw?: any }>;
+};
 
 export type TagType = { name: string; value: string };
 
@@ -19,8 +30,8 @@ export type NodeType = {
     timestamp?: number;
 };
 
-
-export const GQL_TXS_QUERY = "query ($entityId: String!, $limit: Int!, $sortOrder: SortOrder!, $cursor: String) {\n" +
+export const GQL_TXS_QUERY =
+    "query ($entityId: String!, $limit: Int!, $sortOrder: SortOrder!, $cursor: String) {\n" +
     "  transactions(\n" +
     "    sort: $sortOrder\n" +
     "    first: $limit\n" +
@@ -63,4 +74,4 @@ export const GQL_TXS_QUERY = "query ($entityId: String!, $limit: Int!, $sortOrde
     "    __typename\n" +
     "  }\n" +
     "  __typename\n" +
-    "}"
+    "}";

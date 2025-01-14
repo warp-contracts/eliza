@@ -751,6 +751,8 @@ export type Character = {
         twitterMessageHandlerTemplate?: TemplateType;
         twitterShouldRespondTemplate?: TemplateType;
         twitterVoiceHandlerTemplate?: TemplateType;
+        aoMessageTemplate?: string;
+        aoActionTemplate?: string;
         instagramPostTemplate?: TemplateType;
         instagramMessageHandlerTemplate?: TemplateType;
         instagramShouldRespondTemplate?: TemplateType;
