@@ -141,6 +141,7 @@ export class ClientBase extends EventEmitter {
             this.aoClient = new AoClient(profileContractId);
             ClientBase._aoClients[profileContractId] = this.aoClient;
         }
+        this.aoClient.connect();
 
         this.directions =
             "- " +
@@ -223,7 +224,7 @@ export class ClientBase extends EventEmitter {
                             timeoutPromise,
                         ])
                 );
-                return (result ?? { messages: [] });
+                return result ?? { messages: [] };
             } catch (error) {
                 elizaLogger.error("Error fetching search messages:", error);
                 return { messages: [] };
@@ -248,9 +249,7 @@ export class ClientBase extends EventEmitter {
             const existingMemories =
                 await this.runtime.messageManager.getMemoriesByRoomIds({
                     roomIds: cachedTimeline.map((message) =>
-                        stringToUuid(
-                            message.id + "-" + this.runtime.agentId
-                        )
+                        stringToUuid(message.id + "-" + this.runtime.agentId)
                     ),
                 });
 
@@ -271,7 +270,9 @@ export class ClientBase extends EventEmitter {
                 const messagesToSave = cachedTimeline.filter(
                     (message) =>
                         !existingMemoryIds.has(
-                            stringToUuid(message.id + "-" + this.runtime.agentId)
+                            stringToUuid(
+                                message.id + "-" + this.runtime.agentId
+                            )
                         )
                 );
 
@@ -330,7 +331,9 @@ export class ClientBase extends EventEmitter {
                     // check if it already exists
                     const memory =
                         await this.runtime.messageManager.getMemoryById(
-                            stringToUuid(message.id + "-" + this.runtime.agentId)
+                            stringToUuid(
+                                message.id + "-" + this.runtime.agentId
+                            )
                         );
 
                     if (memory) {
@@ -341,7 +344,9 @@ export class ClientBase extends EventEmitter {
                     }
 
                     await this.runtime.messageManager.createMemory({
-                        id: stringToUuid(message.id + "-" + this.runtime.agentId),
+                        id: stringToUuid(
+                            message.id + "-" + this.runtime.agentId
+                        ),
                         userId,
                         content: content,
                         agentId: this.runtime.agentId,
@@ -373,9 +378,7 @@ export class ClientBase extends EventEmitter {
         // Add message IDs to the Set
         for (const message of timeline) {
             messageIdsToCheck.add(message.id);
-            roomIds.add(
-                stringToUuid(message.id + "-" + this.runtime.agentId)
-            );
+            roomIds.add(stringToUuid(message.id + "-" + this.runtime.agentId));
         }
 
         // Check the existing memories in the database
@@ -398,7 +401,9 @@ export class ClientBase extends EventEmitter {
         );
 
         elizaLogger.debug({
-            processingMessages: messagesToSave.map((message) => message.id).join(","),
+            processingMessages: messagesToSave
+                .map((message) => message.id)
+                .join(","),
         });
 
         await this.runtime.ensureUserExists(

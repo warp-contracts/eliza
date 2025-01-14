@@ -1,9 +1,10 @@
 import { SearchMode } from "agent-twitter-client";
-import { dryrun } from "@permaweb/aoconnect";
-import { GQL_TXS_QUERY, NodeType } from "./ao_types.ts";
+import { createDataItemSigner, dryrun, message } from "@permaweb/aoconnect";
+import { AoSigner, GQL_TXS_QUERY, NodeType } from "./ao_types.ts";
 
 export class AoClient {
     profileContractId: string;
+    signer: AoSigner;
 
     constructor(profileContractId: string) {
         this.profileContractId = profileContractId;
@@ -62,8 +63,22 @@ export class AoClient {
         return Promise.resolve(undefined);
     }
 
-    async sendTweet(content: string, tweetId: string) {
-        return Promise.resolve(undefined);
+    async connect() {
+        this.signer = createDataItemSigner(process.env.AO_WALLET);
+    }
+
+    async sendAoMessage(content: string, id: string): Promise<string> {
+        const messageSent = await message({
+            process: process.env.AO_MESSAGE_PROTOCOL_ID,
+            tags: [
+                { name: "Action", value: "Send-Message" },
+                { name: "Message-Id", value: id },
+            ],
+            signer: this.signer,
+            data: content,
+        });
+
+        return messageSent;
     }
 
     async likeTweet(id: string) {}
