@@ -132,9 +132,6 @@ export class AoTheComputerPostClient {
         elizaLogger.log(
             `- Post Immediately: ${this.client.aoConfig.AO_MESSAGE_IMMEDIATELY ? "enabled" : "disabled"}`
         );
-        elizaLogger.log(
-            `- Search Enabled: ${this.client.aoConfig.AO_SEARCH_ENABLE ? "enabled" : "disabled"}`
-        );
 
         if (this.isDryRun) {
             elizaLogger.log(
