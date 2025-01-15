@@ -1,7 +1,7 @@
 import { createDataItemSigner, dryrun, message } from "@permaweb/aoconnect";
 import { AoSigner, NodeType } from "./ao_types.ts";
-import {GQL_TX_QUERY, GQL_TXS_QUERY} from "./ao_graphql_query.ts";
-import {elizaLogger} from "@elizaos/core";
+import { GQL_TX_QUERY, GQL_TXS_QUERY } from "./ao_graphql_query.ts";
+import { elizaLogger } from "@elizaos/core";
 
 export class AoClient {
     profileContractId: string;
@@ -24,7 +24,7 @@ export class AoClient {
                 body: JSON.stringify({
                     query: GQL_TX_QUERY,
                     variables: {
-                        id: messageId
+                        id: messageId,
                     },
                 }),
             }
@@ -37,7 +37,9 @@ export class AoClient {
     }
 
     async getMessageData(messageId: string): Promise<string> {
-        return await fetch(`https://arweave.net/${messageId}`).then((res) => res.text());
+        return await fetch(`https://arweave.net/${messageId}`).then((res) =>
+            res.text()
+        );
     }
 
     async fetchIncomingMessages(count: number): Promise<NodeType[]> {
@@ -64,8 +66,9 @@ export class AoClient {
             }
         ).then((res) => res.json());
 
-        const messages = messageResponse.data.transactions.edges
-            .map((e) => e.node);
+        const messages = messageResponse.data.transactions.edges.map(
+            (e) => e.node
+        );
 
         for (const m of messages) {
             m.data.value = await this.getMessageData(m.id);
@@ -79,21 +82,27 @@ export class AoClient {
     }
 
     async connect() {
-        this.signer = createDataItemSigner(process.env.AO_WALLET);
+        this.signer = createDataItemSigner(JSON.parse(process.env.AO_WALLET));
     }
 
     async sendAoMessage(content: string, id: string): Promise<string> {
-        const messageSent = await message({
-            process: process.env.AO_MESSAGE_PROTOCOL_ID,
-            tags: [
-                { name: "Action", value: "Send-Message" },
-                { name: "Message-Id", value: id },
-            ],
-            signer: this.signer,
-            data: content,
-        });
-
-        return messageSent;
+        let messageId;
+        try {
+            messageId = await message({
+                process: process.env.AO_MESSAGE_PROTOCOL_ID,
+                tags: [
+                    { name: "Action", value: "Send-Message" },
+                    // { name: "Message-Id", value: id },
+                ],
+                signer: this.signer,
+                data: content,
+            });
+        } catch (error) {
+            console.error("Error sending AO message:", error);
+            return;
+        }
+        console.info("Message has been sent to AO", messageId);
+        return messageId;
     }
 
     async likeTweet(id: string) {}

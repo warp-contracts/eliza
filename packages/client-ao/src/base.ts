@@ -14,7 +14,6 @@ import { AoConfig } from "./environment.ts";
 import { AoClient, AoFetchProfileResult } from "./AoClient.ts";
 import { NodeType } from "./ao_types.ts";
 
-
 interface AoProfile extends AoFetchProfileResult {
     contractId: string;
 }
