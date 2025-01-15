@@ -21,7 +21,7 @@ const aoMessageTemplate = `
 # Areas of Expertise
 {{knowledge}}
 
-# About {{agentName}} (@{{twitterUserName}}):
+# About {{agentName}} (@{{aoUserName}}):
 {{bio}}
 {{lore}}
 {{topics}}
@@ -32,14 +32,14 @@ const aoMessageTemplate = `
 
 {{postDirections}}
 
-# Task: Generate a post in the voice and style and perspective of {{agentName}} @{{twitterUserName}}.
+# Task: Generate a post in the voice and style and perspective of {{agentName}} @{{aoUserName}}.
 Write a post that is {{adjective}} about {{topic}} (without mentioning {{topic}} directly), from the perspective of {{agentName}}. Do not add commentary or acknowledge this request, just write the post.
 Your response should be 1, 2, or 3 sentences (choose the length at random).
 Your response should not contain any questions. Brief, concise statements only. The total character count MUST be less than {{maxTweetLength}}. No emojis. Use \\n\\n (double spaces) between statements if there are multiple statements in your response.`;
 
 export const aoActionTemplate =
     `
-# INSTRUCTIONS: Determine actions for {{agentName}} (@{{twitterUserName}}) based on:
+# INSTRUCTIONS: Determine actions for {{agentName}} (@{{aoUserName}}) based on:
 {{bio}}
 {{postDirections}}
 
@@ -70,14 +70,14 @@ Tweet:
  */
 function truncateToCompleteSentence(
     text: string,
-    maxTweetLength: number
+    maxMessageLength: number
 ): string {
-    if (text.length <= maxTweetLength) {
+    if (text.length <= maxMessageLength) {
         return text;
     }
 
     // Attempt to truncate at the last period within the limit
-    const lastPeriodIndex = text.lastIndexOf(".", maxTweetLength - 1);
+    const lastPeriodIndex = text.lastIndexOf(".", maxMessageLength - 1);
     if (lastPeriodIndex !== -1) {
         const truncatedAtPeriod = text.slice(0, lastPeriodIndex + 1).trim();
         if (truncatedAtPeriod.length > 0) {
@@ -86,7 +86,7 @@ function truncateToCompleteSentence(
     }
 
     // If no period, truncate to the nearest whitespace within the limit
-    const lastSpaceIndex = text.lastIndexOf(" ", maxTweetLength - 1);
+    const lastSpaceIndex = text.lastIndexOf(" ", maxMessageLength - 1);
     if (lastSpaceIndex !== -1) {
         const truncatedAtSpace = text.slice(0, lastSpaceIndex).trim();
         if (truncatedAtSpace.length > 0) {
@@ -95,7 +95,7 @@ function truncateToCompleteSentence(
     }
 
     // Fallback: Hard truncate and add ellipsis
-    const hardTruncated = text.slice(0, maxTweetLength - 3).trim();
+    const hardTruncated = text.slice(0, maxMessageLength - 3).trim();
     return hardTruncated + "...";
 }
 
@@ -148,7 +148,7 @@ export class AoTheComputerPostClient {
         const generateNewMessageLoop = async () => {
             const lastPost = await this.runtime.cacheManager.get<{
                 timestamp: number;
-            }>("ao/" + this.aoUsername + "/lastPost");
+            }>("ao/" + this.aoUsername + "/lastMessage");
 
             const lastPostTimestamp = lastPost?.timestamp ?? 0;
             const minMinutes = this.client.aoConfig.AO_MESSAGE_INTERVAL_MIN;
@@ -166,7 +166,9 @@ export class AoTheComputerPostClient {
                 generateNewMessageLoop(); // Set up next iteration
             }, delay);
 
-            elizaLogger.log(`Next tweet scheduled in ${randomMinutes} minutes`);
+            elizaLogger.log(
+                `Next message scheduled in ${randomMinutes} minutes`
+            );
         };
 
         const processActionsLoop = async () => {
@@ -204,9 +206,11 @@ export class AoTheComputerPostClient {
         // Only start tweet generation loop if not in dry run mode
         if (!this.isDryRun) {
             generateNewMessageLoop();
-            elizaLogger.log("Tweet generation loop started");
+            elizaLogger.log("AO message generation loop started");
         } else {
-            elizaLogger.log("Tweet generation loop disabled (dry run mode)");
+            elizaLogger.log(
+                "AO message generation loop disabled (dry run mode)"
+            );
         }
 
         if (
@@ -235,7 +239,7 @@ export class AoTheComputerPostClient {
     createTweetObject(
         tweetResult: any,
         client: any,
-        twitterUsername: string
+        aoUserName: string
     ): Tweet {
         return {
             id: tweetResult.rest_id,
@@ -247,7 +251,7 @@ export class AoTheComputerPostClient {
             timestamp: new Date(tweetResult.legacy.created_at).getTime(),
             userId: client.profile.id,
             inReplyToStatusId: tweetResult.legacy.in_reply_to_status_id_str,
-            permanentUrl: `https://ao.link/${twitterUsername}/status/${tweetResult.rest_id}`,
+            permanentUrl: `https://ao.link/${aoUserName}/status/${tweetResult.rest_id}`,
             hashtags: [],
             mentions: [],
             photos: [],
@@ -257,16 +261,16 @@ export class AoTheComputerPostClient {
         } as Tweet;
     }
 
-    async processAndCacheTweet(
+    async processAndCacheAOMessage(
         runtime: IAgentRuntime,
         client: ClientBase,
         aoMessage: NodeType,
         roomId: UUID,
-        newTweetContent: string
+        aoMessageContent: string
     ) {
         // Cache the last post details
         await runtime.cacheManager.set(
-            `ao/${client.profile.Profile.UserName}/lastPost`,
+            `ao/${process.env.AO_USERNAME}/lastMessage`,
             {
                 id: aoMessage.id,
                 timestamp: Date.now(),
@@ -291,7 +295,7 @@ export class AoTheComputerPostClient {
             userId: runtime.agentId,
             agentId: runtime.agentId,
             content: {
-                text: newTweetContent.trim(),
+                text: aoMessageContent.trim(),
                 url: `https://www.ao.link/#/message/${aoMessage.id}`,
                 source: "AoTheComputer",
             },
@@ -346,7 +350,6 @@ export class AoTheComputerPostClient {
                 async () =>
                     await client.aoClient.sendAoMessage(content, tweetId)
             );
-            // const body = await sendStandardAoMessageResult.json();
             if (!aoMessageResult) {
                 console.error(
                     "Error sending AO message; Bad response:",
@@ -356,8 +359,7 @@ export class AoTheComputerPostClient {
             }
             return aoMessageResult;
         } catch (error) {
-            console.log(error)
-            elizaLogger.error("Error sending standard Message:", error);
+            elizaLogger.error("Error sending standard AO message:", error);
             throw error;
         }
     }
@@ -371,7 +373,10 @@ export class AoTheComputerPostClient {
         aoUsername: string
     ) {
         try {
-            elizaLogger.log(`Sending new message to process:\n`, cleanedContent);
+            elizaLogger.log(
+                `Sending new message to process:\n`,
+                cleanedContent
+            );
 
             let result;
 
@@ -386,9 +391,12 @@ export class AoTheComputerPostClient {
             // }
 
             // const tweet = this.createTweetObject(result, client, aoUsername);
-            // TODO: Here we should probably
-            const aoMessage = {} as NodeType;
-            await this.processAndCacheTweet(
+            // TODO: Here we should probably get message metadata + data and cache it
+            const aoMessage = {
+                id: result,
+                timestamp: Date.now(),
+            } as NodeType;
+            await this.processAndCacheAOMessage(
                 runtime,
                 client,
                 aoMessage,
@@ -402,18 +410,18 @@ export class AoTheComputerPostClient {
     }
 
     /**
-     * Generates and posts a new tweet. If isDryRun is true, only logs what would have been posted.
+     * Generates and posts a new AO message. If isDryRun is true, only logs what would have been posted.
      */
     private async generateNewMessage() {
         elizaLogger.log("Generating new AO message");
 
         try {
             const roomId = stringToUuid(
-                "ao_generate_room-" + this.client.profile.Profile.UserName
+                "ao_generate_room-" + process.env.AO_USERNAME
             );
             await this.runtime.ensureUserExists(
                 this.runtime.agentId,
-                this.client.profile.Profile.UserName,
+                process.env.AO_USERNAME,
                 this.runtime.character.name,
                 "ao"
             );
@@ -427,11 +435,11 @@ export class AoTheComputerPostClient {
                     agentId: this.runtime.agentId,
                     content: {
                         text: topics || "",
-                        action: "SEND_MESSAGE",
+                        action: "AO_MESSAGE",
                     },
                 },
                 {
-                    aoUserName: this.client.profile.Profile.UserName,
+                    aoUserName: process.env.AO_USERNAME,
                 }
             );
 
@@ -518,11 +526,11 @@ export class AoTheComputerPostClient {
                     this.aoUsername
                 );
             } catch (error) {
-                console.error(`postMessage`, error)
+                console.error(`postMessage`, error);
                 elizaLogger.error("Error sending message:", error);
             }
         } catch (error) {
-            console.error(error)
+            console.error(error);
             elizaLogger.error("Error generating new message:", error);
         }
     }
@@ -655,7 +663,7 @@ export class AoTheComputerPostClient {
                             content: { text: "", action: "" },
                         },
                         {
-                            twitterUserName: this.aoUsername,
+                            aoUserName: this.aoUsername,
                             currentTweet: `ID: ${tweet.id}\nFrom: ${tweet.name} (@${tweet.username})\nText: ${tweet.text}`,
                         }
                     );
@@ -798,7 +806,7 @@ export class AoTheComputerPostClient {
                                         },
                                     },
                                     {
-                                        twitterUserName: this.aoUsername,
+                                        aoUserName: this.aoUsername,
                                         currentPost: `From @${tweet.username}: ${tweet.text}`,
                                         formattedConversation,
                                         imageContext:
@@ -993,7 +1001,7 @@ export class AoTheComputerPostClient {
                     content: { text: tweet.text, action: "" },
                 },
                 {
-                    twitterUserName: this.aoUsername,
+                    aoUserName: this.aoUsername,
                     currentPost: `From @${tweet.username}: ${tweet.text}`,
                     formattedConversation,
                     imageContext:
