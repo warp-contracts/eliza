@@ -7,6 +7,7 @@ import { elizaLogger } from "@elizaos/core";
 import { Media } from "@elizaos/core";
 import fs from "fs";
 import path from "path";
+import {NodeType} from "./ao_types.ts";
 
 export const wait = (minTime: number = 1000, maxTime: number = 3000) => {
     const waitTime =
@@ -15,21 +16,20 @@ export const wait = (minTime: number = 1000, maxTime: number = 3000) => {
 };
 
 export async function buildConversationThread(
-    tweet: Tweet,
+    aoMessage: NodeType,
     client: ClientBase,
     maxReplies: number = 10
-): Promise<Tweet[]> {
-    const thread: Tweet[] = [];
+): Promise<NodeType[]> {
+    const thread: NodeType[] = [];
     const visited: Set<string> = new Set();
 
-    async function processThread(currentTweet: Tweet, depth: number = 0) {
-        elizaLogger.debug("Processing tweet:", {
-            id: currentTweet.id,
-            inReplyToStatusId: currentTweet.inReplyToStatusId,
+    async function processThread(currentMessage: NodeType, depth: number = 0) {
+        elizaLogger.debug("Processing message:", {
+            id: currentMessage.id,
             depth: depth,
         });
 
-        if (!currentTweet) {
+        if (!currentMessage) {
             elizaLogger.debug("No current tweet found for thread building");
             return;
         }
@@ -42,127 +42,82 @@ export async function buildConversationThread(
 
         // Handle memory storage
         const memory = await client.runtime.messageManager.getMemoryById(
-            stringToUuid(currentTweet.id + "-" + client.runtime.agentId)
+            stringToUuid(currentMessage.id + "-" + client.runtime.agentId)
         );
         if (!memory) {
             const roomId = stringToUuid(
-                currentTweet.conversationId + "-" + client.runtime.agentId
+                currentMessage.conversationId + "-" + client.runtime.agentId
             );
-            const userId = stringToUuid(currentTweet.userId);
+            const userId = stringToUuid(currentMessage.owner.address);
 
             await client.runtime.ensureConnection(
                 userId,
                 roomId,
-                currentTweet.username,
-                currentTweet.name,
-                "twitter"
+                currentMessage.owner.address,
+                currentMessage.owner.address,
+                "ao"
             );
 
             await client.runtime.messageManager.createMemory({
-                id: stringToUuid(
-                    currentTweet.id + "-" + client.runtime.agentId
-                ),
+                id: stringToUuid(currentMessage.id + "-" + client.runtime.agentId),
                 agentId: client.runtime.agentId,
                 content: {
-                    text: currentTweet.text,
-                    source: "twitter",
-                    url: currentTweet.permanentUrl,
-                    inReplyTo: currentTweet.inReplyToStatusId
-                        ? stringToUuid(
-                              currentTweet.inReplyToStatusId +
-                                  "-" +
-                                  client.runtime.agentId
-                          )
-                        : undefined,
+                    text: currentMessage.data.value,
+                    source: "AoTheComputer",
+                    url: currentMessage.conversationId,
                 },
-                createdAt: currentTweet.timestamp * 1000,
+                createdAt: currentMessage.timestamp * 1000,
                 roomId,
                 userId:
-                    currentTweet.userId === client.profile.id
+                    currentMessage.owner.address === client.profile.Owner
                         ? client.runtime.agentId
-                        : stringToUuid(currentTweet.userId),
+                        : stringToUuid(currentMessage.owner.address),
                 embedding: getEmbeddingZeroVector(),
             });
         }
 
-        if (visited.has(currentTweet.id)) {
-            elizaLogger.debug("Already visited tweet:", currentTweet.id);
+        if (visited.has(currentMessage.id)) {
+            elizaLogger.debug("Already visited tweet:", currentMessage.id);
             return;
         }
 
-        visited.add(currentTweet.id);
-        thread.unshift(currentTweet);
+        visited.add(currentMessage.id);
+        thread.unshift(currentMessage);
 
         elizaLogger.debug("Current thread state:", {
             length: thread.length,
             currentDepth: depth,
-            tweetId: currentTweet.id,
+            tweetId: currentMessage.id,
         });
-
-        // If there's a parent tweet, fetch and process it
-        if (currentTweet.inReplyToStatusId) {
-            elizaLogger.debug(
-                "Fetching parent tweet:",
-                currentTweet.inReplyToStatusId
-            );
-            try {
-                const parentTweet = await client.aoClient.getMessage(
-                    currentTweet.inReplyToStatusId
-                );
-
-                if (parentTweet) {
-                    elizaLogger.debug("Found parent tweet:", {
-                        id: parentTweet.id,
-                        text: parentTweet.text?.slice(0, 50),
-                    });
-                    await processThread(parentTweet, depth + 1);
-                } else {
-                    elizaLogger.debug(
-                        "No parent tweet found for:",
-                        currentTweet.inReplyToStatusId
-                    );
-                }
-            } catch (error) {
-                elizaLogger.error("Error fetching parent tweet:", {
-                    tweetId: currentTweet.inReplyToStatusId,
-                    error,
-                });
-            }
-        } else {
-            elizaLogger.debug(
-                "Reached end of reply chain at:",
-                currentTweet.id
-            );
-        }
     }
 
-    await processThread(tweet, 0);
+    await processThread(aoMessage, 0);
 
     elizaLogger.debug("Final thread built:", {
-        totalTweets: thread.length,
+        totalMessages: thread.length,
         tweetIds: thread.map((t) => ({
             id: t.id,
-            text: t.text?.slice(0, 50),
+            text: t.data?.value?.slice(0, 50),
         })),
     });
 
     return thread;
 }
 
-export async function sendTweet(
+export async function sendMessage(
     client: ClientBase,
     content: Content,
     roomId: UUID,
     twitterUsername: string,
     inReplyTo: string
 ): Promise<Memory[]> {
-    const maxTweetLength = client.aoConfig.MAX_TWEET_LENGTH;
+    const maxMessageLength = client.aoConfig.AO_MAX_MESSAGE_LENGTH;
 
-    const tweetChunks = splitTweetContent(content.text, maxTweetLength);
+    const messageChunks = splitMessageContent(content.text, maxMessageLength);
     const sentTweets: Tweet[] = [];
     let previousTweetId = inReplyTo;
 
-    for (const chunk of tweetChunks) {
+    for (const chunk of messageChunks) {
         let mediaData: { data: Buffer; mediaType: string }[] | undefined;
 
         if (content.attachments && content.attachments.length > 0) {
@@ -196,7 +151,7 @@ export async function sendTweet(
                 })
             );
         }
-        const result = await client.requestQueue.add(async () => client.aoClient.sendTweet(chunk.trim(), previousTweetId, mediaData));
+        const result = await client.requestQueue.add(async () => client.aoClient.sendAoMessage(chunk.trim(), previousTweetId, mediaData));
 
         const body = await result.json();
         const tweetResult = body.data.create_tweet.tweet_results.result;
@@ -236,7 +191,7 @@ export async function sendTweet(
         userId: client.runtime.agentId,
         content: {
             text: tweet.text,
-            source: "twitter",
+            source: "AoTheComputer",
             url: tweet.permanentUrl,
             inReplyTo: tweet.inReplyToStatusId
                 ? stringToUuid(
@@ -252,7 +207,7 @@ export async function sendTweet(
     return memories;
 }
 
-function splitTweetContent(content: string, maxLength: number): string[] {
+function splitMessageContent(content: string, maxLength: number): string[] {
     const paragraphs = content.split("\n\n").map((p) => p.trim());
     const tweets: string[] = [];
     let currentTweet = "";

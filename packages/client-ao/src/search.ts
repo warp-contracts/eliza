@@ -13,7 +13,7 @@ import {
 } from "@elizaos/core";
 import { stringToUuid } from "@elizaos/core";
 import { ClientBase } from "./base";
-import { buildConversationThread, sendTweet, wait } from "./utils.ts";
+import { buildConversationThread, sendMessage, wait } from "./utils.ts";
 
 const twitterSearchTemplate =
     `{{timeline}}
@@ -275,7 +275,7 @@ export class AoSearchClient {
             );
             try {
                 const callback: HandlerCallback = async (response: Content) => {
-                    const memories = await sendTweet(
+                    const memories = await sendMessage(
                         this.client,
                         response,
                         message.roomId,

@@ -39,9 +39,8 @@ export class AoClient {
 
     async getMessageData(messageId: string): Promise<string> {
         console.log(`===== AO == getMessageData`, messageId);
-        const message = await fetch(`https://arweave.net/${messageId}`)
-            .then((res) => res.text())
-        console.log(`===== AO == message data`, message);
+        const message = await fetch(`https://arweave.net/${messageId}`).then((res) => res.text());
+        console.log(`===== AO == message data fetched`, messageId);
         return message;
     }
 
@@ -69,12 +68,14 @@ export class AoClient {
             }
         ).then((res) => res.json());
 
-        return messageResponse.data.transactions.edges
-            .map((e) => e.node)
-            .map((m) => {
-                m.data.value = this.getMessageData(m.id);
-                return m;
-        });
+        const messages = messageResponse.data.transactions.edges
+            .map((e) => e.node);
+
+        for (const m of messages) {
+            m.data.value = await this.getMessageData(m.id);
+        }
+
+        return messages;
     }
 
     fetchSearchMessages(

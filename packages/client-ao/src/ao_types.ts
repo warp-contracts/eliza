@@ -12,6 +12,21 @@ export type AoSigner = {
 
 export type TagType = { name: string; value: string };
 
+export type Message = {
+    id: string;
+    owner?: {
+        address: string;
+        key: string;
+    };
+    data: string;
+    tags: TagType[];
+    signature: string;
+    target: string;
+
+    conversationId: '123';
+    timestamp?: number;
+}
+
 export type NodeType = {
     id: string;
     tags: TagType[];
@@ -20,6 +35,7 @@ export type NodeType = {
         type: string;
         value?: string;
     };
+    url?: string,
     block?: {
         height: number;
         timestamp: number;
@@ -28,5 +44,6 @@ export type NodeType = {
         address: string;
     };
     address?: string;
+    conversationId: '123';
     timestamp?: number;
 };

@@ -296,7 +296,7 @@ export class AoTheComputerPostClient {
             content: {
                 text: newTweetContent.trim(),
                 url: `https://www.ao.link/#/message/${aoMessage.id}`,
-                source: "twitter",
+                source: "AoTheComputer",
             },
             roomId,
             embedding: getEmbeddingZeroVector(),
@@ -359,7 +359,8 @@ export class AoTheComputerPostClient {
             }
             return aoMessageResult;
         } catch (error) {
-            elizaLogger.error("Error sending standard Tweet:", error);
+            console.log(error)
+            elizaLogger.error("Error sending standard Message:", error);
             throw error;
         }
     }
@@ -373,7 +374,7 @@ export class AoTheComputerPostClient {
         aoUsername: string
     ) {
         try {
-            elizaLogger.log(`Sending new message to process:\n`);
+            elizaLogger.log(`Sending new message to process:\n`, cleanedContent);
 
             let result;
 
@@ -398,7 +399,8 @@ export class AoTheComputerPostClient {
                 newMessageContent
             );
         } catch (error) {
-            elizaLogger.error("Error sending tweet:", error);
+            console.error(`send standard ao message`, error);
+            elizaLogger.error("Error sending message:", error);
         }
     }
 
@@ -503,7 +505,7 @@ export class AoTheComputerPostClient {
 
             if (this.isDryRun) {
                 elizaLogger.info(
-                    `Dry run: would have posted tweet: ${cleanedContent}`
+                    `Dry run: would have posted message: ${cleanedContent}`
                 );
                 return;
             }
@@ -519,10 +521,12 @@ export class AoTheComputerPostClient {
                     this.aoUsername
                 );
             } catch (error) {
-                elizaLogger.error("Error sending tweet:", error);
+                console.error(`postMessage`, error)
+                elizaLogger.error("Error sending message:", error);
             }
         } catch (error) {
-            elizaLogger.error("Error generating new tweet:", error);
+            console.error(error)
+            elizaLogger.error("Error generating new message:", error);
         }
     }
 
@@ -899,9 +903,9 @@ export class AoTheComputerPostClient {
                         id: stringToUuid(tweet.id + "-" + this.runtime.agentId),
                         userId: stringToUuid(tweet.userId),
                         content: {
-                            text: tweet.text,
-                            url: tweet.permanentUrl,
-                            source: "twitter",
+                            text: tweet.data.value,
+                            url: tweet.url,
+                            source: "AoTheComputer",
                             action: executedActions.join(","),
                         },
                         agentId: this.runtime.agentId,
