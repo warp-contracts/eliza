@@ -16,7 +16,8 @@ import {
     getEmbeddingZeroVector,
 } from "@elizaos/core";
 import { ClientBase } from "./base";
-import { buildConversationThread, sendTweet, wait } from "./utils.ts";
+import { buildConversationThread, sendMessage, wait } from "./utils.ts";
+import {NodeType} from "./ao_types.ts";
 
 export const aoMessageHandlerTemplate =
     `
@@ -55,12 +56,10 @@ Here is the current post text again. Remember to include an action if the curren
 {{currentPost}}
 ` + messageCompletionFooter;
 
-export const aoShouldRespondTemplate = (targetUsersStr: string) =>
+export const aoShouldRespondTemplate =
     `# INSTRUCTIONS: Determine if {{agentName}} (@{{aoUserName}}) should respond to the message and participate in the conversation. Do not comment. Just respond with "true" or "false".
 
 Response options are RESPOND, IGNORE and STOP.
-
-PRIORITY RULE: ALWAYS RESPOND to these users regardless of topic or message content: ${targetUsersStr}. Topic relevance should be ignored for these users.
 
 For other users:
 - {{agentName}} should RESPOND to messages directed at them
@@ -113,83 +112,70 @@ export class AoInteractionClient {
         try {
             const messages = await this.client.fetchIncomingMessages(20);
 
-            elizaLogger.log(
-                "Completed checking mentioned tweets:",
-                messages.length
-            );
+            elizaLogger.log("Completed checking incoming messages", messages.length);
 
             // Sort tweet candidates by ID in ascending order
-            messages
-                .sort((a, b) => a.timestamp - b.timestamp)
-                .filter((tweet) => tweet.userId !== this.client.profile.id);
+            messages.sort((a, b) => a.timestamp - b.timestamp);
 
-            // for each tweet candidate, handle the tweet
-            for (const tweet of uniqueTweetCandidates) {
+            // for each message candidate, handle the message
+            for (const m of messages) {
                 if (
-                    !this.client.lastCheckedMessageId ||
-                    BigInt(tweet.id) > this.client.lastCheckedMessageId
+                    !this.client.lastCheckedMessageTs ||
+                    m.timestamp > this.client.lastCheckedMessageTs
                 ) {
-                    // Generate the tweetId UUID the same way it's done in handleTweet
-                    const tweetId = stringToUuid(
-                        tweet.id + "-" + this.runtime.agentId
-                    );
+                    // Generate the messageId UUID the same way it's done in handleAoMessage
+                    const messageId = stringToUuid(m.id);
 
-                    // Check if we've already processed this tweet
+                    // Check if we've already processed this message
                     const existingResponse =
                         await this.runtime.messageManager.getMemoryById(
-                            tweetId
+                            messageId
                         );
 
                     if (existingResponse) {
                         elizaLogger.log(
-                            `Already responded to tweet ${tweet.id}, skipping`
+                            `Already responded to message ${m.id}, skipping`
                         );
                         continue;
                     }
-                    elizaLogger.log("New Tweet found", tweet.permanentUrl);
 
-                    const roomId = stringToUuid(
-                        tweet.conversationId + "-" + this.runtime.agentId
-                    );
+                    const roomId = stringToUuid(m.conversationId + "-" + this.runtime.agentId);
 
                     const userIdUUID =
-                        tweet.userId === this.client.profile.id
+                        m.owner.address === this.client.profile.Owner
                             ? this.runtime.agentId
-                            : stringToUuid(tweet.userId!);
+                            : stringToUuid(m.owner.address!);
 
                     await this.runtime.ensureConnection(
                         userIdUUID,
                         roomId,
-                        tweet.username,
-                        tweet.name,
+                        m.owner.address,
+                        m.owner.address,
                         "ao"
                     );
 
-                    const thread = await buildConversationThread(
-                        tweet,
-                        this.client
-                    );
+                    const thread = await buildConversationThread(m, this.client);
 
-                    const message = {
-                        content: { text: tweet.text },
+                    const memory = {
+                        content: { text: m.data.value },
                         agentId: this.runtime.agentId,
                         userId: userIdUUID,
                         roomId,
                     };
 
-                    await this.handleTweet({
-                        tweet,
-                        message,
+                    await this.handleAoMessage({
+                        aoMessage: m,
+                        memory,
                         thread,
                     });
 
-                    // Update the last checked tweet ID after processing each tweet
-                    this.client.lastCheckedMessageId = BigInt(tweet.id);
+                    // Update the last checked message timestamp after processing each message
+                    this.client.lastCheckedMessageTs = m.timestamp;
                 }
             }
 
-            // Save the latest checked tweet ID to the file
-            await this.client.cacheLatestCheckedMessageId();
+            // Save the latest checked message timestamp to the file
+            await this.client.cacheLatestCheckedMessageTimestamp();
 
             elizaLogger.log("Finished checking AO interactions");
         } catch (error) {
@@ -198,52 +184,51 @@ export class AoInteractionClient {
         }
     }
 
-    private async handleTweet({
-        tweet,
-        message,
+    private async handleAoMessage({
+        aoMessage,
+        memory,
         thread,
     }: {
-        tweet: Tweet;
-        message: Memory;
-        thread: Tweet[];
+        aoMessage: NodeType;
+        memory: Memory;
+        thread: NodeType[];
     }) {
-        if (tweet.userId === this.client.profile.id) {
-            // console.log("skipping tweet from bot itself", tweet.id);
-            // Skip processing if the tweet is from the bot itself
+        if (aoMessage.owner.address === this.client.profile.Owner) {
+            // Skip processing if the memory is from the bot itself
             return;
         }
 
-        if (!message.content.text) {
-            elizaLogger.log("Skipping Tweet with no text", tweet.id);
+        if (!memory.content.text) {
+            elizaLogger.log("Skipping Tweet with no text", aoMessage.id);
             return { text: "", action: "IGNORE" };
         }
 
-        elizaLogger.log("Processing Tweet: ", tweet.id);
-        const formatTweet = (tweet: Tweet) => {
+        elizaLogger.log("Processing Tweet: ", aoMessage.id);
+        const formatMessage = (tweet: NodeType) => {
             return `  ID: ${tweet.id}
-  From: ${tweet.name} (@${tweet.username})
-  Text: ${tweet.text}`;
+  From: ${tweet.owner.address} (@${tweet.owner.address})
+  Text: ${tweet.data.value}`;
         };
-        const currentPost = formatTweet(tweet);
+        const currentPost = formatMessage(aoMessage);
 
         elizaLogger.debug("Thread: ", thread);
         const formattedConversation = thread
             .map(
-                (tweet) => `@${tweet.username} (${new Date(
-                    tweet.timestamp * 1000
+                (message) => `@${message.owner.address} (${new Date(
+                    message.timestamp * 1000
                 ).toLocaleString("en-US", {
                     hour: "2-digit",
                     minute: "2-digit",
                     month: "short",
                     day: "numeric",
                 })}):
-        ${tweet.text}`
+        ${message.data.value}`
             )
             .join("\n\n");
 
         elizaLogger.debug("formattedConversation: ", formattedConversation);
 
-        let state = await this.runtime.composeState(message, {
+        let state = await this.runtime.composeState(memory, {
             aoClient: this.client.aoClient,
             aoUserName: this.client.aoConfig.AO_USERNAME,
             currentPost,
@@ -251,42 +236,36 @@ export class AoInteractionClient {
         });
 
         // check if the tweet exists, save if it doesn't
-        const tweetId = stringToUuid(tweet.id + "-" + this.runtime.agentId);
+        const tweetId = stringToUuid(aoMessage.id + "-" + this.runtime.agentId);
         const tweetExists =
             await this.runtime.messageManager.getMemoryById(tweetId);
 
         if (!tweetExists) {
             elizaLogger.log("tweet does not exist, saving");
-            const userIdUUID = stringToUuid(tweet.userId as string);
-            const roomId = stringToUuid(tweet.conversationId);
+            const userIdUUID = stringToUuid(aoMessage.owner.address);
+            const roomId = stringToUuid(aoMessage.conversationId);
 
             const message = {
                 id: tweetId,
                 agentId: this.runtime.agentId,
                 content: {
-                    text: tweet.text,
-                    url: tweet.permanentUrl,
-                    inReplyTo: tweet.inReplyToStatusId
-                        ? stringToUuid(
-                              tweet.inReplyToStatusId +
-                                  "-" +
-                                  this.runtime.agentId
-                          )
-                        : undefined,
+                    text: aoMessage.data.value,
+                    url: aoMessage.url,
                 },
                 userId: userIdUUID,
                 roomId,
-                createdAt: tweet.timestamp * 1000,
+                createdAt: aoMessage.timestamp * 1000,
             };
             this.client.saveRequestMessage(message, state);
         }
 
+        const template = this.runtime.character.templates
+                ?.aoShouldRespondTemplate ||
+            this.runtime.character?.templates?.shouldRespondTemplate ||
+            aoShouldRespondTemplate;
         const shouldRespondContext = composeContext({
             state,
-            template:
-                this.runtime.character.templates
-                    ?.aoShouldRespondTemplate ||
-                this.runtime.character?.templates?.shouldRespondTemplate
+            template
         });
 
         const shouldRespond = await generateShouldRespond({
@@ -321,7 +300,7 @@ export class AoInteractionClient {
         const removeQuotes = (str: string) =>
             str.replace(/^['"](.*)['"]$/, "$1");
 
-        const stringId = stringToUuid(tweet.id + "-" + this.runtime.agentId);
+        const stringId = stringToUuid(aoMessage.id + "-" + this.runtime.agentId);
 
         response.inReplyTo = stringId;
 
@@ -330,12 +309,12 @@ export class AoInteractionClient {
         if (response.text) {
             try {
                 const callback: HandlerCallback = async (response: Content) => {
-                    const memories = await sendTweet(
+                    const memories = await sendMessage(
                         this.client,
                         response,
-                        message.roomId,
+                        memory.roomId,
                         this.client.aoConfig.AO_PROFILE_CONTRACT,
-                        tweet.id
+                        aoMessage.id
                     );
                     return memories;
                 };
@@ -361,16 +340,16 @@ export class AoInteractionClient {
                 }
 
                 await this.runtime.processActions(
-                    message,
+                    memory,
                     responseMessages,
                     state,
                     callback
                 );
 
-                const responseInfo = `Context:\n\n${context}\n\nSelected Post: ${tweet.id} - ${tweet.username}: ${tweet.text}\nAgent's Output:\n${response.text}`;
+                const responseInfo = `Context:\n\n${context}\n\nSelected Post: ${aoMessage.id} - ${aoMessage.owner.address}: ${aoMessage.data.value}\nAgent's Output:\n${response.text}`;
 
                 await this.runtime.cacheManager.set(
-                    `ao/tweet_generation_${tweet.id}.txt`,
+                    `ao/tweet_generation_${aoMessage.id}.txt`,
                     responseInfo
                 );
                 await wait();
@@ -429,7 +408,7 @@ export class AoInteractionClient {
                     agentId: this.runtime.agentId,
                     content: {
                         text: currentTweet.text,
-                        source: "ao",
+                        source: "AoTheComputer",
                         url: currentTweet.permanentUrl,
                         inReplyTo: currentTweet.inReplyToStatusId
                             ? stringToUuid(

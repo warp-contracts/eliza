@@ -76,7 +76,7 @@ export class ClientBase extends EventEmitter {
     runtime: IAgentRuntime;
     aoConfig: AoConfig;
     directions: string;
-    lastCheckedMessageId: bigint | null = null;
+    lastCheckedMessageTs: number | null = null;
     imageDescriptionService: IImageDescriptionService;
     temperature: number = 0.5;
 
@@ -309,16 +309,9 @@ export class ClientBase extends EventEmitter {
                     }
 
                     const content = {
-                        text: message.text,
-                        url: message.permanentUrl,
+                        text: message.data.value,
+                        url: message.url,
                         source: "AoTheComputer",
-                        inReplyTo: message.inReplyToStatusId
-                            ? stringToUuid(
-                                  message.inReplyToStatusId +
-                                      "-" +
-                                      this.runtime.agentId
-                              )
-                            : undefined,
                     } as Content;
 
                     elizaLogger.log("Creating memory for message", message.id);
@@ -439,12 +432,9 @@ export class ClientBase extends EventEmitter {
             }
 
             const content = {
-                text: message.text,
-                url: message.permanentUrl,
+                text: message.data.value,
+                url: message.url,
                 source: "AoTheComputer",
-                inReplyTo: message.inReplyToStatusId
-                    ? stringToUuid(message.inReplyToStatusId)
-                    : undefined,
             } as Content;
 
             await this.runtime.messageManager.createMemory({
@@ -506,21 +496,21 @@ export class ClientBase extends EventEmitter {
     }
 
     async loadLatestCheckedMessage(): Promise<void> {
-        const latestCheckedMessageId =
-            await this.runtime.cacheManager.get<string>(
-                `ao/${this.profile.contractId}/latest_checked_message_id`
+        const latestCheckedMessageTs =
+            await this.runtime.cacheManager.get<number>(
+                `ao/${this.profile.contractId}/latest_checked_message_ts`
             );
 
-        if (latestCheckedMessageId) {
-            this.lastCheckedMessageId = BigInt(latestCheckedMessageId);
+        if (latestCheckedMessageTs) {
+            this.lastCheckedMessageTs = latestCheckedMessageTs;
         }
     }
 
-    async cacheLatestCheckedMessageId() {
-        if (this.lastCheckedMessageId) {
+    async cacheLatestCheckedMessageTimestamp() {
+        if (this.lastCheckedMessageTs) {
             await this.runtime.cacheManager.set(
-                `ao/${this.profile.contractId}/latest_checked_message_id`,
-                this.lastCheckedMessageId.toString()
+                `ao/${this.profile.contractId}/latest_checked_message_ts`,
+                this.lastCheckedMessageTs
             );
         }
     }
