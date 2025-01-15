@@ -9,7 +9,6 @@ import {
     stringToUuid,
     UUID,
 } from "@elizaos/core";
-import { SearchMode } from "agent-twitter-client";
 import { EventEmitter } from "events";
 import { AoConfig } from "./environment.ts";
 import { AoClient, AoFetchProfileResult } from "./AoClient.ts";
@@ -126,7 +125,6 @@ export class ClientBase extends EventEmitter {
 
     constructor(runtime: IAgentRuntime, aoConfig: AoConfig) {
         super();
-        console.log(`===== Base constructor`);
         this.runtime = runtime;
         this.aoConfig = aoConfig;
         const profileContractId = aoConfig.AO_PROFILE_CONTRACT;
@@ -193,48 +191,10 @@ export class ClientBase extends EventEmitter {
         return await this.aoClient.fetchIncomingMessages(count);
     }
 
-    async fetchSearchMessages(
-        query: string,
-        maxMessages: number,
-        searchMode: SearchMode,
-        cursor?: string
-    ): Promise<any> {
-        try {
-            // Sometimes this fails because we are rate limited. in this case, we just need to return an empty array
-            // if we dont get a response in 5 seconds, something is wrong
-            const timeoutPromise = new Promise((resolve) =>
-                setTimeout(() => resolve({ messages: [] }), 15000)
-            );
-
-            try {
-                const result = await this.requestQueue.add(
-                    async () =>
-                        await Promise.race([
-                            this.aoClient.fetchSearchMessages(
-                                query,
-                                maxMessages,
-                                searchMode,
-                                cursor
-                            ),
-                            timeoutPromise,
-                        ])
-                );
-                return result ?? { messages: [] };
-            } catch (error) {
-                elizaLogger.error("Error fetching search messages:", error);
-                return { messages: [] };
-            }
-        } catch (error) {
-            elizaLogger.error("Error fetching search messages:", error);
-            return { messages: [] };
-        }
-    }
-
     private async populateTimeline() {
         elizaLogger.debug("populating timeline...");
 
         const cachedTimeline = await this.getCachedTimeline();
-        console.log(`-- cachedTimeline`, cachedTimeline);
 
         // Check if the cache file exists
         if (cachedTimeline) {

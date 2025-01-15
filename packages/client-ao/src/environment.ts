@@ -21,7 +21,6 @@ export const aoEnvSchema = z.object({
         .number()
         .int()
         .default(AO_DEFAULT_MAX_MESSAGE_LENGTH),
-    AO_SEARCH_ENABLE: z.boolean().default(false),
     AO_RETRY_LIMIT: z.number().int(),
     AO_POLL_INTERVAL: z.number().int(),
     // I guess it's possible to do the transformation with zod
@@ -111,12 +110,6 @@ export async function validateAoConfig(
                 AO_DEFAULT_MAX_MESSAGE_LENGTH
             ),
 
-            AO_SEARCH_ENABLE:
-                parseBooleanFromText(
-                    runtime.getSetting("AO_SEARCH_ENABLE") ||
-                        process.env.AO_SEARCH_ENABLE
-                ) ?? false,
-
             // int
             AO_RETRY_LIMIT: safeParseInt(
                 runtime.getSetting("AO_RETRY_LIMIT") ||
@@ -167,7 +160,6 @@ export async function validateAoConfig(
                 ) ?? false,
         };
 
-        console.log(`----- AO CONFIG`, aoConfig);
 
         return aoEnvSchema.parse(aoConfig);
     } catch (error) {

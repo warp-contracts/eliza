@@ -1,7 +1,7 @@
-import { SearchMode } from "agent-twitter-client";
 import { createDataItemSigner, dryrun, message } from "@permaweb/aoconnect";
 import { AoSigner, NodeType } from "./ao_types.ts";
 import {GQL_TX_QUERY, GQL_TXS_QUERY} from "./ao_graphql_query.ts";
+import {elizaLogger} from "@elizaos/core";
 
 export class AoClient {
     profileContractId: string;
@@ -12,7 +12,7 @@ export class AoClient {
     }
 
     async getMessage(messageId: string): Promise<NodeType> {
-        console.log(`===== AO == getMessage`, messageId);
+        elizaLogger.log(`AO Client getMessage`, messageId);
         const messageRes = await fetch(
             "https://arweave-search.goldsky.com/graphql",
             {
@@ -33,19 +33,15 @@ export class AoClient {
         const message = messageRes.data.transaction;
         message.data.value = await this.getMessageData(messageId);
 
-        console.log(`===== AO == message`, message);
         return message;
     }
 
     async getMessageData(messageId: string): Promise<string> {
-        console.log(`===== AO == getMessageData`, messageId);
-        const message = await fetch(`https://arweave.net/${messageId}`).then((res) => res.text());
-        console.log(`===== AO == message data fetched`, messageId);
-        return message;
+        return await fetch(`https://arweave.net/${messageId}`).then((res) => res.text());
     }
 
     async fetchIncomingMessages(count: number): Promise<NodeType[]> {
-        console.log(`===== AO == getMessages`, this.profileContractId, count);
+        elizaLogger.log(`AO Client getMessages`, this.profileContractId, count);
         const reqBody = {
             query: GQL_TXS_QUERY,
             variables: {
@@ -76,23 +72,6 @@ export class AoClient {
         }
 
         return messages;
-    }
-
-    fetchSearchMessages(
-        query: string,
-        maxTweets: number,
-        searchMode: SearchMode,
-        cursor: string
-    ) {
-        return undefined;
-    }
-
-    async fetchFollowingTimeline(count: number, param2: any[]) {
-        return undefined;
-    }
-
-    async getUserMessages(id: string, count: number): Promise<Array<NodeType>> {
-        return Promise.resolve(undefined);
     }
 
     async sendNoteTweet(content: string, tweetId: string) {
