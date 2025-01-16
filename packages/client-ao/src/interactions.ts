@@ -17,7 +17,8 @@ import {
 } from "@elizaos/core";
 import { ClientBase } from "./base";
 import { buildConversationThread, sendMessage, wait } from "./utils.ts";
-import {NodeType} from "./ao_types.ts";
+import { NodeType } from "./ao_types.ts";
+import { AoTheComputerPostClient } from "./post.ts";
 
 export const aoMessageHandlerTemplate =
     `
@@ -89,9 +90,15 @@ Thread of Tweets You Are Replying To:
 export class AoInteractionClient {
     client: ClientBase;
     runtime: IAgentRuntime;
-    constructor(client: ClientBase, runtime: IAgentRuntime) {
+    postClient: AoTheComputerPostClient;
+    constructor(
+        client: ClientBase,
+        runtime: IAgentRuntime,
+        postClient: AoTheComputerPostClient
+    ) {
         this.client = client;
         this.runtime = runtime;
+        this.postClient = postClient;
     }
 
     async start() {
@@ -112,7 +119,10 @@ export class AoInteractionClient {
         try {
             const messages = await this.client.fetchIncomingMessages(20);
 
-            elizaLogger.log("Completed checking incoming messages", messages.length);
+            elizaLogger.log(
+                "Completed checking incoming messages",
+                messages.length
+            );
 
             // Sort tweet candidates by ID in ascending order
             messages.sort((a, b) => a.timestamp - b.timestamp);
@@ -139,7 +149,9 @@ export class AoInteractionClient {
                         continue;
                     }
 
-                    const roomId = stringToUuid(m.conversationId + "-" + this.runtime.agentId);
+                    const roomId = stringToUuid(
+                        m.conversationId + "-" + this.runtime.agentId
+                    );
 
                     const userIdUUID =
                         m.owner.address === this.client.profile.Owner
@@ -154,7 +166,10 @@ export class AoInteractionClient {
                         "ao"
                     );
 
-                    const thread = await buildConversationThread(m, this.client);
+                    const thread = await buildConversationThread(
+                        m,
+                        this.client
+                    );
 
                     const memory = {
                         content: { text: m.data.value },
@@ -163,11 +178,18 @@ export class AoInteractionClient {
                         roomId,
                     };
 
-                    await this.handleAoMessage({
-                        aoMessage: m,
-                        memory,
-                        thread,
-                    });
+                    // in the end I guess here should be logic for handling missions
+                    if (m.data.value.includes(`Eliza`)) {
+                        elizaLogger.info(`Replying to message: ${m.id}.`);
+                        this.postClient.postMessage(
+                            this.runtime,
+                            this.client,
+                            m.data.value,
+                            roomId,
+                            m.data.value,
+                            process.env.AO_USERNAME
+                        );
+                    }
 
                     // Update the last checked message timestamp after processing each message
                     this.client.lastCheckedMessageTs = m.timestamp;
@@ -259,13 +281,13 @@ export class AoInteractionClient {
             this.client.saveRequestMessage(message, state);
         }
 
-        const template = this.runtime.character.templates
-                ?.aoShouldRespondTemplate ||
+        const template =
+            this.runtime.character.templates?.aoShouldRespondTemplate ||
             this.runtime.character?.templates?.shouldRespondTemplate ||
             aoShouldRespondTemplate;
         const shouldRespondContext = composeContext({
             state,
-            template
+            template,
         });
 
         const shouldRespond = await generateShouldRespond({
@@ -283,8 +305,7 @@ export class AoInteractionClient {
         const context = composeContext({
             state,
             template:
-                this.runtime.character.templates
-                    ?.aoMessageHandlerTemplate ||
+                this.runtime.character.templates?.aoMessageHandlerTemplate ||
                 this.runtime.character?.templates?.messageHandlerTemplate ||
                 aoMessageHandlerTemplate,
         });
@@ -300,7 +321,9 @@ export class AoInteractionClient {
         const removeQuotes = (str: string) =>
             str.replace(/^['"](.*)['"]$/, "$1");
 
-        const stringId = stringToUuid(aoMessage.id + "-" + this.runtime.agentId);
+        const stringId = stringToUuid(
+            aoMessage.id + "-" + this.runtime.agentId
+        );
 
         response.inReplyTo = stringId;
 

@@ -1,8 +1,4 @@
-import {
-    Client,
-    elizaLogger,
-    IAgentRuntime,
-} from "@elizaos/core";
+import { Client, elizaLogger, IAgentRuntime } from "@elizaos/core";
 import { ClientBase } from "./base.ts";
 import { validateAoConfig, AoConfig } from "./environment.ts";
 import { AoInteractionClient } from "./interactions.ts";
@@ -27,7 +23,11 @@ class AoManager {
         this.post = new AoTheComputerPostClient(this.client, runtime);
 
         // Mentions and interactions
-        this.interaction = new AoInteractionClient(this.client, runtime);
+        this.interaction = new AoInteractionClient(
+            this.client,
+            runtime,
+            this.post
+        );
     }
 }
 
