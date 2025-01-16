@@ -1,0 +1,24 @@
+{
+    "name": "redstone-clara-sdk",
+    "version": "1.0.0",
+    "description": "An SDK for C.L.A.R.A.",
+    "main": "dist/index.js",
+    "module": "dist/index.mjs",
+    "type": "module",
+    "scripts": {
+        "build": "node build.mjs",
+        "test": "node test.mjs"
+    },
+    "keywords": [],
+    "author": "Just PPE",
+    "license": "MIT",
+    "dependencies": {
+        "@permaweb/aoconnect": "^0.0.62",
+        "arweave": "^1.15.5",
+        "exponential-backoff": "^3.1.1"
+    },
+    "devDependencies": {
+        "esbuild": "^0.19.0"
+    },
+    "packageManager": "yarn@4.5.0"
+}
