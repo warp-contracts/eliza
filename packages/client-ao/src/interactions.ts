@@ -44,17 +44,17 @@ Recent interactions between {{agentName}} and other users:
 # TASK: Generate a post/reply in the voice, style and perspective of {{agentName}} (@{{aoUserName}}) while using the thread of messages as additional context:
 
 Current Post:
-{{currentPost}}
+{{currentMessage}}
 
 Thread of Messages You Are Replying To:
-{{formattedConversation}}
+{{currentMessage}}
 
 # INSTRUCTIONS: Generate a post in the voice, style and perspective of {{agentName}} (@{{aoUserName}}). You MUST include an action if the current post text includes a prompt that is similar to one of the available actions mentioned here:
 {{actionNames}}
 {{actions}}
 
 Here is the current post text again. Remember to include an action if the current post text includes a prompt that asks for one of the available actions mentioned above (does not need to be exact)
-{{currentPost}}
+{{currentMessage}}
 ` + messageCompletionFooter;
 
 export const aoShouldRespondTemplate =
@@ -63,13 +63,13 @@ export const aoShouldRespondTemplate =
 Response options are RESPOND, IGNORE and STOP.
 
 For other users:
-- {{agentName}} should RESPOND to messages directed at them
-- {{agentName}} should RESPOND to conversations relevant to their background
-- {{agentName}} should IGNORE irrelevant messages
-- {{agentName}} should IGNORE very short messages unless directly addressed
-- {{agentName}} should STOP if asked to stop
-- {{agentName}} should STOP if conversation is concluded
-- {{agentName}} is in a room with other users and wants to be conversational, but not annoying.
+- {{agentName}} should RESPOND to all of the messages which includes questions
+// - {{agentName}} should RESPOND to conversations relevant to their background
+- {{agentName}} should IGNORE messages without questions
+// - {{agentName}} should IGNORE very short messages unless directly addressed
+// - {{agentName}} should STOP if asked to stop
+// - {{agentName}} should STOP if conversation is concluded
+// - {{agentName}} is in a room with other users and wants to be conversational, but not annoying.
 
 IMPORTANT:
 - {{agentName}} (aka @{{aoUserName}}) is particularly sensitive about being annoying, so if there is any doubt, it is better to IGNORE than to RESPOND.
@@ -78,11 +78,11 @@ IMPORTANT:
 Recent Posts:
 {{recentPosts}}
 
-Current Post:
-{{currentPost}}
+Current AO message:
+{{currentMessage}}
 
 Thread of Tweets You Are Replying To:
-{{formattedConversation}}
+{{currentMessage}}
 
 # INSTRUCTIONS: Respond with [RESPOND] if {{agentName}} should respond, or [IGNORE] if {{agentName}} should not respond to the last message and [STOP] if {{agentName}} should stop participating in the conversation.
 ` + shouldRespondFooter;
@@ -124,7 +124,7 @@ export class AoInteractionClient {
                 messages.length
             );
 
-            // Sort tweet candidates by ID in ascending order
+            // Sort AO messages candidates by ID in ascending order
             messages.sort((a, b) => a.timestamp - b.timestamp);
 
             // for each message candidate, handle the message
@@ -178,18 +178,11 @@ export class AoInteractionClient {
                         roomId,
                     };
 
-                    // in the end I guess here should be logic for handling missions
-                    if (m.data.value.includes(`Eliza`)) {
-                        elizaLogger.info(`Replying to message: ${m.id}.`);
-                        this.postClient.postMessage(
-                            this.runtime,
-                            this.client,
-                            m.data.value,
-                            roomId,
-                            m.data.value,
-                            process.env.AO_USERNAME
-                        );
-                    }
+                    await this.handleAoMessage({
+                        aoMessage: m,
+                        memory,
+                        thread,
+                    });
 
                     // Update the last checked message timestamp after processing each message
                     this.client.lastCheckedMessageTs = m.timestamp;
@@ -215,60 +208,60 @@ export class AoInteractionClient {
         memory: Memory;
         thread: NodeType[];
     }) {
+        // TODO: replace with more sophisticated logic (probably filter by message protocol id? or known addresses ids?)
+        if (!aoMessage.data.value.includes(`[MISSION]`)) return;
         if (aoMessage.owner.address === this.client.profile.Owner) {
             // Skip processing if the memory is from the bot itself
             return;
         }
 
         if (!memory.content.text) {
-            elizaLogger.log("Skipping Tweet with no text", aoMessage.id);
+            elizaLogger.log("Skipping AO message with no text", aoMessage.id);
             return { text: "", action: "IGNORE" };
         }
 
-        elizaLogger.log("Processing Tweet: ", aoMessage.id);
-        const formatMessage = (tweet: NodeType) => {
-            return `  ID: ${tweet.id}
-  From: ${tweet.owner.address} (@${tweet.owner.address})
-  Text: ${tweet.data.value}`;
-        };
-        const currentPost = formatMessage(aoMessage);
+        elizaLogger.log("Processing AO message: ", aoMessage.id);
+        const currentMessage = aoMessage.data?.value;
 
-        elizaLogger.debug("Thread: ", thread);
-        const formattedConversation = thread
-            .map(
-                (message) => `@${message.owner.address} (${new Date(
-                    message.timestamp * 1000
-                ).toLocaleString("en-US", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    month: "short",
-                    day: "numeric",
-                })}):
-        ${message.data.value}`
-            )
-            .join("\n\n");
+        // TODO: I'm not convinced what to do with this thread - probably delegating a MISSION is a potential begining of the THREAD
+        // elizaLogger.debug("Thread: ", thread);
+        // const formattedConversation = thread
+        //     .map(
+        //         (message) => `@${message.owner.address} (${new Date(
+        //             message.timestamp * 1000
+        //         ).toLocaleString("en-US", {
+        //             hour: "2-digit",
+        //             minute: "2-digit",
+        //             month: "short",
+        //             day: "numeric",
+        //         })}):
+        // ${message.data.value}`
+        //     )
+        //     .join("\n\n");
 
-        elizaLogger.debug("formattedConversation: ", formattedConversation);
+        // elizaLogger.debug("formattedConversation: ", formattedConversation);
 
         let state = await this.runtime.composeState(memory, {
             aoClient: this.client.aoClient,
             aoUserName: this.client.aoConfig.AO_USERNAME,
-            currentPost,
-            formattedConversation,
+            currentMessage,
+            formattedConversation: currentMessage,
         });
 
-        // check if the tweet exists, save if it doesn't
-        const tweetId = stringToUuid(aoMessage.id + "-" + this.runtime.agentId);
-        const tweetExists =
-            await this.runtime.messageManager.getMemoryById(tweetId);
+        // check if the AO message exists, save if it doesn't
+        const aoMessageId = stringToUuid(
+            aoMessage.id + "-" + this.runtime.agentId
+        );
+        const aoMessageExists =
+            await this.runtime.messageManager.getMemoryById(aoMessageId);
 
-        if (!tweetExists) {
-            elizaLogger.log("tweet does not exist, saving");
+        if (!aoMessageExists) {
+            elizaLogger.log("AO message does not exist, saving");
             const userIdUUID = stringToUuid(aoMessage.owner.address);
             const roomId = stringToUuid(aoMessage.conversationId);
 
             const message = {
-                id: tweetId,
+                id: aoMessageId,
                 agentId: this.runtime.agentId,
                 content: {
                     text: aoMessage.data.value,
@@ -332,12 +325,13 @@ export class AoInteractionClient {
         if (response.text) {
             try {
                 const callback: HandlerCallback = async (response: Content) => {
-                    const memories = await sendMessage(
+                    const memories = await this.postClient.postMessage(
+                        this.runtime,
                         this.client,
-                        response,
+                        response.text,
                         memory.roomId,
-                        this.client.aoConfig.AO_PROFILE_CONTRACT,
-                        aoMessage.id
+                        response.text,
+                        this.client.aoConfig.AO_USERNAME
                     );
                     return memories;
                 };
@@ -348,36 +342,38 @@ export class AoInteractionClient {
                     state
                 )) as State;
 
-                for (const responseMessage of responseMessages) {
-                    if (
-                        responseMessage ===
-                        responseMessages[responseMessages.length - 1]
-                    ) {
-                        responseMessage.content.action = response.action;
-                    } else {
-                        responseMessage.content.action = "CONTINUE";
-                    }
-                    await this.runtime.messageManager.createMemory(
-                        responseMessage
-                    );
-                }
+                // for (const responseMessage of responseMessages) {
+                //     if (
+                //         responseMessage ===
+                //         responseMessages[responseMessages.length - 1]
+                //     ) {
+                //         responseMessage.content.action = response.action;
+                //     } else {
+                //         responseMessage.content.action = "CONTINUE";
+                //     }
+                //     await this.runtime.messageManager.createMemory(
+                //         responseMessage
+                //     );
+                // }
 
-                await this.runtime.processActions(
-                    memory,
-                    responseMessages,
-                    state,
-                    callback
-                );
+                // await this.runtime.processActions(
+                //     memory,
+                //     responseMessages,
+                //     state,
+                //     callback
+                // );
 
                 const responseInfo = `Context:\n\n${context}\n\nSelected Post: ${aoMessage.id} - ${aoMessage.owner.address}: ${aoMessage.data.value}\nAgent's Output:\n${response.text}`;
 
                 await this.runtime.cacheManager.set(
-                    `ao/tweet_generation_${aoMessage.id}.txt`,
+                    `ao/ao_message_generation_${aoMessage.id}.txt`,
                     responseInfo
                 );
                 await wait();
             } catch (error) {
-                elizaLogger.error(`Error sending response tweet: ${error}`);
+                elizaLogger.error(
+                    `Error sending response AO message: ${error}`
+                );
             }
         }
     }
