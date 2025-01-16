@@ -11,7 +11,7 @@ async function sendMessage() {
     process: 'HmjWcUKDsGOc5fA4GkEjwHBiamXHSqyq6NoPGaoWT_Q',
     tags: [{ name: 'Action', value: 'Eval'}],
     signer,
-    data: 'Eliza, please tell me where is Paris.'
+    data: '[MISSION] Please tell me where is Paris.'
   });
   console.log(id)
   return '';
