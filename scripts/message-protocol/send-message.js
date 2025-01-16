@@ -7,26 +7,13 @@ const messageProtocolProcessId = '9e75mNz2AE_oJkTbRwOXp_HRknqftfAyhoNDnbeFfTk';
 
 async function sendMessage() {
   const signer = createDataItemSigner(WALLET);
-  const messageSent = await dryrun({
-    process: 'FYdHwsNEFsR4mZRMrjRZnsCFghTkzgV3N1U5FR9reh4',
+  const id = await message({
+    process: 'HmjWcUKDsGOc5fA4GkEjwHBiamXHSqyq6NoPGaoWT_Q',
     tags: [{ name: 'Action', value: 'Eval'}],
     signer,
-    data: '#Inbox'
+    data: 'Eliza, please tell me where is Paris.'
   });
-  console.log(messageSent)
-// let resultsOut = await results({
-//     process: "FYdHwsNEFsR4mZRMrjRZnsCFghTkzgV3N1U5FR9reh4",
-//     sort: "ASC",
-//     limit: 25,
-//   });
-//   console.log(resultsOut)
-// let test = await result({
-//     // the arweave TXID of the message
-//     message: "cGxbzGgidQQ3Yi8D3yCMMObgHjnmAF7vlyNw8NHEiT4",
-//     // the arweave TXID of the process
-//     process: "FYdHwsNEFsR4mZRMrjRZnsCFghTkzgV3N1U5FR9reh4",
-//   });
-//   console.log(test)
+  console.log(id)
   return '';
 }
 
