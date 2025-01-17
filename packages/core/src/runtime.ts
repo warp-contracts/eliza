@@ -1162,6 +1162,7 @@ Text: ${attachment.text}
             ...additionalKeys,
         } as State;
 
+        console.log(`== validate`);
         const actionPromises = this.actions.map(async (action: Action) => {
             const result = await action.validate(this, message, initialState);
             if (result) {

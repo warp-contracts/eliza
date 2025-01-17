@@ -72,6 +72,7 @@ export class AoClient {
 
         for (const m of messages) {
             m.data.value = await this.getMessageData(m.id);
+            m.conversationId = '88899';
         }
 
         return messages;

@@ -24,7 +24,6 @@ export type Message = {
     target: string;
 
     conversationId: '123';
-    timestamp?: number;
 }
 
 export type NodeType = {
@@ -35,6 +34,7 @@ export type NodeType = {
         type: string;
         value?: string;
     };
+    ingested_at: number;
     url?: string,
     block?: {
         height: number;
@@ -44,6 +44,5 @@ export type NodeType = {
         address: string;
     };
     address?: string;
-    conversationId: '123';
-    timestamp?: number;
+    conversationId: string;
 };

@@ -40,6 +40,8 @@ export const composeContext = ({
         return templateFunction(state);
     }
 
+    console.log(`== ACTIONS`, state["actions"])
+
     // @ts-expect-error match isn't working as expected
     const out = template.replace(/{{\w+}}/g, (match) => {
         const key = match.replace(/{{|}}/g, "");

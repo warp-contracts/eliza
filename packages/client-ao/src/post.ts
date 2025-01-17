@@ -403,6 +403,7 @@ export class AoTheComputerPostClient {
                 roomId,
                 newMessageContent
             );
+            return result;
         } catch (error) {
             console.error(`send standard ao message`, error);
             elizaLogger.error("Error sending message:", error);
