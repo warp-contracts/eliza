@@ -14,7 +14,7 @@ import { postActionResponseFooter } from "@elizaos/core";
 import { generateTweetActions } from "@elizaos/core";
 import { IImageDescriptionService, ServiceType } from "@elizaos/core";
 import { buildConversationThread } from "./utils.ts";
-import { aoMessageHandlerTemplate } from "./interactions.ts";
+import { aoMessageHandlerTemplate } from "./tasks.ts";
 import { NodeType } from "./ao_types.ts";
 
 const aoMessageTemplate = `

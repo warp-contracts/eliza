@@ -7,7 +7,7 @@ import { elizaLogger } from "@elizaos/core";
 import { Media } from "@elizaos/core";
 import fs from "fs";
 import path from "path";
-import {NodeType} from "./ao_types.ts";
+import { NodeType } from "./ao_types.ts";
 
 export const wait = (minTime: number = 1000, maxTime: number = 3000) => {
     const waitTime =
@@ -59,7 +59,9 @@ export async function buildConversationThread(
             );
 
             await client.runtime.messageManager.createMemory({
-                id: stringToUuid(currentMessage.id + "-" + client.runtime.agentId),
+                id: stringToUuid(
+                    currentMessage.id + "-" + client.runtime.agentId
+                ),
                 agentId: client.runtime.agentId,
                 content: {
                     text: currentMessage.data.value,
@@ -151,7 +153,13 @@ export async function sendMessage(
                 })
             );
         }
-        const result = await client.requestQueue.add(async () => client.aoClient.sendAoMessage(chunk.trim(), previousTweetId, mediaData));
+        const result = await client.requestQueue.add(async () =>
+            client.aoClient.sendAoMessage(
+                chunk.trim(),
+                previousTweetId,
+                mediaData
+            )
+        );
 
         const body = await result.json();
         const tweetResult = body.data.create_tweet.tweet_results.result;
@@ -178,7 +186,10 @@ export async function sendMessage(
             sentTweets.push(finalTweet);
             previousTweetId = finalTweet.id;
         } else {
-            elizaLogger.error("Error sending tweet chunk:", { chunk, response: body });
+            elizaLogger.error("Error sending tweet chunk:", {
+                chunk,
+                response: body,
+            });
         }
 
         // Wait a bit between tweets to avoid rate limiting issues
