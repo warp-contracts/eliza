@@ -17,7 +17,7 @@ import {
     Action,
 } from "@elizaos/core";
 import { ClientBase } from "./base.ts";
-import { buildConversationThread, sendMessage, wait } from "./utils.ts";
+import { buildConversationThread, wait } from "./utils.ts";
 import { NodeType, TagType } from "./ao_types.ts";
 import { time } from "console";
 
@@ -112,21 +112,22 @@ export class AoTaskClient {
         elizaLogger.log("Checking AO tasks");
 
         try {
-            const messages = await this.client.fetchIncomingMessages(20);
+            const messages = await this.client.fetchIncomingMessages(5);
 
             elizaLogger.log(
                 "Completed checking incoming messages",
+                this.client.lastCheckedMessageTs,
                 messages.length
             );
 
             // Sort tweet candidates by ID in ascending order
-            messages.sort((a, b) => a.timestamp - b.timestamp);
+            messages.sort((a, b) => a.ingested_at - b.ingested_at);
 
             // for each message candidate, handle the message
             for (const m of messages) {
                 if (
                     !this.client.lastCheckedMessageTs ||
-                    m.timestamp > this.client.lastCheckedMessageTs
+                    m.ingested_at > this.client.lastCheckedMessageTs
                 ) {
                     // Generate the messageId UUID the same way it's done in handleAoMessage
                     const messageId = stringToUuid(m.id);
@@ -180,7 +181,7 @@ export class AoTaskClient {
                     });
 
                     // Update the last checked message timestamp after processing each message
-                    this.client.lastCheckedMessageTs = m.timestamp;
+                    this.client.lastCheckedMessageTs = m.ingested_at;
                 }
             }
 
@@ -340,17 +341,21 @@ export class AoTaskClient {
         memory: Memory;
         thread: NodeType[];
     }) {
+        console.log(`===== handleAoMessage`)
         if (aoMessage.owner.address === this.client.profile.Owner) {
+            console.log(`===== handleAoMessage - own message`)
             // Skip processing if the memory is from the bot itself
             return;
         }
 
         if (!memory.content.text) {
             elizaLogger.log("Skipping Tweet with no text", aoMessage.id);
+            console.log(`===== handleAoMessage - no text`)
             return { text: "", action: "IGNORE" };
         }
 
-        const task = aoMessage.tags.find(
+
+const task = aoMessage.tags.find(
             (t: TagType) => t.name == "Task"
         )?.value;
         if (!task) {
@@ -358,7 +363,7 @@ export class AoTaskClient {
             return;
         }
 
-        elizaLogger.log("Processing Tweet: ", aoMessage.id);
+        elizaLogger.log("Processing Message: ", aoMessage.id);
         const formatMessage = (tweet: NodeType) => {
             return `  ID: ${tweet.id}
   From: ${tweet.owner.address} (@${tweet.owner.address})
@@ -370,7 +375,7 @@ export class AoTaskClient {
         const formattedConversation = thread
             .map(
                 (message) => `@${message.owner.address} (${new Date(
-                    message.timestamp * 1000
+                    message.ingested_at
                 ).toLocaleString("en-US", {
                     hour: "2-digit",
                     minute: "2-digit",
@@ -389,6 +394,7 @@ export class AoTaskClient {
             currentPost,
             formattedConversation,
         });
+
 
         // check if the tweet exists, save if it doesn't
         const tweetId = stringToUuid(aoMessage.id + "-" + this.runtime.agentId);
@@ -409,7 +415,7 @@ export class AoTaskClient {
                 },
                 userId: userIdUUID,
                 roomId,
-                createdAt: Date.now(),
+                createdAt: aoMessage.ingested_at * 1000,
             };
             this.client.saveRequestMessage(message, state);
         }
@@ -451,6 +457,8 @@ export class AoTaskClient {
             modelClass: ModelClass.LARGE,
         });
 
+        console.log(`== ACTIONS == `, response.action)
+
         const removeQuotes = (str: string) =>
             str.replace(/^['"](.*)['"]$/, "$1");
 
@@ -475,6 +483,7 @@ export class AoTaskClient {
                     // return memories;
                     return null;
                 };
+
 
                 const responseMessages = await callback(response);
 
@@ -525,11 +534,12 @@ export class AoTaskClient {
                 const responseInfo = `Context:\n\n${context}\n\nSelected Post: ${aoMessage.id} - ${aoMessage.owner.address}: ${aoMessage.data.value}\nAgent's Output:\n${response.text}`;
 
                 await this.runtime.cacheManager.set(
-                    `ao/tweet_generation_${aoMessage.id}.txt`,
+                    `ao/message_generation_${aoMessage.id}.txt`,
                     responseInfo
                 );
                 await wait();
             } catch (error) {
+                console.log(error);
                 elizaLogger.error(`Error sending response tweet: ${error}`);
             }
         }
