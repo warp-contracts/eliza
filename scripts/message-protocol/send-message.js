@@ -7,11 +7,11 @@ const messageProtocolProcessId = '9e75mNz2AE_oJkTbRwOXp_HRknqftfAyhoNDnbeFfTk';
 
 async function sendMessage() {
   const signer = createDataItemSigner(WALLET);
-  const messageSent = await dryrun({
-    process: 'FYdHwsNEFsR4mZRMrjRZnsCFghTkzgV3N1U5FR9reh4',
-    tags: [{ name: 'Action', value: 'Eval'}],
+  const messageSent = await message({
+    process: 'HmjWcUKDsGOc5fA4GkEjwHBiamXHSqyq6NoPGaoWT_Q',
+    tags: [{ name: 'Action', value: 'Eval'}, {name: 'Task', value: 'POST_TWEET'}],
     signer,
-    data: '#Inbox'
+    data: 'Please tell everyone where is Paris.'
   });
   console.log(messageSent)
 // let resultsOut = await results({

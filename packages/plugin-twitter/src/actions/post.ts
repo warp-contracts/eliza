@@ -8,6 +8,7 @@ import {
     ModelClass,
     formatMessages,
     generateObject,
+    messageCompletionFooter,
 } from "@elizaos/core";
 import { Scraper } from "agent-twitter-client";
 import { tweetTemplate } from "../templates";
@@ -21,8 +22,9 @@ async function composeTweet(
     try {
         const context = composeContext({
             state,
-            template: tweetTemplate,
+            template: tweetTemplate + `\n${messageCompletionFooter}`,
         });
+        console.log(context);
 
         const tweetContentObject = await generateObject({
             runtime,
@@ -31,8 +33,9 @@ async function composeTweet(
             schema: TweetSchema,
             stop: ["\n"],
         });
+        console.log(`tweet content`, tweetContentObject);
 
-        if (!isTweetContent(tweetContentObject.object)) {
+        if (!isTweetContent(tweetContentObject)) {
             elizaLogger.error(
                 "Invalid tweet content:",
                 tweetContentObject.object
@@ -40,7 +43,7 @@ async function composeTweet(
             return;
         }
 
-        const trimmedContent = tweetContentObject.object.text.trim();
+        const trimmedContent = tweetContentObject.text.trim();
 
         // Skip truncation if TWITTER_PREMIUM is true
         if (
@@ -141,7 +144,9 @@ export const postAction: Action = {
     ): Promise<boolean> => {
         try {
             // Generate tweet content using context
+            console.log("generating tweet");
             const tweetContent = await composeTweet(runtime, message, state);
+            console.log("tweett content", tweetContent);
 
             if (!tweetContent) {
                 elizaLogger.error("No content generated for tweet");

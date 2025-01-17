@@ -9,5 +9,6 @@ export const TweetSchema = z.object({
 });
 
 export const isTweetContent = (obj: any): obj is TweetContent => {
+    console.log(obj);
     return TweetSchema.safeParse(obj).success;
 };

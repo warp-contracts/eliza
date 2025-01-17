@@ -1,11 +1,7 @@
-import {
-    Client,
-    elizaLogger,
-    IAgentRuntime,
-} from "@elizaos/core";
+import { Client, elizaLogger, IAgentRuntime } from "@elizaos/core";
 import { ClientBase } from "./base.ts";
 import { validateAoConfig, AoConfig } from "./environment.ts";
-import { AoInteractionClient } from "./interactions.ts";
+import { AoTaskClient } from "./tasks.ts";
 import { AoTheComputerPostClient } from "./post.ts";
 
 /**
@@ -17,7 +13,7 @@ import { AoTheComputerPostClient } from "./post.ts";
 class AoManager {
     client: ClientBase;
     post: AoTheComputerPostClient;
-    interaction: AoInteractionClient;
+    tasks: AoTaskClient;
 
     constructor(runtime: IAgentRuntime, aoConfig: AoConfig) {
         // Pass aoConfig to the base client
@@ -27,7 +23,7 @@ class AoManager {
         this.post = new AoTheComputerPostClient(this.client, runtime);
 
         // Mentions and interactions
-        this.interaction = new AoInteractionClient(this.client, runtime);
+        this.tasks = new AoTaskClient(this.client, runtime);
     }
 }
 
@@ -46,7 +42,7 @@ export const AoTheComputerClientInterface: Client = {
         await manager.post.start();
 
         // Start interactions (mentions, replies)
-        await manager.interaction.start();
+        await manager.tasks.start();
 
         return manager;
     },

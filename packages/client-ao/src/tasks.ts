@@ -14,10 +14,12 @@ import {
     stringToUuid,
     elizaLogger,
     getEmbeddingZeroVector,
+    Action,
 } from "@elizaos/core";
-import { ClientBase } from "./base";
+import { ClientBase } from "./base.ts";
 import { buildConversationThread, sendMessage, wait } from "./utils.ts";
-import {NodeType} from "./ao_types.ts";
+import { NodeType, TagType } from "./ao_types.ts";
+import { time } from "console";
 
 export const aoMessageHandlerTemplate =
     `
@@ -35,8 +37,8 @@ export const aoMessageHandlerTemplate =
 
 {{postDirections}}
 
-Recent interactions between {{agentName}} and other users:
-{{recentPostInteractions}}
+Recent tasks between {{agentName}} and other users:
+{{recentPostTasks}}
 
 {{recentPosts}}
 
@@ -86,7 +88,7 @@ Thread of Tweets You Are Replying To:
 # INSTRUCTIONS: Respond with [RESPOND] if {{agentName}} should respond, or [IGNORE] if {{agentName}} should not respond to the last message and [STOP] if {{agentName}} should stop participating in the conversation.
 ` + shouldRespondFooter;
 
-export class AoInteractionClient {
+export class AoTaskClient {
     client: ClientBase;
     runtime: IAgentRuntime;
     constructor(client: ClientBase, runtime: IAgentRuntime) {
@@ -95,24 +97,27 @@ export class AoInteractionClient {
     }
 
     async start() {
-        const handleAoInteractionsLoop = () => {
-            this.handleAoInteractions();
+        const handleAoTasksLoop = () => {
+            this.handleAoTasks();
             setTimeout(
-                handleAoInteractionsLoop,
+                handleAoTasksLoop,
                 // Defaults to 2 minutes
                 this.client.aoConfig.AO_POLL_INTERVAL * 1000
             );
         };
-        handleAoInteractionsLoop();
+        handleAoTasksLoop();
     }
 
-    async handleAoInteractions() {
-        elizaLogger.log("Checking AO interactions");
+    async handleAoTasks() {
+        elizaLogger.log("Checking AO tasks");
 
         try {
             const messages = await this.client.fetchIncomingMessages(20);
 
-            elizaLogger.log("Completed checking incoming messages", messages.length);
+            elizaLogger.log(
+                "Completed checking incoming messages",
+                messages.length
+            );
 
             // Sort tweet candidates by ID in ascending order
             messages.sort((a, b) => a.timestamp - b.timestamp);
@@ -139,7 +144,9 @@ export class AoInteractionClient {
                         continue;
                     }
 
-                    const roomId = stringToUuid(m.conversationId + "-" + this.runtime.agentId);
+                    const roomId = stringToUuid(
+                        m.id + "-" + this.runtime.agentId
+                    );
 
                     const userIdUUID =
                         m.owner.address === this.client.profile.Owner
@@ -154,7 +161,10 @@ export class AoInteractionClient {
                         "ao"
                     );
 
-                    const thread = await buildConversationThread(m, this.client);
+                    const thread = await buildConversationThread(
+                        m,
+                        this.client
+                    );
 
                     const memory = {
                         content: { text: m.data.value },
@@ -177,14 +187,151 @@ export class AoInteractionClient {
             // Save the latest checked message timestamp to the file
             await this.client.cacheLatestCheckedMessageTimestamp();
 
-            elizaLogger.log("Finished checking AO interactions");
+            elizaLogger.log("Finished checking AO tasks");
         } catch (error) {
             console.log(error);
-            elizaLogger.error("Error handling AO interactions:", error);
+            elizaLogger.error("Error handling AO tasks:", error);
         }
     }
 
-    private async handleAoMessage({
+    private async handleAoMessage({ aoMessage, memory, thread }) {
+        const { owner, tags, data } = aoMessage;
+        if (owner.address === this.client.profile.Owner) {
+            elizaLogger.info(
+                `Skipping AO message, message from current agent.`
+            );
+            return;
+        }
+        const task = tags.find((t: TagType) => t.name == "Task")?.value;
+        if (!task) {
+            elizaLogger.info(`Skipping AO message, no "Task" tag.`);
+            return;
+        }
+        if (!data.value) {
+            elizaLogger.info(`Skipping AO message, no content.`);
+            return;
+        }
+        if (!this.runtime.actions.find((a: Action) => a.name == task)) {
+            elizaLogger.info(
+                `Task could not be processed, no action with name ${task}.`
+            );
+            //TODO: sent message to AO
+            return;
+        }
+        const state = await this.composeMessageState(aoMessage, thread, memory);
+        await this.saveAoMessageIfNeeded(aoMessage, state);
+        await this.processTaskInActions(state, memory, aoMessage, task);
+    }
+
+    private async composeMessageState(
+        aoMessage: NodeType,
+        thread: NodeType[],
+        memory: Memory
+    ) {
+        console.log("memory", memory);
+        const formatMessage = (aoMessage: NodeType) => {
+            return `  ID: ${aoMessage.id}
+  From: ${aoMessage.owner.address} (@${aoMessage.owner.address})
+  Text: ${aoMessage.data.value}`;
+        };
+        const currentMessage = formatMessage(aoMessage);
+        elizaLogger.info("Thread: ", thread);
+        const formattedConversation = thread
+            .map(
+                (message) => `@${message.owner.address} (${new Date(
+                    message.timestamp * 1000
+                ).toLocaleString("en-US", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    month: "short",
+                    day: "numeric",
+                })}):
+        ${message.data.value}`
+            )
+            .join("\n\n");
+
+        elizaLogger.info("formattedConversation: ", formattedConversation);
+        return await this.runtime.composeState(memory, {
+            aoClient: this.client.aoClient,
+            aoUserName: this.client.aoConfig.AO_USERNAME,
+            currentMessage,
+            formattedConversation,
+        });
+    }
+
+    private async saveAoMessageIfNeeded(aoMessage: NodeType, state: State) {
+        const { id, data, url, timestamp } = aoMessage;
+        // check if the AO message exists, save if it doesn't
+        const aoMessageId = stringToUuid(id + "-" + this.runtime.agentId);
+        const aoMessageExists =
+            await this.runtime.messageManager.getMemoryById(aoMessageId);
+
+        if (!aoMessageExists) {
+            elizaLogger.log("AO message does not exist, saving");
+            const userIdUUID = stringToUuid(aoMessage.owner.address);
+            const roomId = stringToUuid(aoMessage.id);
+
+            const message = {
+                id: aoMessageId,
+                agentId: this.runtime.agentId,
+                content: {
+                    text: data.value,
+                    url: url,
+                },
+                userId: userIdUUID,
+                roomId,
+                createdAt: timestamp * 1000,
+            };
+            this.client.saveRequestMessage(message, state);
+        }
+    }
+
+    private async processTaskInActions(
+        state: any,
+        memory: any,
+        aoMessage: NodeType,
+        task: string
+    ) {
+        const { id, data, timestamp, url } = aoMessage;
+        console.log(aoMessage);
+        try {
+            const callback: HandlerCallback = async (response: Content) => {
+                return null;
+            };
+            const responseMessage: Memory = {
+                id: stringToUuid(id + "-" + this.client.runtime.agentId),
+                userId: this.client.runtime.agentId,
+                agentId: this.client.runtime.agentId,
+                createdAt: Date.now(),
+                content: {
+                    text: data.value,
+                    action: task,
+                    source: "AoTheComputer",
+                    url: `https://www.ao.link/#/message/${id}`,
+                    inReplyTo: stringToUuid(
+                        id + "-" + this.client.runtime.agentId
+                    ),
+                },
+                embedding: getEmbeddingZeroVector(),
+                roomId: stringToUuid(id),
+            };
+            await this.runtime.messageManager.createMemory(responseMessage);
+            state = (await this.runtime.updateRecentMessageState(
+                state
+            )) as State;
+            await this.runtime.processActions(
+                responseMessage,
+                [responseMessage],
+                state,
+                callback
+            );
+            await wait();
+        } catch (error) {
+            elizaLogger.error(`Error sending response tweet: ${error}`);
+        }
+    }
+
+    private async handleInteraction({
         aoMessage,
         memory,
         thread,
@@ -201,6 +348,14 @@ export class AoInteractionClient {
         if (!memory.content.text) {
             elizaLogger.log("Skipping Tweet with no text", aoMessage.id);
             return { text: "", action: "IGNORE" };
+        }
+
+        const task = aoMessage.tags.find(
+            (t: TagType) => t.name == "Task"
+        )?.value;
+        if (!task) {
+            elizaLogger.info(`Skipping AO message, no "Task" tag.`);
+            return;
         }
 
         elizaLogger.log("Processing Tweet: ", aoMessage.id);
@@ -243,29 +398,29 @@ export class AoInteractionClient {
         if (!tweetExists) {
             elizaLogger.log("tweet does not exist, saving");
             const userIdUUID = stringToUuid(aoMessage.owner.address);
-            const roomId = stringToUuid(aoMessage.conversationId);
+            const roomId = stringToUuid(aoMessage.id);
 
             const message = {
                 id: tweetId,
                 agentId: this.runtime.agentId,
                 content: {
                     text: aoMessage.data.value,
-                    url: aoMessage.url,
+                    // url: aoMessage.url,
                 },
                 userId: userIdUUID,
                 roomId,
-                createdAt: aoMessage.timestamp * 1000,
+                createdAt: Date.now(),
             };
             this.client.saveRequestMessage(message, state);
         }
 
-        const template = this.runtime.character.templates
-                ?.aoShouldRespondTemplate ||
+        const template =
+            this.runtime.character.templates?.aoShouldRespondTemplate ||
             this.runtime.character?.templates?.shouldRespondTemplate ||
             aoShouldRespondTemplate;
         const shouldRespondContext = composeContext({
             state,
-            template
+            template,
         });
 
         const shouldRespond = await generateShouldRespond({
@@ -283,13 +438,12 @@ export class AoInteractionClient {
         const context = composeContext({
             state,
             template:
-                this.runtime.character.templates
-                    ?.aoMessageHandlerTemplate ||
+                this.runtime.character.templates?.aoMessageHandlerTemplate ||
                 this.runtime.character?.templates?.messageHandlerTemplate ||
                 aoMessageHandlerTemplate,
         });
 
-        elizaLogger.debug("Interactions prompt:\n" + context);
+        elizaLogger.debug("Tasks prompt:\n" + context);
 
         const response = await generateMessageResponse({
             runtime: this.runtime,
@@ -300,7 +454,9 @@ export class AoInteractionClient {
         const removeQuotes = (str: string) =>
             str.replace(/^['"](.*)['"]$/, "$1");
 
-        const stringId = stringToUuid(aoMessage.id + "-" + this.runtime.agentId);
+        const stringId = stringToUuid(
+            aoMessage.id + "-" + this.runtime.agentId
+        );
 
         response.inReplyTo = stringId;
 
@@ -309,14 +465,15 @@ export class AoInteractionClient {
         if (response.text) {
             try {
                 const callback: HandlerCallback = async (response: Content) => {
-                    const memories = await sendMessage(
-                        this.client,
-                        response,
-                        memory.roomId,
-                        this.client.aoConfig.AO_PROFILE_CONTRACT,
-                        aoMessage.id
-                    );
-                    return memories;
+                    // const memories = await sendMessage(
+                    //     this.client,
+                    //     response,
+                    //     memory.roomId,
+                    //     this.client.aoConfig.AO_PROFILE_CONTRACT,
+                    //     aoMessage.id
+                    // );
+                    // return memories;
+                    return null;
                 };
 
                 const responseMessages = await callback(response);
@@ -325,23 +482,42 @@ export class AoInteractionClient {
                     state
                 )) as State;
 
-                for (const responseMessage of responseMessages) {
-                    if (
-                        responseMessage ===
-                        responseMessages[responseMessages.length - 1]
-                    ) {
-                        responseMessage.content.action = response.action;
-                    } else {
-                        responseMessage.content.action = "CONTINUE";
-                    }
-                    await this.runtime.messageManager.createMemory(
-                        responseMessage
-                    );
-                }
+                // for (const responseMessage of responseMessages) {
+                //     if (
+                //         responseMessage ===
+                //         responseMessages[responseMessages.length - 1]
+                //     ) {
+                //         responseMessage.content.action = response.action;
+                //     } else {
+                //         responseMessage.content.action = "CONTINUE";
+                //     }
+                //     await this.runtime.messageManager.createMemory(
+                //         responseMessage
+                //     );
+                // }
+                const responseMessage: Memory = {
+                    id: stringToUuid(
+                        aoMessage.id + "-" + this.client.runtime.agentId
+                    ),
+                    userId: this.client.runtime.agentId,
+                    agentId: this.client.runtime.agentId,
+                    createdAt: aoMessage.timestamp || Date.now(),
+                    content: {
+                        text: aoMessage.data.value,
+                        action: task,
+                        source: "AoTheComputer",
+                        url: `https://www.ao.link/#/message/${aoMessage.id}`,
+                        inReplyTo: stringToUuid(
+                            aoMessage.id + "-" + this.client.runtime.agentId
+                        ),
+                    },
+                    embedding: getEmbeddingZeroVector(),
+                    roomId: stringToUuid(aoMessage.id),
+                };
 
                 await this.runtime.processActions(
                     memory,
-                    responseMessages,
+                    [responseMessage],
                     state,
                     callback
                 );
