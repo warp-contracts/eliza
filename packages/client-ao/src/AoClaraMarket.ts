@@ -1,6 +1,5 @@
 import { ClaraMarket, ClaraProfile } from "redstone-clara-sdk";
-import fs from "fs";
-import { elizaLogger } from "@elizaos/core";
+import { AoClaraProfile } from "./AoClaraProfile";
 
 export class AoClaraMarket {
     private claraMarket: ClaraMarket;
@@ -10,41 +9,14 @@ export class AoClaraMarket {
     constructor(private profileId: string) {
         this.claraMarket = new ClaraMarket(process.env.AO_MARKET_ID);
         this.aoWallet = process.env.AO_WALLET;
-        this.connectProfile();
     }
 
-    async connectProfile() {
-        elizaLogger.info("connecting profile", this.profileId);
-        const parsedWallet = JSON.parse(this.aoWallet);
-        if (fs.existsSync(`../profiles/${this.profileId}`)) {
-            elizaLogger.info(
-                `Agent already registered, connecting`,
-                this.profileId
-            );
-            this.claraProfile = new ClaraProfile(
-                {
-                    id: this.profileId,
-                    jwk: parsedWallet,
-                },
-                process.env.AO_MARKET_ID
-            );
-        } else {
-            try {
-                this.claraProfile = this.claraMarket.registerAgent(
-                    parsedWallet,
-                    {
-                        metadata: { description: this.profileId },
-                        topic: "tweet",
-                        fee: 999999,
-                        agentId: this.profileId,
-                    }
-                );
-            } catch (e) {
-                elizaLogger.error(`Could not create Clara profile`, e);
-                throw new Error(`Could not create Clara profile`);
-            }
-            fs.mkdirSync(`../profiles/${this.profileId}`, { recursive: true });
-            console.log(this.claraProfile);
-        }
+    async init() {
+        const claraProfileInstance = new AoClaraProfile(
+            this.profileId,
+            this.aoWallet,
+            this
+        );
+        this.claraProfile = await claraProfileInstance.connectProfile();
     }
 }

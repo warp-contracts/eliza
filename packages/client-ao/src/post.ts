@@ -141,7 +141,7 @@ export class AoTheComputerPostClient {
     }
 
     async start() {
-        if (!this.client.profile) {
+        if (!this.client.profileId) {
             await this.client.init();
         }
 
@@ -301,7 +301,7 @@ export class AoTheComputerPostClient {
             },
             roomId,
             embedding: getEmbeddingZeroVector(),
-            createdAt: aoMessage.timestamp,
+            createdAt: aoMessage.ingested_at,
         });
     }
 
@@ -394,7 +394,7 @@ export class AoTheComputerPostClient {
             // TODO: Here we should probably get message metadata + data and cache it
             const aoMessage = {
                 id: result,
-                timestamp: Date.now(),
+                ingested_at: Date.now(),
             } as NodeType;
             await this.processAndCacheAOMessage(
                 runtime,

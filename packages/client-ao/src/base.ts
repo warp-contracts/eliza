@@ -129,7 +129,6 @@ export class ClientBase extends EventEmitter {
             this.aoClient = new AoClient(this.profileId, this.walletId);
             ClientBase._aoClients[this.profileId] = this.aoClient;
         }
-        this.aoClient.connect();
 
         this.directions =
             "- " +
@@ -146,6 +145,8 @@ export class ClientBase extends EventEmitter {
             await this.setCookiesFromArray(cachedCookies);
         }
 
+        await this.aoClient.init();
+
         if (this.profileId) {
             elizaLogger.log("AO profile ID:", this.profileId);
             // Store profile info for use in responses
@@ -160,7 +161,6 @@ export class ClientBase extends EventEmitter {
         }
 
         await this.loadLatestCheckedMessage();
-        await this.populateTimeline();
     }
 
     async fetchIncomingMessages(count: number): Promise<NodeType[]> {
@@ -175,229 +175,6 @@ export class ClientBase extends EventEmitter {
     async fetchTimelineForActions(count: number): Promise<NodeType[]> {
         elizaLogger.debug("fetching timeline for actions");
         return await this.aoClient.fetchIncomingMessages(count);
-    }
-
-    private async populateTimeline() {
-        elizaLogger.debug("populating timeline...");
-
-        const cachedTimeline = await this.getCachedTimeline();
-
-        // Check if the cache file exists
-        if (cachedTimeline) {
-            // Read the cached search results from the file
-
-            // Get the existing memories from the database
-            const existingMemories =
-                await this.runtime.messageManager.getMemoriesByRoomIds({
-                    roomIds: cachedTimeline.map((message) =>
-                        stringToUuid(message.id + "-" + this.runtime.agentId)
-                    ),
-                });
-
-            // Create a Set to store the IDs of existing memories
-            const existingMemoryIds = new Set(
-                existingMemories.map((memory) => memory.id.toString())
-            );
-
-            // Check if any of the cached messages exist in the existing memories
-            const someCachedMessagesExist = cachedTimeline.some((message) =>
-                existingMemoryIds.has(
-                    stringToUuid(message.id + "-" + this.runtime.agentId)
-                )
-            );
-
-            if (someCachedMessagesExist) {
-                // Filter out the cached messages that already exist in the database
-                const messagesToSave = cachedTimeline.filter(
-                    (message) =>
-                        !existingMemoryIds.has(
-                            stringToUuid(
-                                message.id + "-" + this.runtime.agentId
-                            )
-                        )
-                );
-
-                console.log({
-                    processingMessages: messagesToSave
-                        .map((message) => message.id)
-                        .join(","),
-                });
-
-                // Save the missing messages as memories
-                for (const message of messagesToSave) {
-                    elizaLogger.log("Saving Message", message.id);
-
-                    const roomId = stringToUuid(
-                        message.id + "-" + this.runtime.agentId
-                    );
-
-                    const userId =
-                        message.owner.address === this.walletId
-                            ? this.runtime.agentId
-                            : stringToUuid(message.owner.address);
-
-                    if (message.owner.address === this.walletId) {
-                        await this.runtime.ensureConnection(
-                            this.runtime.agentId,
-                            roomId,
-                            this.profileId,
-                            this.aoConfig.AO_USERNAME,
-                            "AoTheComputer"
-                        );
-                    } else {
-                        await this.runtime.ensureConnection(
-                            userId,
-                            roomId,
-                            message.owner.address,
-                            message.owner.address,
-                            "AoTheComputer"
-                        );
-                    }
-
-                    const content = {
-                        text: message.data.value,
-                        url: message.url,
-                        source: "AoTheComputer",
-                    } as Content;
-
-                    elizaLogger.log("Creating memory for message", message.id);
-
-                    // check if it already exists
-                    const memory =
-                        await this.runtime.messageManager.getMemoryById(
-                            stringToUuid(
-                                message.id + "-" + this.runtime.agentId
-                            )
-                        );
-
-                    if (memory) {
-                        elizaLogger.log(
-                            "Memory already exists, skipping timeline population"
-                        );
-                        break;
-                    }
-
-                    await this.runtime.messageManager.createMemory({
-                        id: stringToUuid(
-                            message.id + "-" + this.runtime.agentId
-                        ),
-                        userId,
-                        content: content,
-                        agentId: this.runtime.agentId,
-                        roomId,
-                        embedding: getEmbeddingZeroVector(),
-                        createdAt: message.ingested_at * 1000,
-                    });
-
-                    await this.cacheMessage(message);
-                }
-
-                elizaLogger.log(
-                    `Populated ${messagesToSave.length} missing messages from the cache.`
-                );
-                return;
-            }
-        }
-
-        const timeline = await this.fetchIncomingMessages(
-            cachedTimeline ? 10 : 50
-        );
-
-        // Combine the timeline messages and mentions/interactions
-
-        // Create a Set to store unique message IDs
-        const messageIdsToCheck = new Set<string>();
-        const roomIds = new Set<UUID>();
-
-        // Add message IDs to the Set
-        for (const message of timeline) {
-            messageIdsToCheck.add(message.id);
-            roomIds.add(stringToUuid(message.id + "-" + this.runtime.agentId));
-        }
-
-        // Check the existing memories in the database
-        const existingMemories =
-            await this.runtime.messageManager.getMemoriesByRoomIds({
-                roomIds: Array.from(roomIds),
-            });
-
-        // Create a Set to store the existing memory IDs
-        const existingMemoryIds = new Set<UUID>(
-            existingMemories.map((memory) => memory.id)
-        );
-
-        // Filter out the messages that already exist in the database
-        const messagesToSave = timeline.filter(
-            (message) =>
-                !existingMemoryIds.has(
-                    stringToUuid(message.id + "-" + this.runtime.agentId)
-                )
-        );
-
-        elizaLogger.debug({
-            processingMessages: messagesToSave
-                .map((message) => message.id)
-                .join(","),
-        });
-
-        await this.runtime.ensureUserExists(
-            this.runtime.agentId,
-            this.profileId,
-            this.aoConfig.AO_USERNAME,
-            "AoTheComputer"
-        );
-
-        // Save the new messages as memories
-        for (const message of messagesToSave) {
-            elizaLogger.log("Saving Message", message.id);
-
-            const roomId = stringToUuid(
-                message.id + "-" + this.runtime.agentId
-            );
-            const userId =
-                message.owner.address === this.walletId
-                    ? this.runtime.agentId
-                    : stringToUuid(message.owner.address);
-
-            if (message.owner.address === this.walletId) {
-                await this.runtime.ensureConnection(
-                    this.runtime.agentId,
-                    roomId,
-                    this.profileId,
-                    this.aoConfig.AO_USERNAME,
-                    "AoTheComputer"
-                );
-            } else {
-                await this.runtime.ensureConnection(
-                    userId,
-                    roomId,
-                    message.owner.address,
-                    message.owner.address,
-                    "AoTheComputer"
-                );
-            }
-
-            const content = {
-                text: message.data.value,
-                url: message.url,
-                source: "AoTheComputer",
-            } as Content;
-
-            await this.runtime.messageManager.createMemory({
-                id: stringToUuid(message.id + "-" + this.runtime.agentId),
-                userId,
-                content: content,
-                agentId: this.runtime.agentId,
-                roomId,
-                embedding: getEmbeddingZeroVector(),
-                createdAt: message.ingested_at * 1000,
-            });
-
-            await this.cacheMessage(message);
-        }
-
-        // Cache
-        await this.cacheTimeline(timeline);
     }
 
     async setCookiesFromArray(cookiesArray: any[]) {
