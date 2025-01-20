@@ -3,7 +3,6 @@ import { z, ZodError } from "zod";
 
 export const AO_DEFAULT_MAX_MESSAGE_LENGTH = 280;
 
-
 /**
  * This schema defines all required/optional environment settings
  */
@@ -11,12 +10,8 @@ export const aoEnvSchema = z.object({
     AO_DRY_RUN: z.boolean(),
     AO_USERNAME: z.string().min(1, "AO username is required"),
     AO_WALLET: z.string().min(1, "AO wallet is required"),
-    AO_MESSAGE_PROTOCOL_ID: z
-        .string()
-        .min(1, "AO message protocol id is required"),
-    AO_PROFILE_CONTRACT: z
-        .string()
-        .min(1, "AO profile contract is required"),
+    AO_WALLET_ID: z.string().min(1, "AO wallet id is required"),
+    AO_MARKET_ID: z.string().min(1, "AO market protocol id is required"),
     AO_MAX_MESSAGE_LENGTH: z
         .number()
         .int()
@@ -85,23 +80,19 @@ export async function validateAoConfig(
         const aoConfig = {
             AO_DRY_RUN:
                 parseBooleanFromText(
-                    runtime.getSetting("AO_DRY_RUN") ||
-                        process.env.AO_DRY_RUN
+                    runtime.getSetting("AO_DRY_RUN") || process.env.AO_DRY_RUN
                 ) ?? false, // parseBooleanFromText return null if "", map "" to false
 
             AO_USERNAME:
                 runtime.getSetting("AO_USERNAME") || process.env.AO_USERNAME,
 
-            AO_WALLET:
-                runtime.getSetting("AO_WALLET") || process.env.AO_WALLET,
+            AO_WALLET: runtime.getSetting("AO_WALLET") || process.env.AO_WALLET,
 
-            AO_PROFILE_CONTRACT:
-                runtime.getSetting("AO_PROFILE_CONTRACT") ||
-                process.env.AO_PROFILE_CONTRACT,
+            AO_WALLET_ID:
+                runtime.getSetting("AO_WALLET_ID") || process.env.AO_WALLET_ID,
 
-            AO_MESSAGE_PROTOCOL_ID:
-                runtime.getSetting("AO_MESSAGE_PROTOCOL_ID") ||
-                process.env.AO_MESSAGE_PROTOCOL_ID,
+            AO_MARKET_ID:
+                runtime.getSetting("AO_MARKET_ID") || process.env.AO_MARKET_ID,
 
             // number as string?
             AO_MAX_MESSAGE_LENGTH: safeParseInt(
@@ -148,7 +139,7 @@ export async function validateAoConfig(
             // init in minutes (min 1m)
             AO_ACTION_INTERVAL: safeParseInt(
                 runtime.getSetting("AO_ACTION_INTERVAL") ||
-                process.env.AO_ACTION_INTERVAL,
+                    process.env.AO_ACTION_INTERVAL,
                 5 // 5 minutes
             ),
 
@@ -159,7 +150,6 @@ export async function validateAoConfig(
                         process.env.AO_ENABLE_ACTION_PROCESSING
                 ) ?? false,
         };
-
 
         return aoEnvSchema.parse(aoConfig);
     } catch (error) {

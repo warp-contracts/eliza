@@ -150,7 +150,7 @@ export class AoTaskClient {
                     );
 
                     const userIdUUID =
-                        m.owner.address === this.client.profile.Owner
+                        m.owner.address === this.client.walletId
                             ? this.runtime.agentId
                             : stringToUuid(m.owner.address!);
 
@@ -197,7 +197,7 @@ export class AoTaskClient {
 
     private async handleAoMessage({ aoMessage, memory, thread }) {
         const { owner, tags, data } = aoMessage;
-        if (owner.address === this.client.profile.Owner) {
+        if (owner.address === this.client.walletId) {
             elizaLogger.info(
                 `Skipping AO message, message from current agent.`
             );
@@ -240,7 +240,7 @@ export class AoTaskClient {
         const formattedConversation = thread
             .map(
                 (message) => `@${message.owner.address} (${new Date(
-                    message.timestamp * 1000
+                    message.ingested_at * 1000
                 ).toLocaleString("en-US", {
                     hour: "2-digit",
                     minute: "2-digit",
@@ -261,7 +261,7 @@ export class AoTaskClient {
     }
 
     private async saveAoMessageIfNeeded(aoMessage: NodeType, state: State) {
-        const { id, data, url, timestamp } = aoMessage;
+        const { id, data, url, ingested_at } = aoMessage;
         // check if the AO message exists, save if it doesn't
         const aoMessageId = stringToUuid(id + "-" + this.runtime.agentId);
         const aoMessageExists =
@@ -281,7 +281,7 @@ export class AoTaskClient {
                 },
                 userId: userIdUUID,
                 roomId,
-                createdAt: timestamp * 1000,
+                createdAt: ingested_at * 1000,
             };
             this.client.saveRequestMessage(message, state);
         }
@@ -293,7 +293,7 @@ export class AoTaskClient {
         aoMessage: NodeType,
         task: string
     ) {
-        const { id, data, timestamp, url } = aoMessage;
+        const { id, data, ingested_at, url } = aoMessage;
         console.log(aoMessage);
         try {
             const callback: HandlerCallback = async (response: Content) => {
@@ -341,21 +341,20 @@ export class AoTaskClient {
         memory: Memory;
         thread: NodeType[];
     }) {
-        console.log(`===== handleAoMessage`)
-        if (aoMessage.owner.address === this.client.profile.Owner) {
-            console.log(`===== handleAoMessage - own message`)
+        console.log(`===== handleAoMessage`);
+        if (aoMessage.owner.address === this.client.walletId) {
+            console.log(`===== handleAoMessage - own message`);
             // Skip processing if the memory is from the bot itself
             return;
         }
 
         if (!memory.content.text) {
             elizaLogger.log("Skipping Tweet with no text", aoMessage.id);
-            console.log(`===== handleAoMessage - no text`)
+            console.log(`===== handleAoMessage - no text`);
             return { text: "", action: "IGNORE" };
         }
 
-
-const task = aoMessage.tags.find(
+        const task = aoMessage.tags.find(
             (t: TagType) => t.name == "Task"
         )?.value;
         if (!task) {
@@ -394,7 +393,6 @@ const task = aoMessage.tags.find(
             currentPost,
             formattedConversation,
         });
-
 
         // check if the tweet exists, save if it doesn't
         const tweetId = stringToUuid(aoMessage.id + "-" + this.runtime.agentId);
@@ -457,7 +455,7 @@ const task = aoMessage.tags.find(
             modelClass: ModelClass.LARGE,
         });
 
-        console.log(`== ACTIONS == `, response.action)
+        console.log(`== ACTIONS == `, response.action);
 
         const removeQuotes = (str: string) =>
             str.replace(/^['"](.*)['"]$/, "$1");
@@ -484,7 +482,6 @@ const task = aoMessage.tags.find(
                     return null;
                 };
 
-
                 const responseMessages = await callback(response);
 
                 state = (await this.runtime.updateRecentMessageState(
@@ -510,7 +507,7 @@ const task = aoMessage.tags.find(
                     ),
                     userId: this.client.runtime.agentId,
                     agentId: this.client.runtime.agentId,
-                    createdAt: aoMessage.timestamp || Date.now(),
+                    createdAt: aoMessage.ingested_at || Date.now(),
                     content: {
                         text: aoMessage.data.value,
                         action: task,

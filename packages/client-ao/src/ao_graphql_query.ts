@@ -1,5 +1,3 @@
-
-
 export const GQL_TX_QUERY = `
 query ($id: ID!) {
   transaction(id: $id) {
@@ -23,14 +21,18 @@ query ($id: ID!) {
   }
 }
 
-`
+`;
 
-export const GQL_TXS_QUERY = `query ($entityId: String!, $limit: Int!, $sortOrder: SortOrder!, $cursor: String) {
+export const GQL_TXS_QUERY = `query ($entityId: String!, $limit: Int!, $sortOrder: SortOrder!, $cursor: String, $processId: String!) {
   transactions(
     sort: $sortOrder
     first: $limit
     after: $cursor
     recipients: [$entityId]
+    tags: {
+        name: "From-Process",
+        values: [$processId]
+    }
   ) {
     count
     ...MessageFields
@@ -59,4 +61,4 @@ fragment MessageFields on TransactionConnection {
       }
     }
   }
-}`
+}`;
