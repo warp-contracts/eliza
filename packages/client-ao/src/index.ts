@@ -3,6 +3,7 @@ import { ClientBase } from "./base.ts";
 import { validateAoConfig, AoConfig } from "./environment.ts";
 import { AoTaskClient } from "./tasks.ts";
 import { AoTheComputerPostClient } from "./post.ts";
+import { AoClaraMarket } from "./AoClaraMarket.ts";
 
 /**
  * A manager that orchestrates all specialized AoTheComputer logic:
@@ -39,7 +40,7 @@ export const AoTheComputerClientInterface: Client = {
         await manager.client.init();
 
         // Start the posting loop
-        await manager.post.start();
+        // await manager.post.start();
 
         // Start interactions (mentions, replies)
         await manager.tasks.start();

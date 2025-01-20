@@ -3,17 +3,23 @@ import { AoSigner, NodeType } from "./ao_types.ts";
 import { GQL_TX_QUERY, GQL_TXS_QUERY } from "./ao_graphql_query.ts";
 import { elizaLogger } from "@elizaos/core";
 import { AoClaraMarket } from "./AoClaraMarket.ts";
+import { ClaraMarket } from "redstone-clara-sdk";
 
 export class AoClient {
     profileId: string;
     walletId: string;
     signer: AoSigner;
-    aoClaraMarket: AoClaraMarket;
+    private claraMarket: ClaraMarket;
 
     constructor(profileId: string, walletId: string) {
         this.profileId = profileId;
         this.walletId = walletId;
-        this.aoClaraMarket = new AoClaraMarket(this.profileId);
+        this.claraMarket = new AoClaraMarket(this.profileId);
+    }
+
+    async init() {
+        this.signer = createDataItemSigner(JSON.parse(process.env.AO_WALLET));
+        await this.claraMarket.init();
     }
 
     async getMessage(messageId: string): Promise<NodeType> {
@@ -90,10 +96,6 @@ export class AoClient {
 
     async sendNoteTweet(content: string, tweetId: string) {
         return Promise.resolve(undefined);
-    }
-
-    async connect() {
-        this.signer = createDataItemSigner(JSON.parse(process.env.AO_WALLET));
     }
 
     async sendAoMessage(content: string, id: string): Promise<string> {
