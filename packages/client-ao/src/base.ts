@@ -11,12 +11,8 @@ import {
 } from "@elizaos/core";
 import { EventEmitter } from "events";
 import { AoConfig } from "./environment.ts";
-import { AoClient, AoFetchProfileResult } from "./AoClient.ts";
+import { AoClient } from "./AoClient.ts";
 import { NodeType } from "./ao_types.ts";
-
-interface AoProfile extends AoFetchProfileResult {
-    contractId: string;
-}
 
 class RequestQueue {
     private queue: (() => Promise<any>)[] = [];
@@ -77,10 +73,9 @@ export class ClientBase extends EventEmitter {
     lastCheckedMessageTs: number | null = null;
     imageDescriptionService: IImageDescriptionService;
     temperature: number = 0.5;
-
     requestQueue: RequestQueue = new RequestQueue();
-
-    profile: AoProfile | null;
+    profileId: string;
+    walletId: string;
 
     async cacheMessage(message: NodeType): Promise<void> {
         if (!message) {
@@ -126,12 +121,13 @@ export class ClientBase extends EventEmitter {
         super();
         this.runtime = runtime;
         this.aoConfig = aoConfig;
-        const profileContractId = aoConfig.AO_PROFILE_CONTRACT;
-        if (ClientBase._aoClients[profileContractId]) {
-            this.aoClient = ClientBase._aoClients[profileContractId];
+        this.profileId = this.runtime.agentId + "_" + aoConfig.AO_USERNAME;
+        this.walletId = aoConfig.AO_WALLET_ID;
+        if (ClientBase._aoClients[this.profileId]) {
+            this.aoClient = ClientBase._aoClients[this.profileId];
         } else {
-            this.aoClient = new AoClient(profileContractId);
-            ClientBase._aoClients[profileContractId] = this.aoClient;
+            this.aoClient = new AoClient(this.profileId, this.walletId);
+            ClientBase._aoClients[this.profileId] = this.aoClient;
         }
         this.aoClient.connect();
 
@@ -143,33 +139,24 @@ export class ClientBase extends EventEmitter {
     }
 
     async init() {
-        const profileContractId = this.aoConfig.AO_PROFILE_CONTRACT;
-
-        const cachedCookies = await this.getCachedCookies(profileContractId);
+        const cachedCookies = await this.getCachedCookies(this.profileId);
 
         if (cachedCookies) {
             elizaLogger.info("Using cached cookies");
             await this.setCookiesFromArray(cachedCookies);
         }
 
-        // Initialize Twitter profile
-        this.profile = await this.fetchProfile(profileContractId);
-
-        if (this.profile) {
-            elizaLogger.log("AO contract ID:", this.profile.contractId);
-            elizaLogger.log(
-                "AO profile loaded:",
-                JSON.stringify(this.profile, null, 10)
-            );
+        if (this.profileId) {
+            elizaLogger.log("AO profile ID:", this.profileId);
             // Store profile info for use in responses
             this.runtime.character.twitterProfile = {
-                id: this.profile.contractId,
-                username: this.profile.Profile.UserName,
-                screenName: this.profile.Profile.DisplayName,
-                bio: this.profile.Profile.Description,
+                id: this.profileId,
+                username: this.runtime.agentId,
+                screenName: this.aoConfig.AO_USERNAME,
+                bio: this.profileId,
             };
         } else {
-            throw new Error("Failed to load profile");
+            throw new Error("Failed to load profile id");
         }
 
         await this.loadLatestCheckedMessage();
@@ -245,16 +232,16 @@ export class ClientBase extends EventEmitter {
                     );
 
                     const userId =
-                        message.owner.address === this.profile.contractId
+                        message.owner.address === this.walletId
                             ? this.runtime.agentId
                             : stringToUuid(message.owner.address);
 
-                    if (message.owner.address === this.profile.contractId) {
+                    if (message.owner.address === this.walletId) {
                         await this.runtime.ensureConnection(
                             this.runtime.agentId,
                             roomId,
-                            this.profile.Profile.UserName,
-                            this.profile.Profile.UserName,
+                            this.profileId,
+                            this.aoConfig.AO_USERNAME,
                             "AoTheComputer"
                         );
                     } else {
@@ -299,7 +286,7 @@ export class ClientBase extends EventEmitter {
                         agentId: this.runtime.agentId,
                         roomId,
                         embedding: getEmbeddingZeroVector(),
-                        createdAt: message.timestamp * 1000,
+                        createdAt: message.ingested_at * 1000,
                     });
 
                     await this.cacheMessage(message);
@@ -355,8 +342,8 @@ export class ClientBase extends EventEmitter {
 
         await this.runtime.ensureUserExists(
             this.runtime.agentId,
-            this.profile.contractId,
-            this.runtime.character.name,
+            this.profileId,
+            this.aoConfig.AO_USERNAME,
             "AoTheComputer"
         );
 
@@ -368,16 +355,16 @@ export class ClientBase extends EventEmitter {
                 message.id + "-" + this.runtime.agentId
             );
             const userId =
-                message.owner.address === this.profile.contractId
+                message.owner.address === this.walletId
                     ? this.runtime.agentId
                     : stringToUuid(message.owner.address);
 
-            if (message.owner.address === this.profile.contractId) {
+            if (message.owner.address === this.walletId) {
                 await this.runtime.ensureConnection(
                     this.runtime.agentId,
                     roomId,
-                    this.profile.Profile.UserName,
-                    this.profile.Profile.DisplayName,
+                    this.profileId,
+                    this.aoConfig.AO_USERNAME,
                     "AoTheComputer"
                 );
             } else {
@@ -403,7 +390,7 @@ export class ClientBase extends EventEmitter {
                 agentId: this.runtime.agentId,
                 roomId,
                 embedding: getEmbeddingZeroVector(),
-                createdAt: message.timestamp * 1000,
+                createdAt: message.ingested_at * 1000,
             });
 
             await this.cacheMessage(message);
@@ -457,7 +444,7 @@ export class ClientBase extends EventEmitter {
     async loadLatestCheckedMessage(): Promise<void> {
         const latestCheckedMessageTs =
             await this.runtime.cacheManager.get<number>(
-                `ao/${this.profile.contractId}/latest_checked_message_ts`
+                `ao/${this.profileId}/latest_checked_message_ts`
             );
 
         if (latestCheckedMessageTs) {
@@ -468,7 +455,7 @@ export class ClientBase extends EventEmitter {
     async cacheLatestCheckedMessageTimestamp() {
         if (this.lastCheckedMessageTs) {
             await this.runtime.cacheManager.set(
-                `ao/${this.profile.contractId}/latest_checked_message_ts`,
+                `ao/${this.profileId}/latest_checked_message_ts`,
                 this.lastCheckedMessageTs
             );
         }
@@ -476,13 +463,13 @@ export class ClientBase extends EventEmitter {
 
     async getCachedTimeline(): Promise<NodeType[] | undefined> {
         return await this.runtime.cacheManager.get<NodeType[]>(
-            `ao/${this.profile.contractId}/timeline`
+            `ao/${this.profileId}/timeline`
         );
     }
 
     async cacheTimeline(timeline: NodeType[]) {
         await this.runtime.cacheManager.set(
-            `ao/${this.profile.contractId}/timeline`,
+            `ao/${this.profileId}/timeline`,
             timeline,
             { expires: Date.now() + 10 * 1000 }
         );
@@ -496,42 +483,5 @@ export class ClientBase extends EventEmitter {
 
     async cacheCookies(username: string, cookies: any[]) {
         await this.runtime.cacheManager.set(`ao/${username}/cookies`, cookies);
-    }
-
-    async getCachedProfile(contractId: string) {
-        return await this.runtime.cacheManager.get<AoProfile>(
-            `ao/${contractId}/profile`
-        );
-    }
-
-    async cacheProfile(profile: AoProfile) {
-        await this.runtime.cacheManager.set(
-            `ao/${profile.contractId}/profile`,
-            profile
-        );
-    }
-
-    async fetchProfile(profileContractId: string): Promise<AoProfile> {
-        const cached = await this.getCachedProfile(profileContractId);
-
-        if (cached) return cached;
-
-        try {
-            const profile = await this.requestQueue.add(async () => {
-                const profileResult =
-                    await this.aoClient.getProfile(profileContractId);
-                return {
-                    ...profileResult,
-                    contractId: profileContractId,
-                };
-            });
-
-            this.cacheProfile(profile);
-            return profile;
-        } catch (error) {
-            console.error("Error fetching AO profile:", error);
-
-            return undefined;
-        }
     }
 }
