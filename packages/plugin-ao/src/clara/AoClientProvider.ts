@@ -1,4 +1,4 @@
-import {IAgentRuntime, Memory, Provider, State} from "@elizaos/core";
+import {elizaLogger, IAgentRuntime, Memory, Provider, State} from "@elizaos/core";
 import {AoClaraMarket} from "./AoClaraMarket.ts";
 import { ClaraProfile } from "redstone-clara-sdk";
 
@@ -8,11 +8,14 @@ export const aoClientProvider: Provider = {
     get: async (
         runtime: IAgentRuntime,
         _message: Memory,
-        _state?: State
+        _: State
     ): Promise<ClaraProfile | null> => {
         try {
             if (!aoClaraMarket) {
-                aoClaraMarket = new AoClaraMarket(process.env.AO_USERNAME);
+                const profileId = `${runtime?.agentId}_${process.env.AO_USERNAME}`
+                elizaLogger.log("Setting AO Clara market and profile ", profileId);
+
+                aoClaraMarket = new AoClaraMarket(profileId);
                 await aoClaraMarket.connectProfile();
             }
             return aoClaraMarket.claraProfile;
