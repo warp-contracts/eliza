@@ -47,8 +47,6 @@ export const aoEnvSchema = z.object({
     */
     AO_MESSAGE_INTERVAL_MIN: z.number().int(),
     AO_MESSAGE_INTERVAL_MAX: z.number().int(),
-    AO_ENABLE_ACTION_PROCESSING: z.boolean(),
-    AO_ACTION_INTERVAL: z.number().int(),
     AO_MESSAGE_IMMEDIATELY: z.boolean(),
 });
 
@@ -128,20 +126,6 @@ export async function validateAoConfig(
                 parseBooleanFromText(
                     runtime.getSetting("AO_MESSAGE_IMMEDIATELY") ||
                         process.env.AO_MESSAGE_IMMEDIATELY
-                ) ?? false,
-
-            // init in minutes (min 1m)
-            AO_ACTION_INTERVAL: safeParseInt(
-                runtime.getSetting("AO_ACTION_INTERVAL") ||
-                    process.env.AO_ACTION_INTERVAL,
-                5 // 5 minutes
-            ),
-
-            // bool
-            AO_ENABLE_ACTION_PROCESSING:
-                parseBooleanFromText(
-                    runtime.getSetting("AO_ENABLE_ACTION_PROCESSING") ||
-                        process.env.AO_ENABLE_ACTION_PROCESSING
                 ) ?? false,
         };
 
