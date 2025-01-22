@@ -1,13 +1,10 @@
 import {
-    Content,
     elizaLogger,
     getEmbeddingZeroVector,
     IAgentRuntime,
     IImageDescriptionService,
     Memory,
     State,
-    stringToUuid,
-    UUID,
 } from "@elizaos/core";
 import { EventEmitter } from "events";
 import { AoConfig } from "./environment.ts";
@@ -138,13 +135,6 @@ export class ClientBase extends EventEmitter {
     }
 
     async init() {
-        const cachedCookies = await this.getCachedCookies(this.profileId);
-
-        if (cachedCookies) {
-            elizaLogger.info("Using cached cookies");
-            await this.setCookiesFromArray(cachedCookies);
-        }
-
         await this.aoClient.init();
 
         if (this.profileId) {
@@ -177,17 +167,6 @@ export class ClientBase extends EventEmitter {
         return await this.aoClient.fetchIncomingMessages(count);
     }
 
-    async setCookiesFromArray(cookiesArray: any[]) {
-        const cookieStrings = cookiesArray.map(
-            (cookie) =>
-                `${cookie.key}=${cookie.value}; Domain=${cookie.domain}; Path=${cookie.path}; ${
-                    cookie.secure ? "Secure" : ""
-                }; ${cookie.httpOnly ? "HttpOnly" : ""}; SameSite=${
-                    cookie.sameSite || "Lax"
-                }`
-        );
-        await this.aoClient.setCookies(cookieStrings);
-    }
 
     async saveRequestMessage(message: Memory, state: State) {
         if (message.content.text) {
@@ -236,29 +215,5 @@ export class ClientBase extends EventEmitter {
                 this.lastCheckedMessageTs
             );
         }
-    }
-
-    async getCachedTimeline(): Promise<NodeType[] | undefined> {
-        return await this.runtime.cacheManager.get<NodeType[]>(
-            `ao/${this.profileId}/timeline`
-        );
-    }
-
-    async cacheTimeline(timeline: NodeType[]) {
-        await this.runtime.cacheManager.set(
-            `ao/${this.profileId}/timeline`,
-            timeline,
-            { expires: Date.now() + 10 * 1000 }
-        );
-    }
-
-    async getCachedCookies(username: string) {
-        return await this.runtime.cacheManager.get<any[]>(
-            `ao/${username}/cookies`
-        );
-    }
-
-    async cacheCookies(username: string, cookies: any[]) {
-        await this.runtime.cacheManager.set(`ao/${username}/cookies`, cookies);
     }
 }

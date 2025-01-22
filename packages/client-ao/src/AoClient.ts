@@ -1,9 +1,8 @@
-import { createDataItemSigner, dryrun, message } from "@permaweb/aoconnect";
+import { createDataItemSigner } from "@permaweb/aoconnect";
 import { AoSigner, NodeType } from "./ao_types.ts";
 import { GQL_TX_QUERY, GQL_TXS_QUERY } from "./ao_graphql_query.ts";
 import { elizaLogger } from "@elizaos/core";
 import { AoClaraMarket } from "./AoClaraMarket.ts";
-import { ClaraMarket } from "redstone-clara-sdk";
 
 export class AoClient {
     profileId: string;
@@ -108,61 +107,11 @@ export class AoClient {
 
         for (const m of messages) {
             m.data.value = await this.getMessageData(m.id);
-            m.conversationId = "88899";
+            m.conversationId = m.id;
         }
 
         return messages;
     }
 
-    async sendNoteTweet(content: string, tweetId: string) {
-        return Promise.resolve(undefined);
-    }
-
-    async sendAoMessage(content: string, id: string): Promise<string> {
-        let messageId;
-        try {
-            messageId = await message({
-                process: process.env.AO_MARKET_ID,
-                tags: [
-                    { name: "Action", value: "Send-Message" },
-                    // { name: "Message-Id", value: id },
-                ],
-                signer: this.signer,
-                data: content,
-            });
-        } catch (error) {
-            console.error("Error sending AO message:", error);
-            return;
-        }
-        console.info("Message has been sent to AO", messageId);
-        return messageId;
-    }
-
-    async likeTweet(id: string) {}
-
-    async retweet(id: string) {}
-
-    async sendQuoteTweet(quoteContent: string, id: string) {
-        return Promise.resolve(undefined);
-    }
-
-    async setCookies(cookieStrings: string[]) {}
 }
 
-export interface AoFetchProfileResult {
-    Assets: Array<string>;
-    Owner: string;
-    Collections: Array<string>;
-    Profile: AoProfileResult;
-}
-
-export interface AoProfileResult {
-    Version: string;
-    ProfileImage: string;
-    UserName: string;
-    CoverImage: string;
-    Description: string;
-    DateUpdated: number;
-    DisplayName: string;
-    DateCreated: number;
-}

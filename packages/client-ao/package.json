@@ -21,9 +21,8 @@
     "dependencies": {
         "@elizaos/core": "workspace:*",
         "@permaweb/aoconnect": "^0.0.62",
-        "agent-twitter-client": "0.0.18",
         "glob": "11.0.0",
-        "redstone-clara-sdk": "^0.0.12",
+        "redstone-clara-sdk": "^0.0.14",
         "zod": "3.23.8"
     },
     "devDependencies": {
