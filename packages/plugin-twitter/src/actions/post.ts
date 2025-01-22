@@ -6,9 +6,9 @@ import {
     composeContext,
     elizaLogger,
     ModelClass,
-    formatMessages,
     generateObject,
     messageCompletionFooter,
+    HandlerCallback,
 } from "@elizaos/core";
 import { Scraper } from "agent-twitter-client";
 import { tweetTemplate } from "../templates";
@@ -24,7 +24,6 @@ async function composeTweet(
             state,
             template: tweetTemplate + `\n${messageCompletionFooter}`,
         });
-        console.log(context);
 
         const tweetContentObject = await generateObject({
             runtime,
@@ -140,7 +139,9 @@ export const postAction: Action = {
     handler: async (
         runtime: IAgentRuntime,
         message: Memory,
-        state?: State
+        state?: State,
+        options?: { [key: string]: unknown },
+        callback?: HandlerCallback
     ): Promise<boolean> => {
         try {
             // Generate tweet content using context
@@ -150,6 +151,9 @@ export const postAction: Action = {
 
             if (!tweetContent) {
                 elizaLogger.error("No content generated for tweet");
+                callback({
+                    text: `No content generated for tweet`,
+                });
                 return false;
             }
 
@@ -163,12 +167,28 @@ export const postAction: Action = {
                 elizaLogger.info(
                     `Dry run: would have posted tweet: ${tweetContent}`
                 );
+                callback({
+                    text: `No content generated for tweet.`,
+                });
                 return true;
             }
 
-            return await postTweet(tweetContent);
+            const result = await postTweet(tweetContent);
+            if (result) {
+                callback({
+                    text: tweetContent,
+                });
+            } else {
+                callback({
+                    text: `Could not post tweet.`,
+                });
+            }
+            return result;
         } catch (error) {
             elizaLogger.error("Error in post action:", error);
+            callback({
+                text: `Could not post tweet.`,
+            });
             return false;
         }
     },

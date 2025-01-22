@@ -9,7 +9,7 @@ export class AoClient {
     profileId: string;
     walletId: string;
     signer: AoSigner;
-    private claraMarket: ClaraMarket;
+    claraMarket: AoClaraMarket;
 
     constructor(profileId: string, walletId: string) {
         this.profileId = profileId;
@@ -20,6 +20,26 @@ export class AoClient {
     async init() {
         this.signer = createDataItemSigner(JSON.parse(process.env.AO_WALLET));
         await this.claraMarket.init();
+    }
+
+    async sendTaskResult(taskId: string, result: string) {
+        try {
+            const response = await this.claraMarket.profile.sendTaskResult({
+                taskId,
+                result,
+            });
+            elizaLogger.info(
+                `Task result for id: ${taskId} sent`,
+                JSON.stringify(response)
+            );
+            return response;
+        } catch (e) {
+            elizaLogger.error(
+                `Could not send task result for task: ${taskId}.`,
+                e
+            );
+            return false;
+        }
     }
 
     async getMessage(messageId: string): Promise<NodeType> {

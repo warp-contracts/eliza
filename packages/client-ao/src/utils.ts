@@ -17,6 +17,7 @@ export const wait = (minTime: number = 1000, maxTime: number = 3000) => {
 
 export async function buildConversationThread(
     aoMessage: NodeType,
+    prompt: string,
     client: ClientBase,
     maxReplies: number = 10
 ): Promise<NodeType[]> {
@@ -42,11 +43,11 @@ export async function buildConversationThread(
 
         // Handle memory storage
         const memory = await client.runtime.messageManager.getMemoryById(
-            stringToUuid(currentMessage.id + "-" + client.runtime.agentId)
+            stringToUuid(currentMessage.id)
         );
         if (!memory) {
             const roomId = stringToUuid(
-                currentMessage.conversationId + "-" + client.runtime.agentId
+                currentMessage.id + "-" + client.runtime.agentId
             );
             const userId = stringToUuid(currentMessage.owner.address);
 
@@ -64,14 +65,14 @@ export async function buildConversationThread(
                 ),
                 agentId: client.runtime.agentId,
                 content: {
-                    text: currentMessage.data.value,
+                    text: prompt,
                     source: "AoTheComputer",
-                    url: currentMessage.conversationId,
+                    url: currentMessage.id,
                 },
                 createdAt: currentMessage.ingested_at * 1000,
                 roomId,
                 userId:
-                    currentMessage.owner.address === client.profile.Owner
+                    currentMessage.owner.address === client.walletId
                         ? client.runtime.agentId
                         : stringToUuid(currentMessage.owner.address),
                 embedding: getEmbeddingZeroVector(),
