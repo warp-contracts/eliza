@@ -11,7 +11,7 @@ import {
     type Action,
 } from "@elizaos/core";
 import { z } from "zod";
-import {aoClientProvider} from "../aoClientProvider.ts";
+import {aoClientProvider} from "../clara/AoClientProvider.ts";
 import { TOPICS } from "redstone-clara-sdk";
 
 
@@ -62,9 +62,15 @@ export const task: Action = {
     suppressInitialMessage: true,
     validate: async (runtime: IAgentRuntime, message: Memory) => {
         console.log("Validating :", message.userId);
+        try {
+            await aoClientProvider.get(runtime, message);
+        } catch {
+            elizaLogger.error("Failed to load ao client profile");
+            return false;
+        }
         return true;
     },
-    description: "C.L.A.R.A Use CLARA_TASK always. Whenever someone requests a task, related to post, tweet or any task. Always.",
+    description: "C.L.A.R.A, Use CLARA_TASK only if there is any mention of task, request, clara task or clara protocol.",
     handler: async (
         runtime: IAgentRuntime,
         message: Memory,
@@ -93,29 +99,54 @@ export const task: Action = {
             template: claraTaskTemplate,
         });
 
+        let taskObject;
         // Generate transfer content with the schema
-        const task = await generateObject({
-            runtime,
-            context: context,
-            schema: taskSchema,
-            modelClass: ModelClass.SMALL,
-        });
-
-        let result = await aoProfile.registerTask({
-            topic: task.action,
-            reward: 10,
-            matchingStrategy: task.strategy,
-            payload: task.payload
-        });
-
-        // Validate transfer content
-        console.log("== result", result);
-        if (callback) {
-            callback({
-                text: `Task scheduled: <a href="https://www.ao.link/#/message/${result.taskId}" target="_blank" rel="noopener noreferrer">${result.taskId}</a>`,
-                content: result,
+        try {
+            taskObject = await generateObject({
+                runtime,
+                context: context,
+                schema: taskSchema,
+                modelClass: ModelClass.SMALL,
             });
+        } catch (e) {
+            elizaLogger.error(`AO plugin: failed to generate task based on message`, message.content, e);
+            if (callback) {
+                callback({
+                    text: `Cannot generate CLARA task based on input, try again`,
+                    content: '',
+                });
+            }
+            return false;
         }
+
+
+        // Sending request using CLARA SDK
+        try {
+            const result = await aoProfile.registerTask({
+                topic: taskObject.action,
+                reward: 10,
+                matchingStrategy: taskObject.strategy,
+                payload: taskObject.payload
+            });
+            console.log("== result", result);
+            if (callback) {
+                callback({
+                    text: `https://www.ao.link/#/message/${result.taskId}`,
+                    content: result,
+                });
+            }
+            return true;
+        } catch (e) {
+            elizaLogger.error(`AO plugin: failed to send request using CLARA SDK`, message.content, e);
+            if (callback) {
+                callback({
+                    text: `Cannot send CLARA request`,
+                    content: '',
+                });
+            }
+        }
+
+
         return false;
     },
 
