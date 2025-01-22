@@ -114,10 +114,9 @@ export const task: Action = {
 
         // Validate transfer content
         console.log("== result", result);
-        const msgId = JSON.parse(result.Messages[0].Data).id
         if (callback) {
             callback({
-                text: "Task scheduled: https://www.ao.link/#/message/" + msgId,
+                text: "Task scheduled: https://www.ao.link/#/message/" + result.taskId,
                 content: result,
             });
         }
