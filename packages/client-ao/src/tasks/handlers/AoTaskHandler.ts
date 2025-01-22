@@ -159,7 +159,7 @@ export class AoTaskHandler extends AoTask {
             );
             await wait();
         } catch (error) {
-            elizaLogger.error(`Error sending response tweet: ${error}`);
+            elizaLogger.error(`Error sending response message: ${error}`);
         }
     }
 

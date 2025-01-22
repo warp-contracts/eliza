@@ -2,26 +2,19 @@ import { Client, elizaLogger, IAgentRuntime } from "@elizaos/core";
 import { ClientBase } from "./base.ts";
 import { validateAoConfig, AoConfig } from "./environment.ts";
 import { AoTaskClient } from "./tasks/AoTaskClient.ts";
-import { AoTheComputerPostClient } from "./post.ts";
-import { AoClaraMarket } from "./AoClaraMarket.ts";
 
 /**
  * A manager that orchestrates all specialized AoTheComputer logic:
  * - client: base operations (login, timeline caching, etc.)
- * - post: autonomous posting logic
- * - interaction: handling mentions, replies
+ * - interaction: fetching assigned tasks
  */
 class AoManager {
     client: ClientBase;
-    post: AoTheComputerPostClient;
     tasks: AoTaskClient;
 
     constructor(runtime: IAgentRuntime, aoConfig: AoConfig) {
         // Pass aoConfig to the base client
         this.client = new ClientBase(runtime, aoConfig);
-
-        // Posting logic
-        this.post = new AoTheComputerPostClient(this.client, runtime);
 
         // Mentions and interactions
         this.tasks = new AoTaskClient(this.client, runtime);
@@ -39,10 +32,7 @@ export const AoTheComputerClientInterface: Client = {
         // Initialize login/session
         await manager.client.init();
 
-        // Start the posting loop
-        // await manager.post.start();
-
-        // Start interactions (mentions, replies)
+        // Start fetching interactions
         await manager.tasks.start();
 
         return manager;

@@ -7,7 +7,6 @@ export const AO_DEFAULT_MAX_MESSAGE_LENGTH = 280;
  * This schema defines all required/optional environment settings
  */
 export const aoEnvSchema = z.object({
-    AO_DRY_RUN: z.boolean(),
     AO_USERNAME: z.string().min(1, "AO username is required"),
     AO_WALLET: z.string().min(1, "AO wallet is required"),
     AO_WALLET_ID: z.string().min(1, "AO wallet id is required"),
@@ -78,11 +77,6 @@ export async function validateAoConfig(
 ): Promise<AoConfig> {
     try {
         const aoConfig = {
-            AO_DRY_RUN:
-                parseBooleanFromText(
-                    runtime.getSetting("AO_DRY_RUN") || process.env.AO_DRY_RUN
-                ) ?? false, // parseBooleanFromText return null if "", map "" to false
-
             AO_USERNAME:
                 runtime.getSetting("AO_USERNAME") || process.env.AO_USERNAME,
 
