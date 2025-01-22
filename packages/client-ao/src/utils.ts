@@ -68,7 +68,7 @@ export async function buildConversationThread(
                     source: "AoTheComputer",
                     url: currentMessage.conversationId,
                 },
-                createdAt: currentMessage.timestamp * 1000,
+                createdAt: currentMessage.ingested_at * 1000,
                 roomId,
                 userId:
                     currentMessage.owner.address === client.profile.Owner

@@ -1,6 +1,5 @@
 import {
     ActionExample,
-    Content,
     HandlerCallback,
     IAgentRuntime,
     Memory,
@@ -13,7 +12,7 @@ import {
 } from "@elizaos/core";
 import { z } from "zod";
 import {aoClientProvider} from "../aoClientProvider.ts";
-import { ClaraProfile, TOPICS } from "redstone-clara-sdk";
+import { TOPICS } from "redstone-clara-sdk";
 
 
 const claraTaskTemplate = `
@@ -28,7 +27,7 @@ Example response:
 }
 \`\`\`
 
-{{recentMessages}}
+{{task}}
 
 # INSTRUCTIONS: Generate a task. You MUST include an action if the current post text includes a prompt that is similar to one of the available actions mentioned here:
 {{actions}}
@@ -60,6 +59,7 @@ export const task: Action = {
     similes: [
         "TASKS", "CLARA_TASK", "REQUEST", "C.L.A.R.A"
     ],
+    suppressInitialMessage: true,
     validate: async (runtime: IAgentRuntime, message: Memory) => {
         console.log("Validating :", message.userId);
         return true;
@@ -72,17 +72,9 @@ export const task: Action = {
         _options: { [key: string]: unknown },
         callback?: HandlerCallback
     ): Promise<boolean> => {
-        elizaLogger.log("Starting SEND_TOKEN handler...");
-        console.log("== TASK 5", TOPICS);
-        console.log("== message", message.roomId, message.content);
-        console.log("== Callback == ", callback);
+        elizaLogger.log("Starting CLARA_TASK handler...");
 
-
-        state.actions = TOPICS.join(', ')
-        console.log("== actions", state.actions);
         const aoProfile = await aoClientProvider.get(runtime, message, state);
-        // async registerTask({topic, reward, matchingStrategy, payload, contextId = null}) {
-
 
         // // Define the schema for the expected output
         const taskSchema = z.object({
@@ -91,6 +83,10 @@ export const task: Action = {
             strategy: z.string()
         });
 
+        state.actions = TOPICS.join(', ')
+        elizaLogger.debug("Actions", state.actions)
+        state.task = message.content.text
+        elizaLogger.debug("Task command", state.task)
         // Compose transfer context
         const context = composeContext({
             state,
@@ -116,7 +112,7 @@ export const task: Action = {
         console.log("== result", result);
         if (callback) {
             callback({
-                text: "Task scheduled: https://www.ao.link/#/message/" + result.taskId,
+                text: `Task scheduled: <a href="https://www.ao.link/#/message/${result.taskId}" target="_blank" rel="noopener noreferrer">${result.taskId}</a>`,
                 content: result,
             });
         }
