@@ -22,20 +22,20 @@ export type Message = {
     tags: TagType[];
     signature: string;
     target: string;
+};
 
-    conversationId: '123';
-}
+export type NodeDataType = {
+    size: string;
+    type: string;
+    value?: string;
+};
 
 export type NodeType = {
     id: string;
     tags: TagType[];
-    data: {
-        size: string;
-        type: string;
-        value?: string;
-    };
+    data: NodeDataType;
     ingested_at: number;
-    url?: string,
+    url?: string;
     block?: {
         height: number;
         timestamp: number;

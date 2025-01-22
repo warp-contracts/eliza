@@ -1,7 +1,7 @@
 import { Client, elizaLogger, IAgentRuntime } from "@elizaos/core";
 import { ClientBase } from "./base.ts";
 import { validateAoConfig, AoConfig } from "./environment.ts";
-import { AoTaskClient } from "./tasks.ts";
+import { AoTaskClient } from "./tasks/AoTaskClient.ts";
 import { AoTheComputerPostClient } from "./post.ts";
 import { AoClaraMarket } from "./AoClaraMarket.ts";
 

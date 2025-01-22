@@ -1516,15 +1516,12 @@ export async function generateObjectDeprecated({
     while (true) {
         try {
             // this is slightly different than generateObjectArray, in that we parse object, not object array
-            console.log("are we here?");
             const response = await generateText({
                 runtime,
                 context,
                 modelClass,
             });
-            console.log("are we here 2?", response);
             const parsedResponse = parseJSONObjectFromText(response);
-            console.log("are we here 3?", parsedResponse);
             if (parsedResponse) {
                 return parsedResponse;
             }
@@ -2091,15 +2088,11 @@ export const generateObject = async ({
     verifiableInferenceAdapter,
     verifiableInferenceOptions,
 }: GenerationOptions): Promise<GenerateObjectResult<unknown>> => {
-    console.log(`response 5`);
-
     if (!context) {
         const errorMessage = "generateObject context is empty";
         console.error(errorMessage);
         throw new Error(errorMessage);
     }
-
-    console.log(`response 6`);
 
     const provider = runtime.modelProvider;
     const modelSettings = getModelSettings(runtime.modelProvider, modelClass);
@@ -2114,7 +2107,6 @@ export const generateObject = async ({
 
     try {
         context = await trimTokens(context, max_context_length, runtime);
-        console.log(`response 2`);
 
         const modelOptions: ModelSettings = {
             prompt: context,
@@ -2125,7 +2117,6 @@ export const generateObject = async ({
             stop: stop || modelSettings.stop,
             experimental_telemetry: experimental_telemetry,
         };
-        console.log(`response 1`);
 
         const response = await handleProvider({
             provider,
@@ -2143,7 +2134,6 @@ export const generateObject = async ({
             verifiableInferenceAdapter,
             verifiableInferenceOptions,
         });
-        console.log(`response`);
 
         return response;
     } catch (error) {

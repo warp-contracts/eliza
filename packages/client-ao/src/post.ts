@@ -4,6 +4,7 @@ import {
     generateText,
     getEmbeddingZeroVector,
     IAgentRuntime,
+    messageCompletionFooter,
     ModelClass,
     stringToUuid,
     UUID,
@@ -14,8 +15,44 @@ import { postActionResponseFooter } from "@elizaos/core";
 import { generateTweetActions } from "@elizaos/core";
 import { IImageDescriptionService, ServiceType } from "@elizaos/core";
 import { buildConversationThread } from "./utils.ts";
-import { aoMessageHandlerTemplate } from "./tasks.ts";
 import { NodeType } from "./ao_types.ts";
+
+export const aoMessageHandlerTemplate =
+    `
+# Areas of Expertise
+{{knowledge}}
+
+# About {{agentName}} (@{{aoUserName}}):
+{{bio}}
+{{lore}}
+{{topics}}
+
+{{providers}}
+
+{{characterPostExamples}}
+
+{{postDirections}}
+
+Recent tasks between {{agentName}} and other users:
+{{recentPostTasks}}
+
+{{recentPosts}}
+
+# TASK: Generate a post/reply in the voice, style and perspective of {{agentName}} (@{{aoUserName}}) while using the thread of messages as additional context:
+
+Current Post:
+{{currentPost}}
+
+Thread of Messages You Are Replying To:
+{{formattedConversation}}
+
+# INSTRUCTIONS: Generate a post in the voice, style and perspective of {{agentName}} (@{{aoUserName}}). You MUST include an action if the current post text includes a prompt that is similar to one of the available actions mentioned here:
+{{actionNames}}
+{{actions}}
+
+Here is the current post text again. Remember to include an action if the current post text includes a prompt that asks for one of the available actions mentioned above (does not need to be exact)
+{{currentPost}}
+` + messageCompletionFooter;
 
 const aoMessageTemplate = `
 # Areas of Expertise
