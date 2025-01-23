@@ -35,7 +35,7 @@ export class AoClaraMarket {
             try {
                 this.profile = await this.market.registerAgent(parsedWallet, {
                     metadata: { description: this.profileId },
-                    topic: "chat",
+                    topic: "tweet",
                     fee: 1,
                     agentId: this.profileId,
                 });

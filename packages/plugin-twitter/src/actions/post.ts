@@ -13,7 +13,7 @@ import {
 } from "@elizaos/core";
 import { Scraper } from "agent-twitter-client";
 import { tweetTemplate } from "../templates";
-import { isTweetContent, TweetSchema } from "../types";
+import { isTweetContent, TweetMetadata, TweetSchema } from "../types";
 
 export const DEFAULT_MAX_TWEET_LENGTH = 280;
 
@@ -90,7 +90,7 @@ async function sendTweet(twitterClient: Scraper, content: string) {
 async function postTweet(
     runtime: IAgentRuntime,
     content: string
-): Promise<boolean> {
+): Promise<TweetMetadata | null> {
     try {
         const twitterClient = runtime.clients.twitter?.client?.twitterClient;
         const scraper = twitterClient || new Scraper();
@@ -105,13 +105,13 @@ async function postTweet(
                 elizaLogger.error(
                     "Twitter credentials not configured in environment"
                 );
-                return false;
+                return null;
             }
             // Login with credentials
             await scraper.login(username, password, email, twitter2faSecret);
             if (!(await scraper.isLoggedIn())) {
                 elizaLogger.error("Failed to login to Twitter");
-                return false;
+                return null;
             }
         }
 
@@ -139,7 +139,7 @@ async function postTweet(
             name: error.name,
             cause: error.cause,
         });
-        return false;
+        return null;
     }
 }
 
@@ -173,7 +173,7 @@ export const postAction: Action = {
             // Generate tweet content using context
             console.log("generating tweet");
             const tweetContent = await composeTweet(runtime, message, state);
-            console.log("tweett content", tweetContent);
+            console.log("tweet content", tweetContent);
 
             if (!tweetContent) {
                 elizaLogger.error("No content generated for tweet");
@@ -203,13 +203,15 @@ export const postAction: Action = {
             if (result) {
                 callback({
                     text: tweetContent,
+                    id: result.id,
+                    userName: result.userName,
                 });
             } else {
                 callback({
                     text: `Could not post tweet.`,
                 });
             }
-            return result;
+            return !!result;
         } catch (error) {
             elizaLogger.error("Error in post action:", error);
             callback({

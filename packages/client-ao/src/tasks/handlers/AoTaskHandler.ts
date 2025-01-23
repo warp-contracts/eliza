@@ -127,7 +127,7 @@ export class AoTaskHandler extends AoTask {
         const self = this;
         try {
             const callback: HandlerCallback = async (content: Content) => {
-                await self.client.aoClient.sendTaskResult(taskId, content.text);
+                await self.client.aoClient.sendTaskResult(taskId, content);
                 return [];
             };
             const responseMessage: Memory = {

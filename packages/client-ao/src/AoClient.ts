@@ -21,7 +21,10 @@ export class AoClient {
         await this.claraMarket.init();
     }
 
-    async sendTaskResult(taskId: string, result: string) {
+    async sendTaskResult(
+        taskId: string,
+        result: { id: string; text: string; userName: string }
+    ) {
         try {
             const response = await this.claraMarket.profile.sendTaskResult({
                 taskId,
@@ -112,6 +115,4 @@ export class AoClient {
 
         return messages;
     }
-
 }
-
