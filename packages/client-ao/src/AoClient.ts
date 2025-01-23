@@ -1,7 +1,7 @@
 import { createDataItemSigner } from "@permaweb/aoconnect";
 import { AoSigner, NodeType } from "./ao_types.ts";
 import { GQL_TX_QUERY, GQL_TXS_QUERY } from "./ao_graphql_query.ts";
-import { elizaLogger } from "@elizaos/core";
+import { Content, elizaLogger } from "@elizaos/core";
 import { AoClaraMarket } from "./AoClaraMarket.ts";
 
 export class AoClient {
@@ -21,10 +21,7 @@ export class AoClient {
         await this.claraMarket.init();
     }
 
-    async sendTaskResult(
-        taskId: string,
-        result: { id: string; text: string; userName: string }
-    ) {
+    async sendTaskResult(taskId: string, result: Content) {
         try {
             const response = await this.claraMarket.profile.sendTaskResult({
                 taskId,
