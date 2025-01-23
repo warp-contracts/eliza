@@ -11,7 +11,7 @@ import {
     type Action,
 } from "@elizaos/core";
 import { z } from "zod";
-import {aoClientProvider} from "../clara/AoClientProvider.ts";
+import {claraProfileProvider} from "../clara/ClaraProfileProvider.ts";
 import { TOPICS, MATCHERS } from "redstone-clara-sdk";
 
 
@@ -60,9 +60,9 @@ export const task: Action = {
     ],
     suppressInitialMessage: true,
     validate: async (runtime: IAgentRuntime, message: Memory) => {
-        console.log("Validating :", message.userId);
+        elizaLogger.debug("Validating :", message.userId);
         try {
-            await aoClientProvider.get(runtime, message);
+            await claraProfileProvider.get(runtime, message);
         } catch {
             elizaLogger.error("Failed to load ao client profile");
             return false;
@@ -79,7 +79,7 @@ export const task: Action = {
     ): Promise<boolean> => {
         elizaLogger.log("Starting CLARA_TASK handler...");
 
-        const aoProfile = await aoClientProvider.get(runtime, message, state);
+        const claraProfile = await claraProfileProvider.get(runtime, message, state);
 
         // // Define the schema for the expected output
         const taskSchema = z.object({
@@ -122,25 +122,16 @@ export const task: Action = {
 
 
         // Sending request using CLARA SDK
+        let result;
+        let response = "";
         try {
-            const result = await aoProfile.registerTask({
+            result = await claraProfile.registerTask({
                 topic: taskObject.action,
                 reward: 10,
                 matchingStrategy: taskObject.strategy,
                 payload: taskObject.payload
             });
-            console.log("== result", result);
-
-
-            if (callback) {
-                callback({
-                    text:
-                        `Task scheduled: https://www.ao.link/#/message/${result.taskId}.
-                        ${ result.assignedAgentId ? `\nAssigned to ${result.assignedAgentId}` : ''}`,
-                    content: result,
-                });
-            }
-            return true;
+            elizaLogger.debug("== result", result);
         } catch (e) {
             elizaLogger.error(`AO plugin: failed to send request using CLARA SDK`, message.content, e);
             if (callback) {
@@ -149,9 +140,33 @@ export const task: Action = {
                     content: '',
                 });
             }
+            return false;
         }
 
+        response = response + `Task assigned to ${result?.assignedAgentId}
+        \nFee: ${result?.fee}
+        \nC.L.A.R.A. req: https://www.ao.link/#/message/${result?.taskId}\n`;
 
+        try {
+            await pollTaskResult(claraProfile, result.taskId).then((res) => {
+                elizaLogger.debug(`updating message`, res);
+                if (res) {
+                    response = response + `\nX: https://x.com/${res?.result?.userName}/status/${res?.result?.id}\n`
+                }
+            });
+            if (callback) {
+                callback({ text: response });
+            }
+            return true;
+        } catch (e) {
+            elizaLogger.error(`AO plugin: failed to fetch request result using CLARA SDK`, message.content, e);
+            if (callback) {
+                callback({
+                    text: response,
+                    content: result,
+                });
+            }
+        }
         return false;
     },
 
@@ -188,3 +203,34 @@ export const task: Action = {
         ],
     ] as ActionExample[][],
 } as Action;
+
+
+async function pollTaskResult(claraProfile, reqTaskId, interval = 10, duration = 180) {
+    const startTime = Date.now();
+
+    return new Promise((resolve, reject) => {
+        const intervalId = setInterval(async () => {
+            const elapsedTime = Date.now() - startTime;
+
+            if (elapsedTime >= (duration * 1000)) {
+                clearInterval(intervalId);
+                resolve(null);
+                return;
+            }
+
+            try {
+                const taskResult = await claraProfile.loadNextTaskResult();
+                elizaLogger.debug(`next task result`, taskResult);
+                if (taskResult && taskResult.id == reqTaskId) {
+                    clearInterval(intervalId);
+                    resolve(taskResult);
+                }
+            } catch (error) {
+                clearInterval(intervalId);
+                reject(error);
+            }
+        }, interval * 1000);
+    });
+}
+
+
