@@ -150,6 +150,9 @@ importers:
       '@elizaos/plugin-abstract':
         specifier: workspace:*
         version: link:../packages/plugin-abstract
+      '@elizaos/plugin-ao':
+        specifier: workspace:*
+        version: link:../packages/plugin-ao
       '@elizaos/plugin-aptos':
         specifier: workspace:*
         version: link:../packages/plugin-aptos
@@ -524,15 +527,12 @@ importers:
       '@permaweb/aoconnect':
         specifier: ^0.0.62
         version: 0.0.62
-      agent-twitter-client:
-        specifier: 0.0.18
-        version: 0.0.18(bufferutil@4.0.9)(utf-8-validate@5.0.10)
       glob:
         specifier: 11.0.0
         version: 11.0.0
       redstone-clara-sdk:
-        specifier: ^0.0.12
-        version: 0.0.12
+        specifier: ^0.0.14
+        version: 0.0.14
       whatwg-url:
         specifier: 7.1.0
         version: 7.1.0
@@ -1043,6 +1043,33 @@ importers:
       web3:
         specifier: ^4.15.0
         version: 4.16.0(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.23.8)
+      whatwg-url:
+        specifier: 7.1.0
+        version: 7.1.0
+
+  packages/plugin-ao:
+    dependencies:
+      '@elizaos/core':
+        specifier: workspace:*
+        version: link:../core
+      '@permaweb/aoconnect':
+        specifier: ^0.0.62
+        version: 0.0.62
+      form-data:
+        specifier: 4.0.1
+        version: 4.0.1
+      node-cache:
+        specifier: 5.1.2
+        version: 5.1.2
+      redstone-clara-sdk:
+        specifier: ^0.0.14
+        version: 0.0.14
+      tsup:
+        specifier: 8.3.5
+        version: 8.3.5(@swc/core@1.10.4(@swc/helpers@0.5.15))(jiti@2.4.2)(postcss@8.4.49)(tsx@4.19.2)(typescript@5.6.3)(yaml@2.7.0)
+      vitest:
+        specifier: 2.1.4
+        version: 2.1.4(@types/node@22.10.4)(jsdom@25.0.1(bufferutil@4.0.9)(canvas@2.11.2(encoding@0.1.13))(utf-8-validate@5.0.10))(terser@5.37.0)
       whatwg-url:
         specifier: 7.1.0
         version: 7.1.0
@@ -16830,8 +16857,8 @@ packages:
     resolution: {integrity: sha512-DJnGAeenTdpMEH6uAJRK/uiyEIH9WVsUmoLwzudwGJUwZPp80PDBWPHXSAGNPwNvIXAbe7MSUB1zQFugFml66A==}
     engines: {node: '>=4'}
 
-  redstone-clara-sdk@0.0.12:
-    resolution: {integrity: sha512-RThLLDaoBqKnixHcvZ+wx1VqkHVjb4UhTQRNCDYakuVLLJTlNxQEV1Zd57VMZe9R0+bVp0+fovzY1tIuL9nciw==}
+  redstone-clara-sdk@0.0.14:
+    resolution: {integrity: sha512-fymvtWrLM+pLoaivNUH2n+qorB4srb3lIh7bm7NB+S9suuzpXtPYwI6G4m2CvDyn59y0vVJiQoWwHUtL4MvI5Q==}
     engines: {node: '>=20'}
 
   reflect-metadata@0.1.13:
@@ -40377,7 +40404,7 @@ snapshots:
     dependencies:
       redis-errors: 1.2.0
 
-  redstone-clara-sdk@0.0.12:
+  redstone-clara-sdk@0.0.14:
     dependencies:
       '@permaweb/aoconnect': 0.0.62
       arweave: 1.15.5

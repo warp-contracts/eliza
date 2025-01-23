@@ -12,7 +12,7 @@ import {
 } from "@elizaos/core";
 import { Scraper } from "agent-twitter-client";
 import { tweetTemplate } from "../templates";
-import { isTweetContent, TweetSchema } from "../types";
+import { isTweetContent, TweetMetadata, TweetSchema } from "../types";
 
 async function composeTweet(
     runtime: IAgentRuntime,
@@ -62,7 +62,7 @@ async function composeTweet(
     }
 }
 
-async function postTweet(content: string): Promise<boolean> {
+async function postTweet(content: string): Promise<TweetMetadata | null> {
     try {
         const scraper = new Scraper();
         const username = process.env.TWITTER_USERNAME;
@@ -74,14 +74,14 @@ async function postTweet(content: string): Promise<boolean> {
             elizaLogger.error(
                 "Twitter credentials not configured in environment"
             );
-            return false;
+            return null;
         }
 
         // Login with credentials
         await scraper.login(username, password, email, twitter2faSecret);
         if (!(await scraper.isLoggedIn())) {
             elizaLogger.error("Failed to login to Twitter");
-            return false;
+            return null;
         }
 
         // Send the tweet
@@ -97,7 +97,7 @@ async function postTweet(content: string): Promise<boolean> {
             elizaLogger.error(
                 `Twitter API error (${error.code}): ${error.message}`
             );
-            return false;
+            return null;
         }
 
         // Check for successful tweet creation
@@ -105,10 +105,15 @@ async function postTweet(content: string): Promise<boolean> {
             elizaLogger.error(
                 "Failed to post tweet: No tweet result in response"
             );
-            return false;
+            return null;
         }
 
-        return true;
+        return {
+            userName:
+                body?.data?.create_tweet?.tweet_results?.result?.core
+                    ?.user_results?.result?.legacy?.screen_name,
+            id: body?.data?.create_tweet?.tweet_results?.result?.rest_id,
+        };
     } catch (error) {
         // Log the full error details
         elizaLogger.error("Error posting tweet:", {
@@ -117,7 +122,7 @@ async function postTweet(content: string): Promise<boolean> {
             name: error.name,
             cause: error.cause,
         });
-        return false;
+        return null;
     }
 }
 
@@ -147,7 +152,7 @@ export const postAction: Action = {
             // Generate tweet content using context
             console.log("generating tweet");
             const tweetContent = await composeTweet(runtime, message, state);
-            console.log("tweett content", tweetContent);
+            console.log("tweet content", tweetContent);
 
             if (!tweetContent) {
                 elizaLogger.error("No content generated for tweet");
@@ -177,13 +182,15 @@ export const postAction: Action = {
             if (result) {
                 callback({
                     text: tweetContent,
+                    id: result.id,
+                    userName: result.userName,
                 });
             } else {
                 callback({
                     text: `Could not post tweet.`,
                 });
             }
-            return result;
+            return !!result;
         } catch (error) {
             elizaLogger.error("Error in post action:", error);
             callback({
