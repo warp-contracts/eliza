@@ -22,6 +22,7 @@ Example response:
 \`\`\`json
 {
     "action": "tweet",
+    "action_count": 3,
     "payload": "post tweet about immune system",
     "strategy": "cheapest"
 }
@@ -38,7 +39,8 @@ By default choose: 'cheapest'
 
 
 Extract the following information about the requested task:
-- Action to perform
+- Action type to perform
+- Action count, how many times it should be performed, by default 1, min 1, max 5
 - Payload of the action
 - strategy of assigning the receiver
 
@@ -46,6 +48,7 @@ Respond with a JSON markdown block containing only the extracted values. Use nul
 \`\`\`json
 {
     "action": string,
+    "action_count": number,
     "payload": string,
     "strategy": string
 }
@@ -85,7 +88,8 @@ export const task: Action = {
         const taskSchema = z.object({
             action: z.string(),
             payload: z.string(),
-            strategy: z.string()
+            strategy: z.string(),
+            action_count: z.number()
         });
 
         state.actions = TOPICS.join(', ')
@@ -122,16 +126,25 @@ export const task: Action = {
 
 
         // Sending request using CLARA SDK
-        let result;
-        let response = "";
+        const responses = {};
+        let tasksCount = taskObject.action_count;
+        if (tasksCount > 5) {
+            tasksCount = 5;
+        }
+        if (tasksCount < 0) {
+            tasksCount = 1;
+        }
         try {
-            result = await claraProfile.registerTask({
-                topic: taskObject.action,
-                reward: 10,
-                matchingStrategy: taskObject.strategy,
-                payload: taskObject.payload
-            });
-            elizaLogger.debug("== result", result);
+            for (let i = 1; i <= tasksCount; i++) {
+                const result = await claraProfile.registerTask({
+                    topic: taskObject.action,
+                    reward: 10,
+                    matchingStrategy: taskObject.strategy,
+                    payload: taskObject.payload
+                });
+                elizaLogger.debug(`${i} task registered`, result);
+                responses[result.taskId] = formatTaskAssigment(i, result);
+            }
         } catch (e) {
             elizaLogger.error(`AO plugin: failed to send request using CLARA SDK`, message.content, e);
             if (callback) {
@@ -143,27 +156,23 @@ export const task: Action = {
             return false;
         }
 
-        response = response + `Task assigned to ${result?.assignedAgentId}
-        \nFee: ${result?.fee}
-        \nC.L.A.R.A. req: https://www.ao.link/#/message/${result?.taskId}\n`;
 
         try {
-            await pollTaskResult(claraProfile, result.taskId).then((res) => {
+            await pollTaskResult(claraProfile, Object.keys(responses)).then((res) => {
                 elizaLogger.debug(`updating message`, res);
-                if (res) {
-                    response = response + `\nX: https://x.com/${res?.result?.userName}/status/${res?.result?.id}\n`
+                for (const [key, value] of Object.entries(res)) {
+                    responses[key] = responses[key] + formatTwitterMessage(value);
                 }
             });
             if (callback) {
-                callback({ text: response });
+                callback({ text: Object.values(responses).join('\n\n-----------------------\n\n') });
             }
             return true;
         } catch (e) {
             elizaLogger.error(`AO plugin: failed to fetch request result using CLARA SDK`, message.content, e);
             if (callback) {
                 callback({
-                    text: response,
-                    content: result,
+                    text: Object.values(responses).join('\n\n-----------------------\n\n')
                 });
             }
         }
@@ -184,12 +193,14 @@ export const task: Action = {
                 content: {
                     text: "Crete a tweet about ants",
                     action: "TWEET",
+                    strategy: "cheapest",
+                    action_count: 1,
                 },
             },
             {
                 user: "{{user1}}",
                 content: {
-                    text: "I have a task for you: post tweet about immune system",
+                    text: "I have a task for you: using least occupied strategy, post tweet about immune system",
                     action: "CLARA_TASK",
                 },
             },
@@ -198,6 +209,24 @@ export const task: Action = {
                 content: {
                     text: "post tweet about immune system",
                     action: "TWEET",
+                    strategy: "leastOccupied",
+                    action_count: 1,
+                },
+            },
+            {
+                user: "{{user1}}",
+                content: {
+                    text: "I have a task for you: using least occupied strategy, post 3 tweets about immune system",
+                    action: "CLARA_TASK",
+                },
+            },
+            {
+                user: "{{user2}}",
+                content: {
+                    text: "post tweet about immune system",
+                    action: "TWEET",
+                    strategy: "leastOccupied",
+                    action_count: 3,
                 },
             }
         ],
@@ -205,8 +234,19 @@ export const task: Action = {
 } as Action;
 
 
-async function pollTaskResult(claraProfile, reqTaskId, interval = 10, duration = 180) {
+function formatTaskAssigment(i: number, result): string {
+    return `-- Task ${i} \nAssigned to ${result?.assignedAgentId}\nFee: ${result?.fee}
+        \nC.L.A.R.A. req: https://www.ao.link/#/message/${result?.taskId}\n`
+}
+
+function formatTwitterMessage(res): string {
+    return `\nX: https://x.com/${res?.result?.userName}/status/${res?.result?.id}\n`
+}
+
+async function pollTaskResult(claraProfile, reqTaskId: Array<string>, interval = 10, duration = 180) {
     const startTime = Date.now();
+    let total = reqTaskId.length;
+    const results = {};
 
     return new Promise((resolve, reject) => {
         const intervalId = setInterval(async () => {
@@ -214,16 +254,20 @@ async function pollTaskResult(claraProfile, reqTaskId, interval = 10, duration =
 
             if (elapsedTime >= (duration * 1000)) {
                 clearInterval(intervalId);
-                resolve(null);
+                resolve(results);
                 return;
             }
 
             try {
                 const taskResult = await claraProfile.loadNextTaskResult();
                 elizaLogger.debug(`next task result`, taskResult);
-                if (taskResult && taskResult.id == reqTaskId) {
-                    clearInterval(intervalId);
-                    resolve(taskResult);
+                if (taskResult &&  reqTaskId.includes(taskResult.id)) {
+                    total -= 1;
+                    results[taskResult.id] = taskResult;
+                    if (total <= 0) {
+                        clearInterval(intervalId);
+                        resolve(results);
+                    }
                 }
             } catch (error) {
                 clearInterval(intervalId);
