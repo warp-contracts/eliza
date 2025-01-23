@@ -4,7 +4,7 @@ module.exports = {
             name: "agent-smith",
             script: "pnpm",
             node_args: "-r dotenv/config",
-            args: "start --character='characters/agent-smith.character.json'  dotenv_config_path=./smith.env",
+            args: "start --character='characters/agent_smith.character.json'  dotenv_config_path=./smith.env",
             env: {
                 PORT: "3000",
             },
