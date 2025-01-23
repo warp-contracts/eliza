@@ -1,13 +1,13 @@
 import { Plugin } from "@elizaos/core";
 import {task} from "./actions/task.ts";
-import {aoClientProvider} from "./clara/aoClientProvider.ts";
+import {claraProfileProvider} from "./clara/ClaraProfileProvider.ts";
 
 export const aoPlugin: Plugin = {
     name: "ao",
     description: "AO Plugin for Eliza",
     actions: [task],
     evaluators: [],
-    providers: [aoClientProvider],
+    providers: [claraProfileProvider],
 };
 
 export default aoPlugin;
