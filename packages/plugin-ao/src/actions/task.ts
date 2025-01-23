@@ -12,7 +12,7 @@ import {
 } from "@elizaos/core";
 import { z } from "zod";
 import {aoClientProvider} from "../clara/AoClientProvider.ts";
-import { TOPICS } from "redstone-clara-sdk";
+import { TOPICS, MATCHERS } from "redstone-clara-sdk";
 
 
 const claraTaskTemplate = `
@@ -33,8 +33,7 @@ Example response:
 {{actions}}
 
 # INSTRUCTIONS: Generate a strategy. You MUST include a strategy from the available below
-- 'cheapest'
-- 'leastOccupied'
+{{strategies}}
 By default choose: 'cheapest'
 
 
@@ -90,7 +89,9 @@ export const task: Action = {
         });
 
         state.actions = TOPICS.join(', ')
+        state.strategies = MATCHERS.join(', ')
         elizaLogger.debug("Actions", state.actions)
+        elizaLogger.debug("Strategies", state.strategies)
         state.task = message.content.text
         elizaLogger.debug("Task command", state.task)
         // Compose transfer context
@@ -129,6 +130,8 @@ export const task: Action = {
                 payload: taskObject.payload
             });
             console.log("== result", result);
+
+
             if (callback) {
                 callback({
                     text:
