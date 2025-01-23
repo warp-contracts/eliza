@@ -127,7 +127,7 @@ export const task: Action = {
 
         // Sending request using CLARA SDK
         const responses = {};
-        let tasksCount = taskObject.action_count;
+        let tasksCount = taskObject.action_count || 1;
         if (tasksCount > 5) {
             tasksCount = 5;
         }
