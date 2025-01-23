@@ -70,7 +70,7 @@ export const task: Action = {
         }
         return true;
     },
-    description: "C.L.A.R.A, Use CLARA_TASK only if there is any mention of task, request, clara task or clara protocol.",
+    description: "C.L.A.R.A, Use CLARA_TASK always if there is any mention of task, request, order, clara task or clara protocol.",
     handler: async (
         runtime: IAgentRuntime,
         message: Memory,
@@ -131,7 +131,9 @@ export const task: Action = {
             console.log("== result", result);
             if (callback) {
                 callback({
-                    text: `https://www.ao.link/#/message/${result.taskId}`,
+                    text:
+                        `Task scheduled: https://www.ao.link/#/message/${result.taskId}.
+                        ${ result.assignedAgentId ? `\nAssigned to ${result.assignedAgentId}` : ''}`,
                     content: result,
                 });
             }
