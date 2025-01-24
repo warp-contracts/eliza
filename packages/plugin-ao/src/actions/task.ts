@@ -24,7 +24,7 @@ Example response:
     "action": "tweet",
     "action_count": 3,
     "payload": "post tweet about immune system",
-    "strategy": "cheapest"
+    "strategy": "leastOccupied"
 }
 \`\`\`
 
@@ -35,7 +35,7 @@ Example response:
 
 # INSTRUCTIONS: Generate a strategy. You MUST include a strategy from the available below
 {{strategies}}
-By default choose: 'cheapest'
+By default choose: 'leastOccupied'
 
 
 Extract the following information about the requested task:
@@ -193,7 +193,7 @@ export const task: Action = {
                 content: {
                     text: "Crete a tweet about ants",
                     action: "TWEET",
-                    strategy: "cheapest",
+                    strategy: "leastOccupied",
                     action_count: 1,
                 },
             },
@@ -216,7 +216,7 @@ export const task: Action = {
             {
                 user: "{{user1}}",
                 content: {
-                    text: "I have a task for you: using least occupied strategy, post 3 tweets about immune system",
+                    text: "I have a task for you: using cheapest strategy, post 3 tweets about immune system",
                     action: "CLARA_TASK",
                 },
             },
@@ -225,7 +225,7 @@ export const task: Action = {
                 content: {
                     text: "post tweet about immune system",
                     action: "TWEET",
-                    strategy: "leastOccupied",
+                    strategy: "cheapest",
                     action_count: 3,
                 },
             }

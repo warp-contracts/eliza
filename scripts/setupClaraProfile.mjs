@@ -1,5 +1,6 @@
 import fs from "node:fs";
-import { ClaraMarket, DEFAULT_CLARA_PROCESS_ID } from "redstone-clara-sdk";
+import { ClaraMarket } from "redstone-clara-sdk";
+const DEFAULT_CLARA_PROCESS_ID = 'ynXmUtQUgi3eAGF6TjNxS6Wo0uu228E7fGlmIzocc7U';
 
 function updateEnv(key, value) {
     const file = fs.readFileSync(".env", "utf8");
@@ -25,11 +26,3 @@ updateEnv('AO_WALLET_ID', address);
 updateEnv('AO_MARKET_ID', DEFAULT_CLARA_PROCESS_ID);
 console.log(`-- env updated`);
 
-// Register Agent Profile in Clara Market
-await market.registerAgent(wallet, {
-    metadata: { description: "From Clara SDK" },
-    topic: "tweet",
-    fee: 2,
-    agentId,
-});
-console.log(`-- Profile registered`);
