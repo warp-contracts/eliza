@@ -33,7 +33,7 @@ export class AoClaraMarket {
                     parsedWallet,
                     {
                         metadata: { description: this.profileId },
-                        topic: "broadcast",
+                        topic: "chat",
                         fee: 999999,
                         agentId: this.profileId,
                     }
