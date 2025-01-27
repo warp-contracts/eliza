@@ -34,6 +34,11 @@ export class AoTaskHandler extends AoTask {
     }): Promise<void> {
         const { owner, id } = aoMessage;
         const { payload, topic, id: taskId } = parsedData;
+        if (!payload || typeof payload !== "string") {
+            elizaLogger.error(`Task id ${id}, invalid payload : `, payload);
+            return;
+        }
+
         const prompt = payload;
 
         if (
