@@ -75,16 +75,16 @@ async function sendTweet(twitterClient: Scraper, content: string) {
         elizaLogger.error(
             `Twitter API error (${error.code}): ${error.message}`
         );
-        return false;
+        return null;
     }
 
     // Check for successful tweet creation
     if (!body?.data?.create_tweet?.tweet_results?.result) {
         elizaLogger.error("Failed to post tweet: No tweet result in response");
-        return false;
+        return null;
     }
 
-    return true;
+    return body;
 }
 
 async function postTweet(
@@ -119,15 +119,27 @@ async function postTweet(
         elizaLogger.log("Attempting to send tweet:", content);
 
         try {
+            let res = null;
             if (content.length > DEFAULT_MAX_TWEET_LENGTH) {
-                const noteTweetResult = await scraper.sendNoteTweet(content);
-                if (noteTweetResult.errors && noteTweetResult.errors.length > 0) {
+                res = await scraper.sendNoteTweet(content);
+                elizaLogger.debug("Note tweet result:", res);
+                if (
+                    res.errors && res.errors.length > 0) {
                     // Note Tweet failed due to authorization. Falling back to standard Tweet.
-                    return await sendTweet(scraper, content);
+                    res = await sendTweet(scraper, content);
+                } else {
+                    return null;
                 }
-                return true;
+            } else {
+                res = await sendTweet(scraper, content);
             }
-            return await sendTweet(scraper, content);
+            return {
+                userName:
+                res?.data?.create_tweet?.tweet_results?.result?.core
+                    ?.user_results?.result?.legacy?.screen_name,
+                id: res?.data?.create_tweet?.tweet_results?.result?.rest_id,
+            };
+
         } catch (error) {
             throw new Error(`Note Tweet failed: ${error}`);
         }
