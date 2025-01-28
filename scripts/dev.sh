@@ -74,7 +74,7 @@ if [ ! -d "$PACKAGES_DIR" ]; then
 fi
 
 # List of working folders to watch (relative to $PACKAGES_DIR)
-WORKING_FOLDERS=("client-direct") # Core is handled separately
+WORKING_FOLDERS=("client-direct" "client-ao" "plugin-ao") # Core is handled separately
 
 # Initialize an array to hold package-specific commands
 COMMANDS=()
@@ -90,6 +90,7 @@ fi
 # Process remaining working folders
 for FOLDER in "${WORKING_FOLDERS[@]}"; do
   PACKAGE="$PACKAGES_DIR/$FOLDER"
+  echo "INFO: $FOLDER '$PACKAGE' folder monitored"
 
   # Check if the folder exists and add the command
   if [ -d "$PACKAGE" ]; then
