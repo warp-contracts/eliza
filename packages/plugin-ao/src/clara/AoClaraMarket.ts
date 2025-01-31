@@ -34,7 +34,7 @@ export class AoClaraMarket {
                     {
                         metadata: { description: this.profileId },
                         topic: "chat",
-                        fee: 999999,
+                        fee: 100000000000,
                         agentId: this.profileId,
                     }
                 );
