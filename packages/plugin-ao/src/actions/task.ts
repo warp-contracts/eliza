@@ -143,12 +143,15 @@ export const task: Action = {
             for (let i = 1; i <= tasksCount; i++) {
                 const result = await claraProfile.registerTask({
                     topic: taskObject.action,
-                    reward: 10,
+                    reward: 100000000000,
                     matchingStrategy: taskObject.strategy,
                     payload: taskObject.payload,
                 });
                 elizaLogger.debug(`${i} task registered`, result);
-                responses[result.taskId] = formatTaskAssigment(i, result);
+                responses[result.originalMsgId] = {
+                    numberOfAgents: result.numberOfAgents,
+                    assignment: formatTaskAssigment(i, result),
+                };
             }
         } catch (e) {
             elizaLogger.error(
@@ -166,20 +169,31 @@ export const task: Action = {
         }
 
         try {
-            await pollTaskResult(claraProfile, Object.keys(responses)).then(
-                (res) => {
-                    elizaLogger.debug(`updating message`, res);
-                    for (const [key, value] of Object.entries(res)) {
-                        responses[key] =
-                            responses[key] + formatTwitterMessage(value);
+            await pollTaskResult(claraProfile, responses).then((res) => {
+                elizaLogger.debug(`updating message`, res);
+                for (const [key, value] of Object.entries(res)) {
+                    for (const [key2, value2] of Object.entries<any>(value)) {
+                        responses[key][key2] =
+                            formatTwitterMessage(value2.result) +
+                            formatTaskResult(key2, {
+                                key,
+                                fee: value2?.originalTask?.reward,
+                                assignedAgentId: value2?.agentId,
+                                originalTaskId:
+                                    value2?.originalTask?.originalId,
+                            });
                     }
                 }
-            );
+            });
             if (callback) {
                 callback({
-                    text: Object.values(responses).join(
-                        "\n\n-----------------------\n\n"
-                    ),
+                    text: Object.values(responses)
+                        .map((v: any) =>
+                            Object.values(v).join(
+                                "\n\n-----------------------\n\n"
+                            )
+                        )
+                        .join("\n\n-----------------------\n\n"),
                 });
             }
             return true;
@@ -255,22 +269,39 @@ export const task: Action = {
 } as Action;
 
 function formatTaskAssigment(i: number, result): string {
-    return `-- Task ${i} \nAssigned to ${result?.assignedAgentId}\nFee: ${result?.fee}
-        \nC.L.A.R.A. req: https://www.ao.link/#/message/${result?.taskId}\n`;
+    console.log(i, result);
+    if (result?.numberOfAgents && result.numberOfAgents > 1) {
+        return `-- Task ${i} \Assigned to: ${result.numberOfAgents} agents\n`;
+    } else {
+        return `-- Task ${i} \nReward: ${result?.fee}
+            \nC.L.A.R.A. req: https://www.ao.link/#/message/${result?.originalMsgId}\n`;
+    }
+}
+
+function formatTaskResult(taskResultId: string, result): string {
+    return `\n-- Task: ${result?.originalTaskId}
+        \nResult ${taskResultId} \nAssigned to ${result?.assignedAgentId}\nFee: ${result?.fee}
+        \nC.L.A.R.A. req: https://www.ao.link/#/message/${result?.originalTaskId}\n`;
 }
 
 function formatTwitterMessage(res): string {
-    return `\nX: https://x.com/${res?.result?.userName}/status/${res?.result?.id}\n`;
+    return `\nX: https://x.com/${res?.userName}/status/${res?.id}\n`;
 }
 
 async function pollTaskResult(
     claraProfile,
-    reqTaskId: Array<string>,
+    responses: any,
     interval = 10,
     duration = 300
 ) {
     const startTime = Date.now();
-    let total = reqTaskId.length;
+    let total = 0;
+    const reqTaskId = Object.keys(responses);
+    console.log("reqTaskId", reqTaskId);
+    reqTaskId.forEach((key: string) => {
+        total += parseInt(responses[key].numberOfAgents);
+    });
+    console.log("total", total);
     const results = {};
 
     return new Promise((resolve, reject) => {
@@ -286,12 +317,21 @@ async function pollTaskResult(
             try {
                 const taskResult = await claraProfile.loadNextTaskResult();
                 elizaLogger.debug(`next task result`, taskResult);
-                if (taskResult && reqTaskId.includes(taskResult.id)) {
-                    total -= 1;
-                    results[taskResult.id] = taskResult;
-                    if (total <= 0) {
-                        clearInterval(intervalId);
-                        resolve(results);
+                if (taskResult) {
+                    const foundReqTask = reqTaskId.find((r) =>
+                        taskResult.id.includes(r)
+                    );
+                    elizaLogger.debug(`found req task`, foundReqTask);
+                    if (foundReqTask) {
+                        total -= 1;
+                        results[foundReqTask] = {
+                            ...results[foundReqTask],
+                            [taskResult.id]: taskResult,
+                        };
+                        if (total <= 0) {
+                            clearInterval(intervalId);
+                            resolve(results);
+                        }
                     }
                 }
             } catch (error) {
