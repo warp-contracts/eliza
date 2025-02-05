@@ -143,7 +143,7 @@ export const task: Action = {
             for (let i = 1; i <= tasksCount; i++) {
                 const result = await claraProfile.registerTask({
                     topic: taskObject.action,
-                    reward: 100000000000,
+                    reward: 100000000,
                     matchingStrategy: taskObject.strategy,
                     payload: taskObject.payload,
                 });
