@@ -11,7 +11,7 @@ import {
     UUID,
 } from "@elizaos/core";
 import { ClientBase } from "../../base";
-import { NodeType } from "../../ao_types";
+import { AoTaskType, NodeType } from "../../ao_types";
 import { AoStateCompositionHandler } from "./AoStateCompositionHandler";
 import { wait } from "../../utils";
 import { AoTask } from "../AoTask";
@@ -28,12 +28,12 @@ export class AoTaskHandler extends AoTask {
 
     async handle({
         aoMessage,
-        parsedData,
+        // parsedData,
         aoMessageId,
         aoRoomId,
     }): Promise<void> {
-        const { owner, id } = aoMessage;
-        const { payload, topic, id: taskId } = parsedData;
+        const { payload, id, topic, requester } = aoMessage;
+        // const { payload, topic, id: taskId } = parsedData;
         if (!payload || typeof payload !== "string") {
             elizaLogger.error(`Task id ${id}, invalid payload : `, payload);
             return;
@@ -55,12 +55,12 @@ export class AoTaskHandler extends AoTask {
                 `AO task could not be processed, no action with name ${topic}.`
             );
         }
-        const userIdUUID = this.buildUserUUID(owner);
+        const userIdUUID = this.buildUserUUID(requester);
         await this.runtime.ensureConnection(
             userIdUUID,
             aoRoomId,
-            owner.address,
-            owner.address,
+            requester,
+            requester,
             "ao"
         );
         const memory = this.buildMemory(prompt, aoRoomId, userIdUUID);
@@ -84,35 +84,35 @@ export class AoTaskHandler extends AoTask {
             aoMessageId,
             prompt,
             topic,
-            taskId
+            id
         );
     }
 
     private async saveAoTaskIfNeeded(
-        aoMessage: NodeType,
+        aoMessage: AoTaskType,
         roomId: UUID,
         messageId: UUID,
         prompt: string,
         state: State
     ) {
-        const { url, ingested_at } = aoMessage;
+        const { timestamp, requester } = aoMessage;
         const aoMessageExists =
             await this.runtime.messageManager.getMemoryById(messageId);
 
         if (!aoMessageExists) {
             elizaLogger.log("AO message does not exist, saving");
-            const userIdUUID = stringToUuid(aoMessage.owner.address);
+            const userIdUUID = stringToUuid(requester);
 
             const message = {
                 id: messageId,
                 agentId: this.runtime.agentId,
                 content: {
                     text: prompt,
-                    url: url,
+                    url: "",
                 },
                 userId: userIdUUID,
                 roomId,
-                createdAt: ingested_at * 1000,
+                createdAt: timestamp,
             };
             this.client.saveRequestMessage(message, state);
         }
@@ -121,7 +121,7 @@ export class AoTaskHandler extends AoTask {
     private async processTaskInActions(
         state: any,
         memory: any,
-        aoMessage: NodeType,
+        aoMessage: AoTaskType,
         roomId: UUID,
         messageId: UUID,
         prompt: string,
@@ -177,9 +177,7 @@ export class AoTaskHandler extends AoTask {
         };
     }
 
-    private buildUserUUID(owner: { address: string }): UUID {
-        return owner.address === this.walletId
-            ? this.agentId
-            : stringToUuid(owner.address!);
+    private buildUserUUID(owner: string): UUID {
+        return stringToUuid(owner);
     }
 }

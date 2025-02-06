@@ -1,5 +1,5 @@
 import { elizaLogger, IAgentRuntime, Memory, State } from "@elizaos/core";
-import { NodeType } from "../../ao_types";
+import { AoTaskType, NodeType } from "../../ao_types";
 import { ClientBase } from "../../base";
 import { AoTask } from "../AoTask";
 import { buildConversationThread } from "../../utils";
@@ -10,7 +10,7 @@ export class AoStateCompositionHandler extends AoTask {
     }
 
     async handle(
-        aoMessage: NodeType,
+        aoMessage: AoTaskType,
         prompt: string,
         memory: Memory
     ): Promise<State> {
@@ -23,8 +23,8 @@ export class AoStateCompositionHandler extends AoTask {
         elizaLogger.info("Thread: ", thread);
         const formattedConversation = thread
             .map(
-                (message) => `@${message.owner.address} (${new Date(
-                    message.ingested_at * 1000
+                (message) => `@${message.requester} (${new Date(
+                    message.timestamp
                 ).toLocaleString("en-US", {
                     hour: "2-digit",
                     minute: "2-digit",
@@ -48,9 +48,9 @@ export class AoStateCompositionHandler extends AoTask {
         });
     }
 
-    formatMessage(aoMessage: NodeType, prompt: string) {
+    formatMessage(aoMessage: AoTaskType, prompt: string) {
         return `  ID: ${aoMessage.id}
-  From: ${aoMessage.owner.address} (@${aoMessage.owner.address})
+  From: ${aoMessage.requester} (@${aoMessage.requester})
   Text: ${prompt}`;
     }
 }

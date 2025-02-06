@@ -154,6 +154,7 @@ export const task: Action = {
                 };
             }
         } catch (e) {
+            console.log(e);
             elizaLogger.error(
                 `AO plugin: failed to send request using CLARA SDK`,
                 message.content,
@@ -269,7 +270,6 @@ export const task: Action = {
 } as Action;
 
 function formatTaskAssigment(i: number, result): string {
-    console.log(i, result);
     if (result?.numberOfAgents && result.numberOfAgents > 1) {
         return `-- Task ${i} \Assigned to: ${result.numberOfAgents} agents\n`;
     } else {
