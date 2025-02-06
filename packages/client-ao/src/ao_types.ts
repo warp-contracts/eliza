@@ -46,3 +46,18 @@ export type NodeType = {
     address?: string;
     conversationId: string;
 };
+
+export type AoTaskType = {
+    id: string;
+    requester: string;
+    originalId: string;
+    matchingStrategy: string;
+    block: number;
+    agentId: string;
+    contextId: string;
+    topic: string;
+    timestamp: number;
+    requesterId: string;
+    reward: string;
+    payload: string;
+};

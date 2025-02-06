@@ -1,5 +1,5 @@
 import { elizaLogger, IAgentRuntime, stringToUuid, UUID } from "@elizaos/core";
-import { NodeDataType, NodeType, TagType } from "../../ao_types";
+import { AoTaskType, NodeDataType, NodeType, TagType } from "../../ao_types";
 import { ClientBase } from "../../base";
 import { AoTaskHandler } from "./AoTaskHandler";
 import { AO_TASK_ASSIGNMENT_TAG_NAME } from "../AoTaskClient";
@@ -7,15 +7,15 @@ import { AoTask } from "../AoTask";
 
 export class AoMessageHandler extends AoTask {
     private aoTaskHandler: AoTaskHandler;
-    private aoMessage: NodeType;
+    private aoMessage: AoTaskType;
     constructor(runtime: IAgentRuntime, client: ClientBase) {
         super(client, runtime);
         this.aoTaskHandler = new AoTaskHandler(this.client, this.runtime);
     }
 
-    async handle(aoMessage: NodeType) {
+    async handle(aoMessage: AoTaskType) {
         this.aoMessage = aoMessage;
-        const { id, data } = this.aoMessage;
+        const { id, payload } = this.aoMessage;
         const aoMessageId = stringToUuid(id);
         const aoRoomId = stringToUuid(id + "-" + this.agentId);
 
@@ -25,14 +25,14 @@ export class AoMessageHandler extends AoTask {
             this.updateLastCheckedMessage();
             return;
         }
-        const parsedData = this.getAoMessageParsedData(data);
-        if (!parsedData) {
-            elizaLogger.log(`Skipping AO message, could not parse data.`);
-            this.updateLastCheckedMessage();
-            return;
-        }
-        const prompt = parsedData.payload;
-        if (!prompt) {
+        // const parsedData = this.getAoMessageParsedData(data);
+        // if (!parsedData) {
+        //     elizaLogger.log(`Skipping AO message, could not parse data.`);
+        //     this.updateLastCheckedMessage();
+        //     return;
+        // }
+        // const prompt = payload;
+        if (!payload) {
             elizaLogger.log(`Skipping AO message, could not locate prompt.`);
             this.updateLastCheckedMessage();
             return;
@@ -40,7 +40,7 @@ export class AoMessageHandler extends AoTask {
 
         await this.aoTaskHandler.handle({
             aoMessage,
-            parsedData,
+            // parsedData,
             aoMessageId,
             aoRoomId,
         });
@@ -61,21 +61,21 @@ export class AoMessageHandler extends AoTask {
     }
 
     private updateLastCheckedMessage() {
-        this.client.lastCheckedMessageTs = this.aoMessage.ingested_at;
+        this.client.lastCheckedMessageTs = this.aoMessage.timestamp;
     }
 
     private async validate(aoMessageId: UUID): Promise<boolean> {
-        const { owner, tags } = this.aoMessage;
-        if (owner.address === this.walletId) {
+        const { requester } = this.aoMessage;
+        if (requester === this.walletId) {
             elizaLogger.log(`Skipping AO message, message from current agent.`);
             return false;
         }
 
-        const action = tags.find((t: TagType) => t.name == "Action")?.value;
-        if (!action || !(action == AO_TASK_ASSIGNMENT_TAG_NAME)) {
-            elizaLogger.log(`Skipping AO message, no "Task-Assignment" tag.`);
-            return false;
-        }
+        // const action = tags.find((t: TagType) => t.name == "Action")?.value;
+        // if (!action || !(action == AO_TASK_ASSIGNMENT_TAG_NAME)) {
+        //     elizaLogger.log(`Skipping AO message, no "Task-Assignment" tag.`);
+        //     return false;
+        // }
 
         const existingResponse =
             await this.runtime.messageManager.getMemoryById(aoMessageId);

@@ -2,7 +2,7 @@ import { getEmbeddingZeroVector } from "@elizaos/core";
 import { stringToUuid } from "@elizaos/core";
 import { ClientBase } from "./base";
 import { elizaLogger } from "@elizaos/core";
-import { NodeType } from "./ao_types.ts";
+import { AoTaskType, NodeType } from "./ao_types.ts";
 
 export const wait = (minTime: number = 1000, maxTime: number = 3000) => {
     const waitTime =
@@ -11,15 +11,18 @@ export const wait = (minTime: number = 1000, maxTime: number = 3000) => {
 };
 
 export async function buildConversationThread(
-    aoMessage: NodeType,
+    aoMessage: AoTaskType,
     prompt: string,
     client: ClientBase,
     maxReplies: number = 10
-): Promise<NodeType[]> {
-    const thread: NodeType[] = [];
+): Promise<AoTaskType[]> {
+    const thread: AoTaskType[] = [];
     const visited: Set<string> = new Set();
 
-    async function processThread(currentMessage: NodeType, depth: number = 0) {
+    async function processThread(
+        currentMessage: AoTaskType,
+        depth: number = 0
+    ) {
         elizaLogger.debug("Processing message:", {
             id: currentMessage.id,
             depth: depth,
@@ -44,13 +47,13 @@ export async function buildConversationThread(
             const roomId = stringToUuid(
                 currentMessage.id + "-" + client.runtime.agentId
             );
-            const userId = stringToUuid(currentMessage.owner.address);
+            const userId = stringToUuid(currentMessage.requester);
 
             await client.runtime.ensureConnection(
                 userId,
                 roomId,
-                currentMessage.owner.address,
-                currentMessage.owner.address,
+                currentMessage.requester,
+                currentMessage.requester,
                 "ao"
             );
 
@@ -64,12 +67,12 @@ export async function buildConversationThread(
                     source: "AoTheComputer",
                     url: currentMessage.id,
                 },
-                createdAt: currentMessage.ingested_at * 1000,
+                createdAt: currentMessage.timestamp,
                 roomId,
                 userId:
-                    currentMessage.owner.address === client.walletId
+                    currentMessage.requester === client.walletId
                         ? client.runtime.agentId
-                        : stringToUuid(currentMessage.owner.address),
+                        : stringToUuid(currentMessage.requester),
                 embedding: getEmbeddingZeroVector(),
             });
         }
@@ -95,10 +98,9 @@ export async function buildConversationThread(
         totalMessages: thread.length,
         messageIds: thread.map((t) => ({
             id: t.id,
-            text: t.data?.value?.slice(0, 50),
+            text: t.payload.slice(0, 50),
         })),
     });
 
     return thread;
 }
-
