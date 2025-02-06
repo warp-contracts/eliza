@@ -1,5 +1,5 @@
 import { elizaLogger, IAgentRuntime, Memory, State } from "@elizaos/core";
-import { AoTaskType, NodeType } from "../../ao_types";
+import { AoTaskType } from "../../ao_types";
 import { ClientBase } from "../../base";
 import { AoTask } from "../AoTask";
 import { buildConversationThread } from "../../utils";

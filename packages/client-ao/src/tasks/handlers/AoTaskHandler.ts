@@ -11,7 +11,7 @@ import {
     UUID,
 } from "@elizaos/core";
 import { ClientBase } from "../../base";
-import { AoTaskType, NodeType } from "../../ao_types";
+import { AoTaskType } from "../../ao_types";
 import { AoStateCompositionHandler } from "./AoStateCompositionHandler";
 import { wait } from "../../utils";
 import { AoTask } from "../AoTask";
@@ -26,14 +26,8 @@ export class AoTaskHandler extends AoTask {
         );
     }
 
-    async handle({
-        aoMessage,
-        // parsedData,
-        aoMessageId,
-        aoRoomId,
-    }): Promise<void> {
+    async handle({ aoMessage, aoMessageId, aoRoomId }): Promise<void> {
         const { payload, id, topic, requester } = aoMessage;
-        // const { payload, topic, id: taskId } = parsedData;
         if (!payload || typeof payload !== "string") {
             elizaLogger.error(`Task id ${id}, invalid payload : `, payload);
             return;
