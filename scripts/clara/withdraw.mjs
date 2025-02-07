@@ -1,7 +1,5 @@
 import fs from "node:fs";
-import { createDataItemSigner } from "@permaweb/aoconnect";
-
-const DEFAULT_CLARA_PROCESS_ID = '86kVM56iOu4P_AfgGGfS9wEDzpO9yb6vaX_tOaDKqMU';
+import { ClaraProfile } from "redstone-clara-sdk";
 
 function getFromEnv(key) {
     const fileContent = fs.readFileSync(".env", "utf8");
@@ -12,16 +10,18 @@ function getFromEnv(key) {
     }
     return null;
 }
+
 async function withdraw() {
-    const wallet = getFromEnv('AO_WALLET');
-    const signer = createDataItemSigner(JSON.parse(wallet));
-    const processId = DEFAULT_CLARA_PROCESS_ID;
-    const id = await message({
-      process: processId,
-      tags: [{ name: 'Action', value: 'Claim-Reward-All' }],
-      signer,
-    });
-    return `https://www.ao.link/#/message/${id}`;
+    const wallet = getFromEnv('AO_WALLET').replaceAll("'", '');
+    const marketId = getFromEnv('AO_MARKET_ID').replaceAll("'", '');
+    const claraProfile = new ClaraProfile(
+        {
+            id: 'agent_id',
+            jwk: JSON.parse(wallet),
+        },
+       marketId
+    );
+    return await claraProfile.withdraw();
   }
 
   withdraw().then(console.log).catch(console.error);

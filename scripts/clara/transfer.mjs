@@ -15,13 +15,13 @@ function getFromEnv(key) {
 }
 
 async function transfer() {
-    const wallet = getFromEnv('AO_WALLET');
+    const wallet = getFromEnv('AO_WALLET').replaceAll("'", '')
     const signer = createDataItemSigner(JSON.parse(wallet));
     const id = await message({
       process: TOKEN_ID,
       tags: [{ name: 'Action', value: 'Transfer' },
         { name: 'Recipient', value: DEFAULT_CLARA_PROCESS_ID },
-        { name: 'Quantity', value: '100000000' }],
+        { name: 'Quantity', value: '1000000000' }],
       signer,
     });
     return `https://www.ao.link/#/message/${id}`;
