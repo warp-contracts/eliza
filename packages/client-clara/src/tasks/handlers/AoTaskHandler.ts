@@ -11,7 +11,7 @@ import {
     UUID,
 } from "@elizaos/core";
 import { ClientBase } from "../../base";
-import { AoTaskType } from "../../ao_types";
+import { ClaraTaskType } from "../../ao_types";
 import { AoStateCompositionHandler } from "./AoStateCompositionHandler";
 import { wait } from "../../utils";
 import { AoTask } from "../AoTask";
@@ -83,7 +83,7 @@ export class AoTaskHandler extends AoTask {
     }
 
     private async saveAoTaskIfNeeded(
-        aoMessage: AoTaskType,
+        aoMessage: ClaraTaskType,
         roomId: UUID,
         messageId: UUID,
         prompt: string,
@@ -115,7 +115,7 @@ export class AoTaskHandler extends AoTask {
     private async processTaskInActions(
         state: any,
         memory: any,
-        aoMessage: AoTaskType,
+        aoMessage: ClaraTaskType,
         roomId: UUID,
         messageId: UUID,
         prompt: string,
@@ -126,7 +126,7 @@ export class AoTaskHandler extends AoTask {
         const self = this;
         try {
             const callback: HandlerCallback = async (content: Content) => {
-                await self.client.aoClient.sendTaskResult(taskId, content);
+                await self.client.claraClient.sendTaskResult(taskId, content);
                 return [];
             };
             const responseMessage: Memory = {

@@ -82,6 +82,12 @@ importers:
       '@commitlint/config-conventional':
         specifier: 18.6.3
         version: 18.6.3
+      '@permaweb/aoconnect':
+        specifier: ^0.0.62
+        version: 0.0.62
+      '@story-protocol/core-sdk':
+        specifier: 1.2.0-rc.3
+        version: 1.2.0-rc.3(bufferutil@4.0.9)(typescript@5.6.3)(utf-8-validate@6.0.5)(zod@3.24.1)
       '@types/jest':
         specifier: ^29.5.11
         version: 29.5.14
@@ -151,6 +157,9 @@ importers:
       '@elizaos/client-auto':
         specifier: workspace:*
         version: link:../packages/client-auto
+      '@elizaos/client-clara':
+        specifier: workspace:*
+        version: link:../packages/client-clara
       '@elizaos/client-deva':
         specifier: workspace:*
         version: link:../packages/client-deva
@@ -214,6 +223,9 @@ importers:
       '@elizaos/plugin-ankr':
         specifier: workspace:*
         version: link:../packages/plugin-ankr
+      '@elizaos/plugin-ao':
+        specifier: workspace:*
+        version: link:../packages/plugin-ao
       '@elizaos/plugin-aptos':
         specifier: workspace:*
         version: link:../packages/plugin-aptos
@@ -1004,6 +1016,37 @@ importers:
       tsup:
         specifier: 8.3.5
         version: 8.3.5(@swc/core@1.10.14(@swc/helpers@0.5.15))(jiti@2.4.2)(postcss@8.5.1)(tsx@4.19.2)(typescript@5.7.3)(yaml@2.7.0)
+
+  packages/client-clara:
+    dependencies:
+      '@elizaos/core':
+        specifier: workspace:*
+        version: link:../core
+      '@permaweb/aoconnect':
+        specifier: ^0.0.62
+        version: 0.0.62
+      glob:
+        specifier: 11.0.0
+        version: 11.0.0
+      redstone-clara-sdk:
+        specifier: ^0.0.23
+        version: 0.0.23(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.23.8)
+      whatwg-url:
+        specifier: 7.1.0
+        version: 7.1.0
+      zod:
+        specifier: 3.23.8
+        version: 3.23.8
+    devDependencies:
+      '@story-protocol/core-sdk':
+        specifier: 1.2.0-rc.3
+        version: 1.2.0-rc.3(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.23.8)
+      tsup:
+        specifier: 8.3.5
+        version: 8.3.5(@swc/core@1.10.14(@swc/helpers@0.5.15))(jiti@2.4.2)(postcss@8.5.1)(tsx@4.19.2)(typescript@5.7.3)(yaml@2.7.0)
+      viem:
+        specifier: 2.21.58
+        version: 2.21.58(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.23.8)
 
   packages/client-deva:
     dependencies:
@@ -1894,6 +1937,33 @@ importers:
         specifier: ^3.0.0
         version: 3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(jsdom@25.0.1(bufferutil@4.0.9)(canvas@2.11.2(encoding@0.1.13))(utf-8-validate@6.0.5))(terser@5.38.0)
 
+  packages/plugin-ao:
+    dependencies:
+      '@elizaos/core':
+        specifier: workspace:*
+        version: link:../core
+      '@permaweb/aoconnect':
+        specifier: ^0.0.62
+        version: 0.0.62
+      form-data:
+        specifier: 4.0.1
+        version: 4.0.1
+      node-cache:
+        specifier: 5.1.2
+        version: 5.1.2
+      redstone-clara-sdk:
+        specifier: ^0.0.21
+        version: 0.0.21
+      tsup:
+        specifier: 8.3.5
+        version: 8.3.5(@swc/core@1.10.14(@swc/helpers@0.5.15))(jiti@2.4.2)(postcss@8.5.1)(tsx@4.19.2)(typescript@5.7.3)(yaml@2.7.0)
+      vitest:
+        specifier: 2.1.4
+        version: 2.1.4(@types/node@22.13.1)(jsdom@25.0.1(bufferutil@4.0.9)(canvas@2.11.2(encoding@0.1.13))(utf-8-validate@6.0.5))(terser@5.38.0)
+      whatwg-url:
+        specifier: 7.1.0
+        version: 7.1.0
+
   packages/plugin-apro:
     dependencies:
       '@elizaos/core':
@@ -2462,7 +2532,7 @@ importers:
         version: link:../core
       '@skip-go/client':
         specifier: ^0.16.3
-        version: 0.16.8(@types/react@19.0.8)(bufferutil@4.0.9)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(starknet@6.18.0(encoding@0.1.13))(utf-8-validate@5.0.10)(viem@2.21.58(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.1))
+        version: 0.16.8(@types/react@19.0.8)(bufferutil@4.0.9)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(starknet@6.18.0(encoding@0.1.13))(utf-8-validate@5.0.10)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.1))
       axios:
         specifier: ^1.7.9
         version: 1.7.9
@@ -2818,7 +2888,7 @@ importers:
         version: 5.15.5
       '@lifi/sdk':
         specifier: 3.4.1
-        version: 3.4.1(@solana/wallet-adapter-base@0.9.23)(typescript@5.7.3)(viem@2.21.58(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.24.1))
+        version: 3.4.1(@solana/wallet-adapter-base@0.9.23)(typescript@5.7.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.24.1))
       '@lifi/types':
         specifier: 16.3.0
         version: 16.3.0
@@ -3044,16 +3114,16 @@ importers:
         version: 0.4.6(zod@3.23.8)
       '@goat-sdk/plugin-erc20':
         specifier: 0.2.2
-        version: 0.2.2(@goat-sdk/core@0.4.6(zod@3.23.8))(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(viem@2.21.58(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.23.8))
+        version: 0.2.2(@goat-sdk/core@0.4.6(zod@3.23.8))(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.23.8))
       '@goat-sdk/plugin-kim':
         specifier: 0.1.2
-        version: 0.1.2(@goat-sdk/core@0.4.6(zod@3.23.8))(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(viem@2.21.58(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.23.8))
+        version: 0.1.2(@goat-sdk/core@0.4.6(zod@3.23.8))(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.23.8))
       '@goat-sdk/wallet-evm':
         specifier: 0.2.0
         version: 0.2.0(@goat-sdk/core@0.4.6(zod@3.23.8))(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)
       '@goat-sdk/wallet-viem':
         specifier: 0.2.0
-        version: 0.2.0(@goat-sdk/wallet-evm@0.2.0(@goat-sdk/core@0.4.6(zod@3.23.8))(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5))(viem@2.21.58(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.23.8))
+        version: 0.2.0(@goat-sdk/wallet-evm@0.2.0(@goat-sdk/core@0.4.6(zod@3.23.8))(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5))(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.23.8))
       tsup:
         specifier: 8.3.5
         version: 8.3.5(@swc/core@1.10.14(@swc/helpers@0.5.15))(jiti@2.4.2)(postcss@8.5.1)(tsx@4.19.2)(typescript@5.7.3)(yaml@2.7.0)
@@ -3451,7 +3521,7 @@ importers:
         version: 5.15.5
       '@lifi/sdk':
         specifier: 3.4.1
-        version: 3.4.1(@solana/wallet-adapter-base@0.9.23(@solana/web3.js@1.95.8(bufferutil@4.0.9)(encoding@0.1.13)(utf-8-validate@5.0.10)))(@solana/web3.js@1.95.8(bufferutil@4.0.9)(encoding@0.1.13)(utf-8-validate@5.0.10))(typescript@5.7.3)(viem@2.21.58(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.1))
+        version: 3.4.1(@solana/wallet-adapter-base@0.9.23(@solana/web3.js@1.95.8(bufferutil@4.0.9)(encoding@0.1.13)(utf-8-validate@5.0.10)))(@solana/web3.js@1.95.8(bufferutil@4.0.9)(encoding@0.1.13)(utf-8-validate@5.0.10))(typescript@5.7.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.1))
       '@lifi/types':
         specifier: 16.3.0
         version: 16.3.0
@@ -4254,13 +4324,13 @@ importers:
         version: 0.3.8(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.7.3)(utf-8-validate@5.0.10)
       '@goat-sdk/plugin-coingecko':
         specifier: 0.1.4
-        version: 0.1.4(@goat-sdk/core@0.3.8(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.7.3)(utf-8-validate@5.0.10))(viem@2.21.58(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.1))
+        version: 0.1.4(@goat-sdk/core@0.3.8(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.7.3)(utf-8-validate@5.0.10))(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.1))
       '@goat-sdk/plugin-erc20':
         specifier: 0.1.7
-        version: 0.1.7(@goat-sdk/core@0.3.8(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.7.3)(utf-8-validate@5.0.10))(viem@2.21.58(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.1))
+        version: 0.1.7(@goat-sdk/core@0.3.8(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.7.3)(utf-8-validate@5.0.10))(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.1))
       '@goat-sdk/wallet-viem':
         specifier: 0.1.3
-        version: 0.1.3(@goat-sdk/core@0.3.8(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.7.3)(utf-8-validate@5.0.10))(viem@2.21.58(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.1))
+        version: 0.1.3(@goat-sdk/core@0.3.8(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.7.3)(utf-8-validate@5.0.10))(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.1))
       '@solana/web3.js':
         specifier: npm:@solana/web3.js@1.95.8
         version: 1.95.8(bufferutil@4.0.9)(encoding@0.1.13)(utf-8-validate@5.0.10)
@@ -5082,16 +5152,16 @@ importers:
         version: 0.4.6(zod@3.23.8)
       '@goat-sdk/plugin-zilliqa':
         specifier: 0.1.3
-        version: 0.1.3(@goat-sdk/core@0.4.6(zod@3.23.8))(@goat-sdk/wallet-evm@0.2.6(@goat-sdk/core@0.4.6(zod@3.23.8))(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5))(@goat-sdk/wallet-zilliqa@0.2.6(@goat-sdk/core@0.4.6(zod@3.23.8))(@goat-sdk/wallet-evm@0.2.6(@goat-sdk/core@0.4.6(zod@3.23.8))(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5))(@goat-sdk/wallet-viem@0.2.6(@goat-sdk/wallet-evm@0.2.6(@goat-sdk/core@0.4.6(zod@3.23.8))(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5))(viem@2.21.58(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.23.8)))(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.7.3)(utf-8-validate@6.0.5))(encoding@0.1.13)(viem@2.21.58(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.23.8))
+        version: 0.1.3(@goat-sdk/core@0.4.6(zod@3.23.8))(@goat-sdk/wallet-evm@0.2.6(@goat-sdk/core@0.4.6(zod@3.23.8))(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5))(@goat-sdk/wallet-zilliqa@0.2.6(@goat-sdk/core@0.4.6(zod@3.23.8))(@goat-sdk/wallet-evm@0.2.6(@goat-sdk/core@0.4.6(zod@3.23.8))(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5))(@goat-sdk/wallet-viem@0.2.6(@goat-sdk/wallet-evm@0.2.6(@goat-sdk/core@0.4.6(zod@3.23.8))(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5))(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.23.8)))(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.7.3)(utf-8-validate@6.0.5))(encoding@0.1.13)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.23.8))
       '@goat-sdk/wallet-evm':
         specifier: 0.2.6
         version: 0.2.6(@goat-sdk/core@0.4.6(zod@3.23.8))(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)
       '@goat-sdk/wallet-viem':
         specifier: 0.2.6
-        version: 0.2.6(@goat-sdk/wallet-evm@0.2.6(@goat-sdk/core@0.4.6(zod@3.23.8))(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5))(viem@2.21.58(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.23.8))
+        version: 0.2.6(@goat-sdk/wallet-evm@0.2.6(@goat-sdk/core@0.4.6(zod@3.23.8))(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5))(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.23.8))
       '@goat-sdk/wallet-zilliqa':
         specifier: 0.2.6
-        version: 0.2.6(@goat-sdk/core@0.4.6(zod@3.23.8))(@goat-sdk/wallet-evm@0.2.6(@goat-sdk/core@0.4.6(zod@3.23.8))(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5))(@goat-sdk/wallet-viem@0.2.6(@goat-sdk/wallet-evm@0.2.6(@goat-sdk/core@0.4.6(zod@3.23.8))(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5))(viem@2.21.58(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.23.8)))(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.7.3)(utf-8-validate@6.0.5)
+        version: 0.2.6(@goat-sdk/core@0.4.6(zod@3.23.8))(@goat-sdk/wallet-evm@0.2.6(@goat-sdk/core@0.4.6(zod@3.23.8))(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5))(@goat-sdk/wallet-viem@0.2.6(@goat-sdk/wallet-evm@0.2.6(@goat-sdk/core@0.4.6(zod@3.23.8))(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5))(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.23.8)))(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.7.3)(utf-8-validate@6.0.5)
       '@zilliqa-js/account':
         specifier: ^3.5.0
         version: 3.5.0(encoding@0.1.13)
@@ -11026,6 +11096,17 @@ packages:
     resolution: {integrity: sha512-BRs5XUAwiyCDQMsVA9IDvDa7UBR9gAvPHgugOeGng3YN6vJ9JYonyDc0lNczErgtCWtucjR5N7VtaonboD/ezg==}
     engines: {node: '>=10.12.0'}
 
+  '@permaweb/ao-scheduler-utils@0.0.25':
+    resolution: {integrity: sha512-b0UYSTgnLMIYLScrfNBgcqK7ZMmd78L3J0Jz4RIsIq2P5PtkdRqQ7fYqLlltg7bD1f3dvl4TkO1925ED4ei7LA==}
+    engines: {node: '>=18'}
+
+  '@permaweb/aoconnect@0.0.62':
+    resolution: {integrity: sha512-e42yASru6ze09rugKzi2yD3E57OK0xSbjDM5TI7gKnDVMo8JHweiLCntglItJ44vuNUA7Sdool83v4bmEohaZw==}
+    engines: {node: '>=18'}
+
+  '@permaweb/protocol-tag-utils@0.0.2':
+    resolution: {integrity: sha512-2IiKu71W7pkHKIzxabCGQ5q8DSppZaE/sPcPF2hn+OWwfe04M7b5X5LHRXQNPRuxHWuioieGdPQb3F7apOlffQ==}
+
   '@phala/dstack-sdk@0.1.7':
     resolution: {integrity: sha512-/+8S6XpAnN9X6pCiA7eBD+QtEWOtYhlN7Osrf9K59G6E8q6SdXUbJzuNpNBHtlZV+Pm7zm4zOhnwnpvShLD0Xg==}
     engines: {node: '>=18.0.0'}
@@ -14442,11 +14523,25 @@ packages:
   '@vitest/expect@1.6.1':
     resolution: {integrity: sha512-jXL+9+ZNIJKruofqXuuTClf44eSpcHlgj3CiuNihUF3Ioujtmc0zIa3UJOW5RjDK1YLBJZnWBlPuqhYycLioog==}
 
+  '@vitest/expect@2.1.4':
+    resolution: {integrity: sha512-DOETT0Oh1avie/D/o2sgMHGrzYUFFo3zqESB2Hn70z6QB1HrS2IQ9z5DfyTqU8sg4Bpu13zZe9V4+UTNQlUeQA==}
+
   '@vitest/expect@2.1.9':
     resolution: {integrity: sha512-UJCIkTBenHeKT1TTlKMJWy1laZewsRIzYighyYiJKZreqtdxSos/S1t+ktRMQWu2CKqaarrkeszJx1cgC5tGZw==}
 
   '@vitest/expect@3.0.5':
     resolution: {integrity: sha512-nNIOqupgZ4v5jWuQx2DSlHLEs7Q4Oh/7AYwNyE+k0UQzG7tSmjPXShUikn1mpNGzYEN2jJbTvLejwShMitovBA==}
+
+  '@vitest/mocker@2.1.4':
+    resolution: {integrity: sha512-Ky/O1Lc0QBbutJdW0rqLeFNbuLEyS+mIPiNdlVlp2/yhJ0SbyYqObS5IHdhferJud8MbbwMnexg4jordE5cCoQ==}
+    peerDependencies:
+      msw: ^2.4.9
+      vite: ^5.0.0
+    peerDependenciesMeta:
+      msw:
+        optional: true
+      vite:
+        optional: true
 
   '@vitest/mocker@2.1.9':
     resolution: {integrity: sha512-tVL6uJgoUdi6icpxmdrn5YNo3g3Dxv+IHJBr0GXHaEdTcw3F+cPKnsXFhli6nO+f/6SDKPHEK1UN+k+TQv0Ehg==}
@@ -14470,6 +14565,9 @@ packages:
       vite:
         optional: true
 
+  '@vitest/pretty-format@2.1.4':
+    resolution: {integrity: sha512-L95zIAkEuTDbUX1IsjRl+vyBSLh3PwLLgKpghl37aCK9Jvw0iP+wKwIFhfjdUtA2myLgjrG6VU6JCFLv8q/3Ww==}
+
   '@vitest/pretty-format@2.1.9':
     resolution: {integrity: sha512-KhRIdGV2U9HOUzxfiHmY8IFHTdqtOhIzCpd8WRdJiE7D/HUcZVD0EgQCVjm+Q9gkUXWgBvMmTtZgIG48wq7sOQ==}
 
@@ -14481,6 +14579,9 @@ packages:
 
   '@vitest/runner@1.6.1':
     resolution: {integrity: sha512-3nSnYXkVkf3mXFfE7vVyPmi3Sazhb/2cfZGGs0JRzFsPFvAMBEcrweV1V1GsrstdXeKCTXlJbvnQwGWgEIHmOA==}
+
+  '@vitest/runner@2.1.4':
+    resolution: {integrity: sha512-sKRautINI9XICAMl2bjxQM8VfCMTB0EbsBc/EDFA57V6UQevEKY/TOPOF5nzcvCALltiLfXWbq4MaAwWx/YxIA==}
 
   '@vitest/runner@2.1.9':
     resolution: {integrity: sha512-ZXSSqTFIrzduD63btIfEyOmNcBmQvgOVsPNPe0jYtESiXkhd8u2erDLnMxmGrDCwHCCHE7hxwRDCT3pt0esT4g==}
@@ -14494,6 +14595,9 @@ packages:
   '@vitest/snapshot@1.6.1':
     resolution: {integrity: sha512-WvidQuWAzU2p95u8GAKlRMqMyN1yOJkGHnx3M1PL9Raf7AQ1kwLKg04ADlCa3+OXUZE7BceOhVZiuWAbzCKcUQ==}
 
+  '@vitest/snapshot@2.1.4':
+    resolution: {integrity: sha512-3Kab14fn/5QZRog5BPj6Rs8dc4B+mim27XaKWFWHWA87R56AKjHTGcBFKpvZKDzC4u5Wd0w/qKsUIio3KzWW4Q==}
+
   '@vitest/snapshot@2.1.9':
     resolution: {integrity: sha512-oBO82rEjsxLNJincVhLhaxxZdEtV0EFHMK5Kmx5sJ6H9L183dHECjiefOAdnqpIgT5eZwT04PoggUnW88vOBNQ==}
 
@@ -14505,6 +14609,9 @@ packages:
 
   '@vitest/spy@1.6.1':
     resolution: {integrity: sha512-MGcMmpGkZebsMZhbQKkAf9CX5zGvjkBTqf8Zx3ApYWXr3wG+QvEu2eXWfnIIWYSJExIp4V9FCKDEeygzkYrXMw==}
+
+  '@vitest/spy@2.1.4':
+    resolution: {integrity: sha512-4JOxa+UAizJgpZfaCPKK2smq9d8mmjZVPMt2kOsg/R8QkoRzydHH1qHxIYNvr1zlEaFj4SXiaaJWxq/LPLKaLg==}
 
   '@vitest/spy@2.1.9':
     resolution: {integrity: sha512-E1B35FwzXXTs9FHNK6bDszs7mtydNi5MIfUWpceJ8Xbfb1gBMscAnwLbEu+B44ed6W3XjL9/ehLPHR1fkf1KLQ==}
@@ -14525,6 +14632,9 @@ packages:
 
   '@vitest/utils@1.6.1':
     resolution: {integrity: sha512-jOrrUvXM4Av9ZWiG1EajNto0u96kWAhJ1LmPmJhXXQx/32MecEKd10pOLYgS2BQx1TgkGhloPU1ArDW2vvaY6g==}
+
+  '@vitest/utils@2.1.4':
+    resolution: {integrity: sha512-MXDnZn0Awl2S86PSNIim5PWXgIAx8CIkzu35mBdSApUip6RFOGXBCf3YFyeEu8n1IHk4bWD46DeYFu9mQlFIRg==}
 
   '@vitest/utils@2.1.9':
     resolution: {integrity: sha512-v0psaMSkNJ3A2NMrUEHFRzJtDPFn+/VWZ5WxImB21T9fjucJRmS7xCS3ppEnARb9y11OAzaD+P2Ps+b+BGX5iQ==}
@@ -19680,6 +19790,9 @@ packages:
     engines: {node: '>=18'}
     hasBin: true
 
+  hyper-async@1.1.2:
+    resolution: {integrity: sha512-cnpOgKa+5FZOaccTtjduac1FrZuSc38/ftCp3vYJdUMt+7c+uvGDKLDK4MTNK8D3aFjIeveVrPcSgUPvzZLopg==}
+
   hyperliquid@1.5.8:
     resolution: {integrity: sha512-y3gJ8Z77UZYlJov234EQXGajTzKhFd+Vp9vL96sIogFeylkObh1ut7/hpznDlEBDgZi3ij0dIf8dYrRZ1DzW2g==}
     engines: {node: '>=16.0.0'}
@@ -22097,6 +22210,9 @@ packages:
   mnemonist@0.38.5:
     resolution: {integrity: sha512-bZTFT5rrPKtPJxj8KSV0WkPyNxl72vQepqqVUAW2ARUpUSF2qXMB6jZj7hW5/k7C1rtpzqbD/IIbJwLXUjCHeg==}
 
+  mnemonist@0.39.8:
+    resolution: {integrity: sha512-vyWo2K3fjrUw8YeeZ1zF0fy6Mu59RHokURlld8ymdUPjMlD9EC9ov1/YPqTgqRvUN9nTr3Gqfz29LYAmu0PHPQ==}
+
   mocha@10.8.2:
     resolution: {integrity: sha512-VZlYo/WE8t1tstuRmqgeyBgCbJc/lEdopaa+axcKzTBJ+UIdlAB9XnmvTCAH4pwR4ElNInaedhEBmZD8iCSVEg==}
     engines: {node: '>= 14.0.0'}
@@ -22837,6 +22953,14 @@ packages:
 
   ox@0.4.4:
     resolution: {integrity: sha512-oJPEeCDs9iNiPs6J0rTx+Y0KGeCGyCAA3zo94yZhm8G5WpOxrwUtn2Ie/Y8IyARSqqY/j9JTKA3Fc1xs1DvFnw==}
+    peerDependencies:
+      typescript: '>=5.4.0'
+    peerDependenciesMeta:
+      typescript:
+        optional: true
+
+  ox@0.6.7:
+    resolution: {integrity: sha512-17Gk/eFsFRAZ80p5eKqv89a57uXjd3NgIf1CaXojATPBuujVc/fQSVhBeAU9JCRB+k7J50WQAyWTxK19T9GgbA==}
     peerDependencies:
       typescript: '>=5.4.0'
     peerDependenciesMeta:
@@ -24758,6 +24882,14 @@ packages:
   redis-parser@3.0.0:
     resolution: {integrity: sha512-DJnGAeenTdpMEH6uAJRK/uiyEIH9WVsUmoLwzudwGJUwZPp80PDBWPHXSAGNPwNvIXAbe7MSUB1zQFugFml66A==}
     engines: {node: '>=4'}
+
+  redstone-clara-sdk@0.0.21:
+    resolution: {integrity: sha512-BU2djdj8d/kH6SOYLpr/159n7bwgTe9/CmxO6AYBs2PjiX89zjsyiP0i+pwpYu01VXeyqR169QPG/hcB1avZQQ==}
+    engines: {node: '>=20'}
+
+  redstone-clara-sdk@0.0.23:
+    resolution: {integrity: sha512-1d44YnUyhbJy6/UsNU4if9jwf2/cTrDjOWRdI8nC3sobAGIGENajeF2VPdnApMz9Dc8kaYMC8x6KAvM0zsn+Hg==}
+    engines: {node: '>=20'}
 
   reflect-metadata@0.1.13:
     resolution: {integrity: sha512-Ts1Y/anZELhSsjMcU605fU9RE4Oi3p5ORujwbIKXfWa+0Zxs510Qrmrce5/Jowq3cHSZSJqBjypxmHarc+vEWg==}
@@ -27543,6 +27675,14 @@ packages:
       typescript:
         optional: true
 
+  viem@2.23.2:
+    resolution: {integrity: sha512-NVmW/E0c5crMOtbEAqMF0e3NmvQykFXhLOc/CkLIXOlzHSA6KXVz3CYVmaKqBF8/xtjsjHAGjdJN3Ru1kFJLaA==}
+    peerDependencies:
+      typescript: '>=5.0.4'
+    peerDependenciesMeta:
+      typescript:
+        optional: true
+
   vite-node@1.4.0:
     resolution: {integrity: sha512-VZDAseqjrHgNd4Kh8icYHWzTKSCZMhia7GyHfhtzLW33fZlG9SwsB6CEhgyVOWkJfJ2pFLrp/Gj1FSfAiqH9Lw==}
     engines: {node: ^18.0.0 || >=20.0.0}
@@ -27550,6 +27690,11 @@ packages:
 
   vite-node@1.6.1:
     resolution: {integrity: sha512-YAXkfvGtuTzwWbDSACdJSg4A4DZiAqckWe90Zapc/sEX3XvHcw1NdurM/6od8J207tSDqNbSsgdCacBgvJKFuA==}
+    engines: {node: ^18.0.0 || >=20.0.0}
+    hasBin: true
+
+  vite-node@2.1.4:
+    resolution: {integrity: sha512-kqa9v+oi4HwkG6g8ufRnb5AeplcRw8jUF6/7/Qz1qRQOXHImG8YnLbB+LLszENwFnoBl9xIf9nVdCFzNd7GQEg==}
     engines: {node: ^18.0.0 || >=20.0.0}
     hasBin: true
 
@@ -27705,6 +27850,31 @@ packages:
       jsdom:
         optional: true
 
+  vitest@2.1.4:
+    resolution: {integrity: sha512-eDjxbVAJw1UJJCHr5xr/xM86Zx+YxIEXGAR+bmnEID7z9qWfoxpHw0zdobz+TQAFOLT+nEXz3+gx6nUJ7RgmlQ==}
+    engines: {node: ^18.0.0 || >=20.0.0}
+    hasBin: true
+    peerDependencies:
+      '@edge-runtime/vm': '*'
+      '@types/node': ^18.0.0 || >=20.0.0
+      '@vitest/browser': 2.1.4
+      '@vitest/ui': 2.1.4
+      happy-dom: '*'
+      jsdom: '*'
+    peerDependenciesMeta:
+      '@edge-runtime/vm':
+        optional: true
+      '@types/node':
+        optional: true
+      '@vitest/browser':
+        optional: true
+      '@vitest/ui':
+        optional: true
+      happy-dom:
+        optional: true
+      jsdom:
+        optional: true
+
   vitest@2.1.9:
     resolution: {integrity: sha512-MSmPM9REYqDGBI8439mA4mWhV5sKmDlBKWIYbA3lRb2PTHACE0mgKwA8yQ2xq9vxDTuk4iPrECBAEW2aoFXY0Q==}
     engines: {node: ^18.0.0 || >=20.0.0}
@@ -27818,6 +27988,13 @@ packages:
 
   walker@1.0.8:
     resolution: {integrity: sha512-ts/8E8l5b7kY0vlWLewOkDXMmPdLcVV4GmOQLyxuSswIJsweeFZtAsMF7k1Nszz+TYBQrlYRmzOnr398y1JemQ==}
+
+  warp-arbundles@1.0.4:
+    resolution: {integrity: sha512-KeRac/EJ7VOK+v5+PSMh2SrzpCKOAFnJICLlqZWt6qPkDCzVwcrNE5wFxOlEk5U170ewMDAB3e86UHUblevXpw==}
+
+  warp-isomorphic@1.0.7:
+    resolution: {integrity: sha512-fXHbUXwdYqPm9fRPz8mjv5ndPco09aMQuTe4kXfymzOq8V6F3DLsg9cIafxvjms9/mc6eijzkLBJ63yjEENEjA==}
+    engines: {node: '>=16.8.0'}
 
   wasm-feature-detect@1.8.0:
     resolution: {integrity: sha512-zksaLKM2fVlnB5jQQDqKXXwYHLQUVH9es+5TOOHwGOVJOCeRBCiPjwSg+3tN2AdTCzjgli4jijCH290kXb/zWQ==}
@@ -30765,13 +30942,21 @@ snapshots:
       bs58: 5.0.0
       viem: 2.21.58(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.1)
 
-  '@bigmi/core@0.0.4(bitcoinjs-lib@7.0.0-rc.0(typescript@5.7.3))(bs58@5.0.0)(viem@2.21.58(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.24.1))':
+  '@bigmi/core@0.0.4(bitcoinjs-lib@7.0.0-rc.0(typescript@5.7.3))(bs58@5.0.0)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.1))':
     dependencies:
       '@noble/hashes': 1.7.1
       bech32: 2.0.0
       bitcoinjs-lib: 7.0.0-rc.0(typescript@5.7.3)
       bs58: 5.0.0
-      viem: 2.21.58(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.24.1)
+      viem: 2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.1)
+
+  '@bigmi/core@0.0.4(bitcoinjs-lib@7.0.0-rc.0(typescript@5.7.3))(bs58@5.0.0)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.24.1))':
+    dependencies:
+      '@noble/hashes': 1.7.1
+      bech32: 2.0.0
+      bitcoinjs-lib: 7.0.0-rc.0(typescript@5.7.3)
+      bs58: 5.0.0
+      viem: 2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.24.1)
 
   '@binance/connector@3.6.1(bufferutil@4.0.9)(utf-8-validate@6.0.5)':
     dependencies:
@@ -33773,7 +33958,7 @@ snapshots:
       '@anthropic-ai/sdk': 0.30.1(encoding@0.1.13)
       '@fal-ai/client': 1.2.0
       '@types/uuid': 10.0.0
-      ai: 3.4.33(openai@4.73.0(encoding@0.1.13)(zod@3.24.1))(react@19.0.0)(sswr@2.1.0(svelte@5.19.8))(svelte@5.19.8)(vue@3.5.13(typescript@5.7.3))(zod@3.23.8)
+      ai: 3.4.33(openai@4.73.0(encoding@0.1.13)(zod@3.23.8))(react@19.0.0)(sswr@2.1.0(svelte@5.19.8))(svelte@5.19.8)(vue@3.5.13(typescript@5.7.3))(zod@3.23.8)
       anthropic-vertex-ai: 1.0.2(encoding@0.1.13)(zod@3.23.8)
       fastembed: 1.14.1
       fastestsmallesttextencoderdecoder: 1.0.22
@@ -33826,7 +34011,7 @@ snapshots:
       '@fal-ai/client': 1.2.0
       '@tavily/core': 0.0.2
       '@types/uuid': 10.0.0
-      ai: 3.4.33(openai@4.73.0(encoding@0.1.13)(zod@3.24.1))(react@19.0.0)(sswr@2.1.0(svelte@5.19.8))(svelte@5.19.8)(vue@3.5.13(typescript@5.7.3))(zod@3.23.8)
+      ai: 3.4.33(openai@4.73.0(encoding@0.1.13)(zod@3.23.8))(react@19.0.0)(sswr@2.1.0(svelte@5.19.8))(svelte@5.19.8)(vue@3.5.13(typescript@5.7.3))(zod@3.23.8)
       anthropic-vertex-ai: 1.0.2(encoding@0.1.13)(zod@3.23.8)
       dotenv: 16.4.5
       fastembed: 1.14.1
@@ -33884,7 +34069,7 @@ snapshots:
       '@fal-ai/client': 1.2.0
       '@tavily/core': 0.0.2
       '@types/uuid': 10.0.0
-      ai: 3.4.33(openai@4.73.0(encoding@0.1.13)(zod@3.24.1))(react@19.0.0)(sswr@2.1.0(svelte@5.19.8))(svelte@5.19.8)(vue@3.5.13(typescript@5.7.3))(zod@3.23.8)
+      ai: 3.4.33(openai@4.73.0(encoding@0.1.13)(zod@3.23.8))(react@19.0.0)(sswr@2.1.0(svelte@5.19.8))(svelte@5.19.8)(vue@3.5.13(typescript@5.7.3))(zod@3.23.8)
       anthropic-vertex-ai: 1.0.2(encoding@0.1.13)(zod@3.23.8)
       dotenv: 16.4.5
       fastembed: 1.14.1
@@ -33942,7 +34127,7 @@ snapshots:
       '@fal-ai/client': 1.2.0
       '@tavily/core': 0.0.2
       '@types/uuid': 10.0.0
-      ai: 3.4.33(openai@4.73.0(encoding@0.1.13)(zod@3.24.1))(react@19.0.0)(sswr@2.1.0(svelte@5.19.8))(svelte@5.19.8)(vue@3.5.13(typescript@5.7.3))(zod@3.23.8)
+      ai: 3.4.33(openai@4.73.0(encoding@0.1.13)(zod@3.23.8))(react@19.0.0)(sswr@2.1.0(svelte@5.19.8))(svelte@5.19.8)(vue@3.5.13(typescript@5.7.3))(zod@3.23.8)
       anthropic-vertex-ai: 1.0.2(encoding@0.1.13)(zod@3.23.8)
       dotenv: 16.4.5
       fastembed: 1.14.1
@@ -35193,49 +35378,49 @@ snapshots:
       reflect-metadata: 0.2.2
       zod: 3.23.8
 
-  '@goat-sdk/plugin-coingecko@0.1.4(@goat-sdk/core@0.3.8(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.7.3)(utf-8-validate@5.0.10))(viem@2.21.58(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.1))':
+  '@goat-sdk/plugin-coingecko@0.1.4(@goat-sdk/core@0.3.8(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.7.3)(utf-8-validate@5.0.10))(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.1))':
     dependencies:
       '@goat-sdk/core': 0.3.8(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.7.3)(utf-8-validate@5.0.10)
-      viem: 2.21.58(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.1)
+      viem: 2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.1)
       zod: 3.23.8
 
-  '@goat-sdk/plugin-erc20@0.1.7(@goat-sdk/core@0.3.8(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.7.3)(utf-8-validate@5.0.10))(viem@2.21.58(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.1))':
+  '@goat-sdk/plugin-erc20@0.1.7(@goat-sdk/core@0.3.8(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.7.3)(utf-8-validate@5.0.10))(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.1))':
     dependencies:
       '@goat-sdk/core': 0.3.8(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.7.3)(utf-8-validate@5.0.10)
-      viem: 2.21.58(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.1)
+      viem: 2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.1)
       zod: 3.24.1
 
-  '@goat-sdk/plugin-erc20@0.2.2(@goat-sdk/core@0.4.6(zod@3.23.8))(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(viem@2.21.58(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.23.8))':
+  '@goat-sdk/plugin-erc20@0.2.2(@goat-sdk/core@0.4.6(zod@3.23.8))(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.23.8))':
     dependencies:
       '@goat-sdk/core': 0.4.6(zod@3.23.8)
       '@goat-sdk/wallet-evm': 0.2.0(@goat-sdk/core@0.4.6(zod@3.23.8))(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)
-      viem: 2.21.58(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.23.8)
+      viem: 2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.23.8)
       zod: 3.23.8
     transitivePeerDependencies:
       - bufferutil
       - typescript
       - utf-8-validate
 
-  '@goat-sdk/plugin-kim@0.1.2(@goat-sdk/core@0.4.6(zod@3.23.8))(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(viem@2.21.58(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.23.8))':
+  '@goat-sdk/plugin-kim@0.1.2(@goat-sdk/core@0.4.6(zod@3.23.8))(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.23.8))':
     dependencies:
       '@goat-sdk/core': 0.4.6(zod@3.23.8)
       '@goat-sdk/wallet-evm': 0.2.0(@goat-sdk/core@0.4.6(zod@3.23.8))(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)
-      viem: 2.21.58(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.23.8)
+      viem: 2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.23.8)
       zod: 3.23.8
     transitivePeerDependencies:
       - bufferutil
       - typescript
       - utf-8-validate
 
-  '@goat-sdk/plugin-zilliqa@0.1.3(@goat-sdk/core@0.4.6(zod@3.23.8))(@goat-sdk/wallet-evm@0.2.6(@goat-sdk/core@0.4.6(zod@3.23.8))(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5))(@goat-sdk/wallet-zilliqa@0.2.6(@goat-sdk/core@0.4.6(zod@3.23.8))(@goat-sdk/wallet-evm@0.2.6(@goat-sdk/core@0.4.6(zod@3.23.8))(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5))(@goat-sdk/wallet-viem@0.2.6(@goat-sdk/wallet-evm@0.2.6(@goat-sdk/core@0.4.6(zod@3.23.8))(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5))(viem@2.21.58(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.23.8)))(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.7.3)(utf-8-validate@6.0.5))(encoding@0.1.13)(viem@2.21.58(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.23.8))':
+  '@goat-sdk/plugin-zilliqa@0.1.3(@goat-sdk/core@0.4.6(zod@3.23.8))(@goat-sdk/wallet-evm@0.2.6(@goat-sdk/core@0.4.6(zod@3.23.8))(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5))(@goat-sdk/wallet-zilliqa@0.2.6(@goat-sdk/core@0.4.6(zod@3.23.8))(@goat-sdk/wallet-evm@0.2.6(@goat-sdk/core@0.4.6(zod@3.23.8))(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5))(@goat-sdk/wallet-viem@0.2.6(@goat-sdk/wallet-evm@0.2.6(@goat-sdk/core@0.4.6(zod@3.23.8))(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5))(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.23.8)))(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.7.3)(utf-8-validate@6.0.5))(encoding@0.1.13)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.23.8))':
     dependencies:
       '@goat-sdk/core': 0.4.6(zod@3.23.8)
       '@goat-sdk/wallet-evm': 0.2.6(@goat-sdk/core@0.4.6(zod@3.23.8))(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)
-      '@goat-sdk/wallet-zilliqa': 0.2.6(@goat-sdk/core@0.4.6(zod@3.23.8))(@goat-sdk/wallet-evm@0.2.6(@goat-sdk/core@0.4.6(zod@3.23.8))(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5))(@goat-sdk/wallet-viem@0.2.6(@goat-sdk/wallet-evm@0.2.6(@goat-sdk/core@0.4.6(zod@3.23.8))(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5))(viem@2.21.58(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.23.8)))(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.7.3)(utf-8-validate@6.0.5)
+      '@goat-sdk/wallet-zilliqa': 0.2.6(@goat-sdk/core@0.4.6(zod@3.23.8))(@goat-sdk/wallet-evm@0.2.6(@goat-sdk/core@0.4.6(zod@3.23.8))(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5))(@goat-sdk/wallet-viem@0.2.6(@goat-sdk/wallet-evm@0.2.6(@goat-sdk/core@0.4.6(zod@3.23.8))(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5))(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.23.8)))(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.7.3)(utf-8-validate@6.0.5)
       '@zilliqa-js/crypto': 3.5.0
       '@zilliqa-js/util': 3.5.0
       '@zilliqa-js/zilliqa': 3.5.0(encoding@0.1.13)
-      viem: 2.21.58(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.23.8)
+      viem: 2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.23.8)
       zod: 3.23.8
     transitivePeerDependencies:
       - encoding
@@ -35263,26 +35448,26 @@ snapshots:
       - typescript
       - utf-8-validate
 
-  '@goat-sdk/wallet-viem@0.1.3(@goat-sdk/core@0.3.8(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.7.3)(utf-8-validate@5.0.10))(viem@2.21.58(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.1))':
+  '@goat-sdk/wallet-viem@0.1.3(@goat-sdk/core@0.3.8(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.7.3)(utf-8-validate@5.0.10))(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.1))':
     dependencies:
       '@goat-sdk/core': 0.3.8(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.7.3)(utf-8-validate@5.0.10)
-      viem: 2.21.58(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.1)
+      viem: 2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.1)
 
-  '@goat-sdk/wallet-viem@0.2.0(@goat-sdk/wallet-evm@0.2.0(@goat-sdk/core@0.4.6(zod@3.23.8))(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5))(viem@2.21.58(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.23.8))':
+  '@goat-sdk/wallet-viem@0.2.0(@goat-sdk/wallet-evm@0.2.0(@goat-sdk/core@0.4.6(zod@3.23.8))(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5))(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.23.8))':
     dependencies:
       '@goat-sdk/wallet-evm': 0.2.0(@goat-sdk/core@0.4.6(zod@3.23.8))(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)
-      viem: 2.21.58(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.23.8)
+      viem: 2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.23.8)
 
-  '@goat-sdk/wallet-viem@0.2.6(@goat-sdk/wallet-evm@0.2.6(@goat-sdk/core@0.4.6(zod@3.23.8))(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5))(viem@2.21.58(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.23.8))':
+  '@goat-sdk/wallet-viem@0.2.6(@goat-sdk/wallet-evm@0.2.6(@goat-sdk/core@0.4.6(zod@3.23.8))(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5))(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.23.8))':
     dependencies:
       '@goat-sdk/wallet-evm': 0.2.6(@goat-sdk/core@0.4.6(zod@3.23.8))(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)
-      viem: 2.21.58(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.23.8)
+      viem: 2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.23.8)
 
-  '@goat-sdk/wallet-zilliqa@0.2.6(@goat-sdk/core@0.4.6(zod@3.23.8))(@goat-sdk/wallet-evm@0.2.6(@goat-sdk/core@0.4.6(zod@3.23.8))(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5))(@goat-sdk/wallet-viem@0.2.6(@goat-sdk/wallet-evm@0.2.6(@goat-sdk/core@0.4.6(zod@3.23.8))(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5))(viem@2.21.58(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.23.8)))(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.7.3)(utf-8-validate@6.0.5)':
+  '@goat-sdk/wallet-zilliqa@0.2.6(@goat-sdk/core@0.4.6(zod@3.23.8))(@goat-sdk/wallet-evm@0.2.6(@goat-sdk/core@0.4.6(zod@3.23.8))(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5))(@goat-sdk/wallet-viem@0.2.6(@goat-sdk/wallet-evm@0.2.6(@goat-sdk/core@0.4.6(zod@3.23.8))(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5))(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.23.8)))(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.7.3)(utf-8-validate@6.0.5)':
     dependencies:
       '@goat-sdk/core': 0.4.6(zod@3.23.8)
       '@goat-sdk/wallet-evm': 0.2.6(@goat-sdk/core@0.4.6(zod@3.23.8))(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)
-      '@goat-sdk/wallet-viem': 0.2.6(@goat-sdk/wallet-evm@0.2.6(@goat-sdk/core@0.4.6(zod@3.23.8))(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5))(viem@2.21.58(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.23.8))
+      '@goat-sdk/wallet-viem': 0.2.6(@goat-sdk/wallet-evm@0.2.6(@goat-sdk/core@0.4.6(zod@3.23.8))(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5))(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.23.8))
       '@zilliqa-js/account': 3.5.0(encoding@0.1.13)
       '@zilliqa-js/zilliqa': 3.5.0(encoding@0.1.13)
       abitype: 1.0.8(typescript@5.7.3)(zod@3.23.8)
@@ -37064,9 +37249,9 @@ snapshots:
     dependencies:
       '@lifi/types': 16.3.0
 
-  '@lifi/sdk@3.4.1(@solana/wallet-adapter-base@0.9.23(@solana/web3.js@1.95.8(bufferutil@4.0.9)(encoding@0.1.13)(utf-8-validate@5.0.10)))(@solana/web3.js@1.95.8(bufferutil@4.0.9)(encoding@0.1.13)(utf-8-validate@5.0.10))(typescript@5.7.3)(viem@2.21.58(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.1))':
+  '@lifi/sdk@3.4.1(@solana/wallet-adapter-base@0.9.23(@solana/web3.js@1.95.8(bufferutil@4.0.9)(encoding@0.1.13)(utf-8-validate@5.0.10)))(@solana/web3.js@1.95.8(bufferutil@4.0.9)(encoding@0.1.13)(utf-8-validate@5.0.10))(typescript@5.7.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.1))':
     dependencies:
-      '@bigmi/core': 0.0.4(bitcoinjs-lib@7.0.0-rc.0(typescript@5.7.3))(bs58@5.0.0)(viem@2.21.58(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.1))
+      '@bigmi/core': 0.0.4(bitcoinjs-lib@7.0.0-rc.0(typescript@5.7.3))(bs58@5.0.0)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.1))
       '@lifi/types': 16.3.0
       '@noble/curves': 1.8.1
       '@noble/hashes': 1.7.1
@@ -37075,7 +37260,7 @@ snapshots:
       bech32: 2.0.0
       bitcoinjs-lib: 7.0.0-rc.0(typescript@5.7.3)
       bs58: 5.0.0
-      viem: 2.21.58(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.1)
+      viem: 2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.1)
     transitivePeerDependencies:
       - typescript
 
@@ -37093,9 +37278,9 @@ snapshots:
     transitivePeerDependencies:
       - typescript
 
-  '@lifi/sdk@3.4.1(@solana/wallet-adapter-base@0.9.23)(typescript@5.7.3)(viem@2.21.58(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.24.1))':
+  '@lifi/sdk@3.4.1(@solana/wallet-adapter-base@0.9.23)(typescript@5.7.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.24.1))':
     dependencies:
-      '@bigmi/core': 0.0.4(bitcoinjs-lib@7.0.0-rc.0(typescript@5.7.3))(bs58@5.0.0)(viem@2.21.58(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.24.1))
+      '@bigmi/core': 0.0.4(bitcoinjs-lib@7.0.0-rc.0(typescript@5.7.3))(bs58@5.0.0)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.24.1))
       '@lifi/types': 16.3.0
       '@noble/curves': 1.8.1
       '@noble/hashes': 1.7.1
@@ -37103,7 +37288,7 @@ snapshots:
       bech32: 2.0.0
       bitcoinjs-lib: 7.0.0-rc.0(typescript@5.7.3)
       bs58: 5.0.0
-      viem: 2.21.58(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.24.1)
+      viem: 2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.24.1)
     transitivePeerDependencies:
       - typescript
 
@@ -41322,6 +41507,28 @@ snapshots:
       tslib: 2.8.1
       webcrypto-core: 1.8.1
 
+  '@permaweb/ao-scheduler-utils@0.0.25':
+    dependencies:
+      lru-cache: 10.4.3
+      ramda: 0.30.1
+      zod: 3.24.1
+
+  '@permaweb/aoconnect@0.0.62':
+    dependencies:
+      '@permaweb/ao-scheduler-utils': 0.0.25
+      '@permaweb/protocol-tag-utils': 0.0.2
+      buffer: 6.0.3
+      debug: 4.4.0(supports-color@8.1.1)
+      hyper-async: 1.1.2
+      mnemonist: 0.39.8
+      ramda: 0.30.1
+      warp-arbundles: 1.0.4
+      zod: 3.24.1
+    transitivePeerDependencies:
+      - supports-color
+
+  '@permaweb/protocol-tag-utils@0.0.2': {}
+
   '@phala/dstack-sdk@0.1.7(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.1)':
     optionalDependencies:
       viem: 2.21.58(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.1)
@@ -43361,7 +43568,7 @@ snapshots:
 
   '@sinonjs/text-encoding@0.7.3': {}
 
-  '@skip-go/client@0.16.8(@types/react@19.0.8)(bufferutil@4.0.9)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(starknet@6.18.0(encoding@0.1.13))(utf-8-validate@5.0.10)(viem@2.21.58(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.1))':
+  '@skip-go/client@0.16.8(@types/react@19.0.8)(bufferutil@4.0.9)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(starknet@6.18.0(encoding@0.1.13))(utf-8-validate@5.0.10)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.1))':
     dependencies:
       '@cosmjs/amino': 0.32.4
       '@cosmjs/cosmwasm-stargate': 0.32.4(bufferutil@4.0.9)(utf-8-validate@5.0.10)
@@ -43378,7 +43585,7 @@ snapshots:
       cosmjs-types: 0.9.0
       create-hash: 1.2.0
       keccak: 3.0.4
-      viem: 2.21.58(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.1)
+      viem: 2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.1)
     transitivePeerDependencies:
       - '@types/react'
       - bufferutil
@@ -45518,6 +45725,36 @@ snapshots:
 
   '@starknet-io/types-js@0.7.10': {}
 
+  '@story-protocol/core-sdk@1.2.0-rc.3(bufferutil@4.0.9)(typescript@5.6.3)(utf-8-validate@6.0.5)(zod@3.24.1)':
+    dependencies:
+      abitype: 0.10.3(typescript@5.6.3)(zod@3.24.1)
+      axios: 1.7.9
+      bs58: 5.0.0
+      dotenv: 16.4.7
+      multiformats: 9.9.0
+      viem: 2.21.58(bufferutil@4.0.9)(typescript@5.6.3)(utf-8-validate@6.0.5)(zod@3.24.1)
+    transitivePeerDependencies:
+      - bufferutil
+      - debug
+      - typescript
+      - utf-8-validate
+      - zod
+
+  '@story-protocol/core-sdk@1.2.0-rc.3(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.23.8)':
+    dependencies:
+      abitype: 0.10.3(typescript@5.7.3)(zod@3.23.8)
+      axios: 1.7.9
+      bs58: 5.0.0
+      dotenv: 16.4.7
+      multiformats: 9.9.0
+      viem: 2.21.58(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.23.8)
+    transitivePeerDependencies:
+      - bufferutil
+      - debug
+      - typescript
+      - utf-8-validate
+      - zod
+
   '@story-protocol/core-sdk@1.2.0-rc.3(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.24.1)':
     dependencies:
       abitype: 0.10.3(typescript@5.7.3)(zod@3.24.1)
@@ -47404,6 +47641,13 @@ snapshots:
       '@vitest/utils': 1.6.1
       chai: 4.5.0
 
+  '@vitest/expect@2.1.4':
+    dependencies:
+      '@vitest/spy': 2.1.4
+      '@vitest/utils': 2.1.4
+      chai: 5.1.2
+      tinyrainbow: 1.2.0
+
   '@vitest/expect@2.1.9':
     dependencies:
       '@vitest/spy': 2.1.9
@@ -47417,6 +47661,14 @@ snapshots:
       '@vitest/utils': 3.0.5
       chai: 5.1.2
       tinyrainbow: 2.0.0
+
+  '@vitest/mocker@2.1.4(vite@5.4.12(@types/node@22.13.1)(terser@5.38.0))':
+    dependencies:
+      '@vitest/spy': 2.1.4
+      estree-walker: 3.0.3
+      magic-string: 0.30.17
+    optionalDependencies:
+      vite: 5.4.12(@types/node@22.13.1)(terser@5.38.0)
 
   '@vitest/mocker@2.1.9(vite@5.4.12(@types/node@22.13.1)(terser@5.38.0))':
     dependencies:
@@ -47442,6 +47694,10 @@ snapshots:
     optionalDependencies:
       vite: 5.4.12(@types/node@22.13.1)(terser@5.38.0)
 
+  '@vitest/pretty-format@2.1.4':
+    dependencies:
+      tinyrainbow: 1.2.0
+
   '@vitest/pretty-format@2.1.9':
     dependencies:
       tinyrainbow: 1.2.0
@@ -47460,6 +47716,11 @@ snapshots:
     dependencies:
       '@vitest/utils': 1.6.1
       p-limit: 5.0.0
+      pathe: 1.1.2
+
+  '@vitest/runner@2.1.4':
+    dependencies:
+      '@vitest/utils': 2.1.4
       pathe: 1.1.2
 
   '@vitest/runner@2.1.9':
@@ -47484,6 +47745,12 @@ snapshots:
       pathe: 1.1.2
       pretty-format: 29.7.0
 
+  '@vitest/snapshot@2.1.4':
+    dependencies:
+      '@vitest/pretty-format': 2.1.4
+      magic-string: 0.30.17
+      pathe: 1.1.2
+
   '@vitest/snapshot@2.1.9':
     dependencies:
       '@vitest/pretty-format': 2.1.9
@@ -47503,6 +47770,10 @@ snapshots:
   '@vitest/spy@1.6.1':
     dependencies:
       tinyspy: 2.2.1
+
+  '@vitest/spy@2.1.4':
+    dependencies:
+      tinyspy: 3.0.2
 
   '@vitest/spy@2.1.9':
     dependencies:
@@ -47542,6 +47813,12 @@ snapshots:
       estree-walker: 3.0.3
       loupe: 2.3.7
       pretty-format: 29.7.0
+
+  '@vitest/utils@2.1.4':
+    dependencies:
+      '@vitest/pretty-format': 2.1.4
+      loupe: 3.1.3
+      tinyrainbow: 1.2.0
 
   '@vitest/utils@2.1.9':
     dependencies:
@@ -48792,6 +49069,16 @@ snapshots:
       fs-extra: 10.1.0
       yargs: 17.7.2
 
+  abitype@0.10.3(typescript@5.6.3)(zod@3.24.1):
+    optionalDependencies:
+      typescript: 5.6.3
+      zod: 3.24.1
+
+  abitype@0.10.3(typescript@5.7.3)(zod@3.23.8):
+    optionalDependencies:
+      typescript: 5.7.3
+      zod: 3.23.8
+
   abitype@0.10.3(typescript@5.7.3)(zod@3.24.1):
     optionalDependencies:
       typescript: 5.7.3
@@ -48943,7 +49230,7 @@ snapshots:
       - typescript
       - utf-8-validate
 
-  ai@3.4.33(openai@4.73.0(encoding@0.1.13)(zod@3.24.1))(react@19.0.0)(sswr@2.1.0(svelte@5.19.8))(svelte@5.19.8)(vue@3.5.13(typescript@5.7.3))(zod@3.23.8):
+  ai@3.4.33(openai@4.73.0(encoding@0.1.13)(zod@3.23.8))(react@19.0.0)(sswr@2.1.0(svelte@5.19.8))(svelte@5.19.8)(vue@3.5.13(typescript@5.7.3))(zod@3.23.8):
     dependencies:
       '@ai-sdk/provider': 1.0.6
       '@ai-sdk/provider-utils': 2.1.6(zod@3.23.8)
@@ -49244,7 +49531,6 @@ snapshots:
   arconnect@0.4.2:
     dependencies:
       arweave: 1.15.5
-    optional: true
 
   are-docs-informative@0.0.2: {}
 
@@ -49364,7 +49650,6 @@ snapshots:
       asn1.js: 5.4.1
       base64-js: 1.5.1
       bignumber.js: 9.1.2
-    optional: true
 
   ask-sdk-core@2.14.0(ask-sdk-model@1.86.0):
     dependencies:
@@ -55431,6 +55716,8 @@ snapshots:
 
   husky@9.1.7: {}
 
+  hyper-async@1.1.2: {}
+
   hyperliquid@1.5.8(bufferutil@4.0.9)(utf-8-validate@6.0.5):
     dependencies:
       '@msgpack/msgpack': 3.0.0-beta3
@@ -59126,6 +59413,10 @@ snapshots:
     dependencies:
       obliterator: 2.0.5
 
+  mnemonist@0.39.8:
+    dependencies:
+      obliterator: 2.0.5
+
   mocha@10.8.2:
     dependencies:
       ansi-colors: 4.1.3
@@ -59286,7 +59577,7 @@ snapshots:
       array-differ: 3.0.0
       array-union: 2.1.0
       arrify: 2.0.1
-      minimatch: 3.0.5
+      minimatch: 3.1.2
 
   multistream@4.1.0:
     dependencies:
@@ -60177,11 +60468,11 @@ snapshots:
   ox@0.4.4(typescript@4.9.5)(zod@3.24.1):
     dependencies:
       '@adraffy/ens-normalize': 1.11.0
-      '@noble/curves': 1.7.0
-      '@noble/hashes': 1.6.1
-      '@scure/bip32': 1.6.0
-      '@scure/bip39': 1.5.0
-      abitype: 1.0.7(typescript@4.9.5)(zod@3.24.1)
+      '@noble/curves': 1.8.1
+      '@noble/hashes': 1.7.1
+      '@scure/bip32': 1.6.2
+      '@scure/bip39': 1.5.4
+      abitype: 1.0.8(typescript@4.9.5)(zod@3.24.1)
       eventemitter3: 5.0.1
     optionalDependencies:
       typescript: 4.9.5
@@ -60191,11 +60482,11 @@ snapshots:
   ox@0.4.4(typescript@5.6.3)(zod@3.24.1):
     dependencies:
       '@adraffy/ens-normalize': 1.11.0
-      '@noble/curves': 1.7.0
-      '@noble/hashes': 1.6.1
-      '@scure/bip32': 1.6.0
-      '@scure/bip39': 1.5.0
-      abitype: 1.0.7(typescript@5.6.3)(zod@3.24.1)
+      '@noble/curves': 1.8.1
+      '@noble/hashes': 1.7.1
+      '@scure/bip32': 1.6.2
+      '@scure/bip39': 1.5.4
+      abitype: 1.0.8(typescript@5.6.3)(zod@3.24.1)
       eventemitter3: 5.0.1
     optionalDependencies:
       typescript: 5.6.3
@@ -60205,11 +60496,11 @@ snapshots:
   ox@0.4.4(typescript@5.7.3)(zod@3.23.8):
     dependencies:
       '@adraffy/ens-normalize': 1.11.0
-      '@noble/curves': 1.7.0
-      '@noble/hashes': 1.6.1
-      '@scure/bip32': 1.6.0
-      '@scure/bip39': 1.5.0
-      abitype: 1.0.7(typescript@5.7.3)(zod@3.23.8)
+      '@noble/curves': 1.8.1
+      '@noble/hashes': 1.7.1
+      '@scure/bip32': 1.6.2
+      '@scure/bip39': 1.5.4
+      abitype: 1.0.8(typescript@5.7.3)(zod@3.23.8)
       eventemitter3: 5.0.1
     optionalDependencies:
       typescript: 5.7.3
@@ -60219,11 +60510,39 @@ snapshots:
   ox@0.4.4(typescript@5.7.3)(zod@3.24.1):
     dependencies:
       '@adraffy/ens-normalize': 1.11.0
-      '@noble/curves': 1.7.0
-      '@noble/hashes': 1.6.1
-      '@scure/bip32': 1.6.0
-      '@scure/bip39': 1.5.0
-      abitype: 1.0.7(typescript@5.7.3)(zod@3.24.1)
+      '@noble/curves': 1.8.1
+      '@noble/hashes': 1.7.1
+      '@scure/bip32': 1.6.2
+      '@scure/bip39': 1.5.4
+      abitype: 1.0.8(typescript@5.7.3)(zod@3.24.1)
+      eventemitter3: 5.0.1
+    optionalDependencies:
+      typescript: 5.7.3
+    transitivePeerDependencies:
+      - zod
+
+  ox@0.6.7(typescript@5.7.3)(zod@3.23.8):
+    dependencies:
+      '@adraffy/ens-normalize': 1.11.0
+      '@noble/curves': 1.8.1
+      '@noble/hashes': 1.7.1
+      '@scure/bip32': 1.6.2
+      '@scure/bip39': 1.5.4
+      abitype: 1.0.8(typescript@5.7.3)(zod@3.23.8)
+      eventemitter3: 5.0.1
+    optionalDependencies:
+      typescript: 5.7.3
+    transitivePeerDependencies:
+      - zod
+
+  ox@0.6.7(typescript@5.7.3)(zod@3.24.1):
+    dependencies:
+      '@adraffy/ens-normalize': 1.11.0
+      '@noble/curves': 1.8.1
+      '@noble/hashes': 1.7.1
+      '@scure/bip32': 1.6.2
+      '@scure/bip39': 1.5.4
+      abitype: 1.0.8(typescript@5.7.3)(zod@3.24.1)
       eventemitter3: 5.0.1
     optionalDependencies:
       typescript: 5.7.3
@@ -62404,6 +62723,27 @@ snapshots:
   redis-parser@3.0.0:
     dependencies:
       redis-errors: 1.2.0
+
+  redstone-clara-sdk@0.0.21:
+    dependencies:
+      '@permaweb/aoconnect': 0.0.62
+      arweave: 1.15.5
+      exponential-backoff: 3.1.1
+    transitivePeerDependencies:
+      - supports-color
+
+  redstone-clara-sdk@0.0.23(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.23.8):
+    dependencies:
+      '@permaweb/aoconnect': 0.0.62
+      arweave: 1.15.5
+      exponential-backoff: 3.1.1
+      viem: 2.21.58(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.23.8)
+    transitivePeerDependencies:
+      - bufferutil
+      - supports-color
+      - typescript
+      - utf-8-validate
+      - zod
 
   reflect-metadata@0.1.13: {}
 
@@ -66054,6 +66394,57 @@ snapshots:
       - utf-8-validate
       - zod
 
+  viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.1):
+    dependencies:
+      '@noble/curves': 1.8.1
+      '@noble/hashes': 1.7.1
+      '@scure/bip32': 1.6.2
+      '@scure/bip39': 1.5.4
+      abitype: 1.0.8(typescript@5.7.3)(zod@3.24.1)
+      isows: 1.0.6(ws@8.18.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+      ox: 0.6.7(typescript@5.7.3)(zod@3.24.1)
+      ws: 8.18.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+    optionalDependencies:
+      typescript: 5.7.3
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+      - zod
+
+  viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.23.8):
+    dependencies:
+      '@noble/curves': 1.8.1
+      '@noble/hashes': 1.7.1
+      '@scure/bip32': 1.6.2
+      '@scure/bip39': 1.5.4
+      abitype: 1.0.8(typescript@5.7.3)(zod@3.23.8)
+      isows: 1.0.6(ws@8.18.0(bufferutil@4.0.9)(utf-8-validate@6.0.5))
+      ox: 0.6.7(typescript@5.7.3)(zod@3.23.8)
+      ws: 8.18.0(bufferutil@4.0.9)(utf-8-validate@6.0.5)
+    optionalDependencies:
+      typescript: 5.7.3
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+      - zod
+
+  viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.24.1):
+    dependencies:
+      '@noble/curves': 1.8.1
+      '@noble/hashes': 1.7.1
+      '@scure/bip32': 1.6.2
+      '@scure/bip39': 1.5.4
+      abitype: 1.0.8(typescript@5.7.3)(zod@3.24.1)
+      isows: 1.0.6(ws@8.18.0(bufferutil@4.0.9)(utf-8-validate@6.0.5))
+      ox: 0.6.7(typescript@5.7.3)(zod@3.24.1)
+      ws: 8.18.0(bufferutil@4.0.9)(utf-8-validate@6.0.5)
+    optionalDependencies:
+      typescript: 5.7.3
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+      - zod
+
   vite-node@1.4.0(@types/node@22.13.1)(terser@5.38.0):
     dependencies:
       cac: 6.7.14
@@ -66078,6 +66469,23 @@ snapshots:
       debug: 4.4.0(supports-color@8.1.1)
       pathe: 1.1.2
       picocolors: 1.1.1
+      vite: 5.4.12(@types/node@22.13.1)(terser@5.38.0)
+    transitivePeerDependencies:
+      - '@types/node'
+      - less
+      - lightningcss
+      - sass
+      - sass-embedded
+      - stylus
+      - sugarss
+      - supports-color
+      - terser
+
+  vite-node@2.1.4(@types/node@22.13.1)(terser@5.38.0):
+    dependencies:
+      cac: 6.7.14
+      debug: 4.4.0(supports-color@8.1.1)
+      pathe: 1.1.2
       vite: 5.4.12(@types/node@22.13.1)(terser@5.38.0)
     transitivePeerDependencies:
       - '@types/node'
@@ -66370,6 +66778,42 @@ snapshots:
     transitivePeerDependencies:
       - less
       - lightningcss
+      - sass
+      - sass-embedded
+      - stylus
+      - sugarss
+      - supports-color
+      - terser
+
+  vitest@2.1.4(@types/node@22.13.1)(jsdom@25.0.1(bufferutil@4.0.9)(canvas@2.11.2(encoding@0.1.13))(utf-8-validate@6.0.5))(terser@5.38.0):
+    dependencies:
+      '@vitest/expect': 2.1.4
+      '@vitest/mocker': 2.1.4(vite@5.4.12(@types/node@22.13.1)(terser@5.38.0))
+      '@vitest/pretty-format': 2.1.9
+      '@vitest/runner': 2.1.4
+      '@vitest/snapshot': 2.1.4
+      '@vitest/spy': 2.1.4
+      '@vitest/utils': 2.1.4
+      chai: 5.1.2
+      debug: 4.4.0(supports-color@8.1.1)
+      expect-type: 1.1.0
+      magic-string: 0.30.17
+      pathe: 1.1.2
+      std-env: 3.8.0
+      tinybench: 2.9.0
+      tinyexec: 0.3.2
+      tinypool: 1.0.2
+      tinyrainbow: 1.2.0
+      vite: 5.4.12(@types/node@22.13.1)(terser@5.38.0)
+      vite-node: 2.1.4(@types/node@22.13.1)(terser@5.38.0)
+      why-is-node-running: 2.3.0
+    optionalDependencies:
+      '@types/node': 22.13.1
+      jsdom: 25.0.1(bufferutil@4.0.9)(canvas@2.11.2(encoding@0.1.13))(utf-8-validate@6.0.5)
+    transitivePeerDependencies:
+      - less
+      - lightningcss
+      - msw
       - sass
       - sass-embedded
       - stylus
@@ -66885,6 +67329,18 @@ snapshots:
     dependencies:
       makeerror: 1.0.12
 
+  warp-arbundles@1.0.4:
+    dependencies:
+      arweave: 1.15.5
+      base64url: 3.0.1
+      buffer: 6.0.3
+      warp-isomorphic: 1.0.7
+
+  warp-isomorphic@1.0.7:
+    dependencies:
+      buffer: 6.0.3
+      undici: 5.28.5
+
   wasm-feature-detect@1.8.0: {}
 
   watchpack@2.4.2:
@@ -67358,8 +67814,8 @@ snapshots:
 
   webauthn-p256@0.0.10:
     dependencies:
-      '@noble/curves': 1.7.0
-      '@noble/hashes': 1.6.1
+      '@noble/curves': 1.8.1
+      '@noble/hashes': 1.7.1
 
   webcrypto-core@1.8.1:
     dependencies:

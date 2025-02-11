@@ -1,5 +1,5 @@
 import { elizaLogger, IAgentRuntime, Memory, State } from "@elizaos/core";
-import { AoTaskType } from "../../ao_types";
+import { ClaraTaskType } from "../../ao_types";
 import { ClientBase } from "../../base";
 import { AoTask } from "../AoTask";
 import { buildConversationThread } from "../../utils";
@@ -10,7 +10,7 @@ export class AoStateCompositionHandler extends AoTask {
     }
 
     async handle(
-        aoMessage: AoTaskType,
+        aoMessage: ClaraTaskType,
         prompt: string,
         memory: Memory
     ): Promise<State> {
@@ -40,15 +40,15 @@ export class AoStateCompositionHandler extends AoTask {
             formattedConversation
         );
         return await this.runtime.composeState(memory, {
-            aoClient: this.client.aoClient,
-            aoUserName: this.client.aoConfig.AO_USERNAME,
+            aoClient: this.client.claraClient,
+            aoUserName: this.client.claraConfig.CLARA_USERNAME,
             currentMessage,
             formattedConversation,
             recentPostInteractions: [formattedConversation],
         });
     }
 
-    formatMessage(aoMessage: AoTaskType, prompt: string) {
+    formatMessage(aoMessage: ClaraTaskType, prompt: string) {
         return `  ID: ${aoMessage.id}
   From: ${aoMessage.requester} (@${aoMessage.requester})
   Text: ${prompt}`;

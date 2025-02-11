@@ -7,8 +7,8 @@ import {
     State,
 } from "@elizaos/core";
 import { EventEmitter } from "events";
-import { AoConfig } from "./environment.ts";
-import { AoClient } from "./AoClient.ts";
+import { AoConfig, ClaraConfig } from "./environment.ts";
+import { ClaraClient } from "./ClaraClient.ts";
 import { NodeType } from "./ao_types.ts";
 
 class RequestQueue {
@@ -62,10 +62,10 @@ class RequestQueue {
 }
 
 export class ClientBase extends EventEmitter {
-    static _aoClients: { [accountIdentifier: string]: AoClient } = {};
-    aoClient: AoClient;
+    static _claraClients: { [accountIdentifier: string]: ClaraClient } = {};
+    claraClient: ClaraClient;
     runtime: IAgentRuntime;
-    aoConfig: AoConfig;
+    claraConfig: ClaraConfig;
     directions: string;
     lastCheckedMessageTs: number | null = null;
     imageDescriptionService: IImageDescriptionService;
@@ -74,37 +74,37 @@ export class ClientBase extends EventEmitter {
     profileId: string;
     walletId: string;
 
-    async cacheMessage(message: NodeType): Promise<void> {
-        if (!message) {
-            console.warn("Message is undefined, skipping cache");
-            return;
-        }
+    // async cacheMessage(message: NodeType): Promise<void> {
+    //     if (!message) {
+    //         console.warn("Message is undefined, skipping cache");
+    //         return;
+    //     }
 
-        this.runtime.cacheManager.set(`ao/messages/${message.id}`, message);
-    }
+    //     this.runtime.cacheManager.set(`ao/messages/${message.id}`, message);
+    // }
 
-    async getCachedMessage(messageId: string): Promise<NodeType | undefined> {
-        const cached = await this.runtime.cacheManager.get<NodeType>(
-            `ao/messages/${messageId}`
-        );
+    // async getCachedMessage(messageId: string): Promise<NodeType | undefined> {
+    //     const cached = await this.runtime.cacheManager.get<NodeType>(
+    //         `ao/messages/${messageId}`
+    //     );
 
-        return cached;
-    }
+    //     return cached;
+    // }
 
-    async getMessage(messageId: string): Promise<NodeType> {
-        const cachedMessage = await this.getCachedMessage(messageId);
+    // async getMessage(messageId: string): Promise<NodeType> {
+    //     const cachedMessage = await this.getCachedMessage(messageId);
 
-        if (cachedMessage) {
-            return cachedMessage;
-        }
+    //     if (cachedMessage) {
+    //         return cachedMessage;
+    //     }
 
-        const message = await this.requestQueue.add(() =>
-            this.aoClient.getMessage(messageId)
-        );
+    //     const message = await this.requestQueue.add(() =>
+    //         this.aoClient.getMessage(messageId)
+    //     );
 
-        await this.cacheMessage(message);
-        return message;
-    }
+    //     await this.cacheMessage(message);
+    //     return message;
+    // }
 
     callback: (self: ClientBase) => any = null;
 
@@ -114,17 +114,17 @@ export class ClientBase extends EventEmitter {
         );
     }
 
-    constructor(runtime: IAgentRuntime, aoConfig: AoConfig) {
+    constructor(runtime: IAgentRuntime, claraConfig: ClaraConfig) {
         super();
         this.runtime = runtime;
-        this.aoConfig = aoConfig;
-        this.profileId = this.runtime.agentId + "_" + aoConfig.AO_USERNAME;
-        this.walletId = aoConfig.AO_WALLET_ID;
-        if (ClientBase._aoClients[this.profileId]) {
-            this.aoClient = ClientBase._aoClients[this.profileId];
+        this.claraConfig = claraConfig;
+        this.profileId = this.runtime.agentId + "_" + claraConfig.CLARA_USERNAME;
+        this.walletId = claraConfig.CLARA_WALLET_ID;
+        if (ClientBase._claraClients[this.profileId]) {
+            this.claraClient = ClientBase._claraClients[this.profileId];
         } else {
-            this.aoClient = new AoClient(this.profileId, this.walletId);
-            ClientBase._aoClients[this.profileId] = this.aoClient;
+            this.claraClient = new ClaraClient(this.profileId, this.walletId, this.claraConfig);
+            ClientBase._claraClients[this.profileId] = this.claraClient;
         }
 
         this.directions =
@@ -135,7 +135,7 @@ export class ClientBase extends EventEmitter {
     }
 
     async init() {
-        await this.aoClient.init();
+        await this.claraClient.init();
 
         if (this.profileId) {
             elizaLogger.log("AO profile ID:", this.profileId);
@@ -143,29 +143,29 @@ export class ClientBase extends EventEmitter {
             this.runtime.character.twitterProfile = {
                 id: this.profileId,
                 username: this.runtime.agentId,
-                screenName: this.aoConfig.AO_USERNAME,
+                screenName: this.claraConfig.CLARA_USERNAME,
                 bio: this.profileId,
             };
         } else {
             throw new Error("Failed to load profile id");
         }
 
-        await this.loadLatestCheckedMessage();
+        await this.loadLatestCheckedMessage(this.claraConfig.CLARA_IMPL);
     }
 
-    async fetchIncomingMessages(count: number): Promise<NodeType[]> {
-        elizaLogger.debug("fetching home timeline");
-        const incomingMessages =
-            await this.aoClient.fetchIncomingMessages(count);
+    // async fetchIncomingMessages(count: number): Promise<NodeType[]> {
+    //     elizaLogger.debug("fetching home timeline");
+    //     const incomingMessages =
+    //         await this.aoClient.fetchIncomingMessages(count);
 
-        elizaLogger.debug(incomingMessages, { depth: Infinity });
-        return incomingMessages;
-    }
+    //     elizaLogger.debug(incomingMessages, { depth: Infinity });
+    //     return incomingMessages;
+    // }
 
-    async fetchTimelineForActions(count: number): Promise<NodeType[]> {
-        elizaLogger.debug("fetching timeline for actions");
-        return await this.aoClient.fetchIncomingMessages(count);
-    }
+    // async fetchTimelineForActions(count: number): Promise<NodeType[]> {
+    //     elizaLogger.debug("fetching timeline for actions");
+    //     return await this.aoClient.fetchIncomingMessages(count);
+    // }
 
 
     async saveRequestMessage(message: Memory, state: State) {
@@ -192,15 +192,15 @@ export class ClientBase extends EventEmitter {
 
             await this.runtime.evaluate(message, {
                 ...state,
-                twitterClient: this.aoClient,
+                twitterClient: this.claraClient,
             });
         }
     }
 
-    async loadLatestCheckedMessage(): Promise<void> {
+    async loadLatestCheckedMessage(claraImpl: string): Promise<void> {
         const latestCheckedMessageTs =
             await this.runtime.cacheManager.get<number>(
-                `ao/${this.profileId}/latest_checked_message_ts`
+                `${claraImpl}/${this.profileId}/latest_checked_message_ts`
             );
 
         if (latestCheckedMessageTs) {
@@ -208,10 +208,10 @@ export class ClientBase extends EventEmitter {
         }
     }
 
-    async cacheLatestCheckedMessageTimestamp() {
+    async cacheLatestCheckedMessageTimestamp(claraImpl: string) {
         if (this.lastCheckedMessageTs) {
             await this.runtime.cacheManager.set(
-                `ao/${this.profileId}/latest_checked_message_ts`,
+                `${claraImpl}/${this.profileId}/latest_checked_message_ts`,
                 this.lastCheckedMessageTs
             );
         }

@@ -1,18 +1,18 @@
 import { elizaLogger, IAgentRuntime, stringToUuid, UUID } from "@elizaos/core";
-import { AoTaskType } from "../../ao_types";
+import { ClaraTaskType } from "../../ao_types";
 import { ClientBase } from "../../base";
 import { AoTaskHandler } from "./AoTaskHandler";
 import { AoTask } from "../AoTask";
 
 export class AoMessageHandler extends AoTask {
     private aoTaskHandler: AoTaskHandler;
-    private aoMessage: AoTaskType;
+    private aoMessage: ClaraTaskType;
     constructor(runtime: IAgentRuntime, client: ClientBase) {
         super(client, runtime);
         this.aoTaskHandler = new AoTaskHandler(this.client, this.runtime);
     }
 
-    async handle(aoMessage: AoTaskType) {
+    async handle(aoMessage: ClaraTaskType) {
         this.aoMessage = aoMessage;
         const { id, payload } = this.aoMessage;
         const aoMessageId = stringToUuid(id);
@@ -40,7 +40,20 @@ export class AoMessageHandler extends AoTask {
     }
 
     private updateLastCheckedMessage() {
-        this.client.lastCheckedMessageTs = this.aoMessage.timestamp;
+        switch (this.client.claraConfig.CLARA_IMPL) {
+            case "ao":
+                this.client.lastCheckedMessageTs = this.aoMessage.timestamp;
+                break;
+            case "story":
+                this.client.lastCheckedMessageTs = Number(
+                    this.aoMessage.cursor
+                );
+                break;
+            default:
+                throw new Error(
+                    `Unknown Clara impl: ${this.client.claraConfig.CLARA_IMPL}`
+                );
+        }
     }
 
     private async validate(aoMessageId: UUID): Promise<boolean> {

@@ -47,12 +47,11 @@ export type NodeType = {
     conversationId: string;
 };
 
-export type AoTaskType = {
+export type ClaraTaskType = {
     id: string;
     requester: string;
     originalId: string;
     matchingStrategy: string;
-    block: number;
     agentId: string;
     contextId: string;
     topic: string;
@@ -60,4 +59,12 @@ export type AoTaskType = {
     requesterId: string;
     reward: string;
     payload: string;
+    block?: number;
+    blockNumber?: number;
+    cursor?: number;
+};
+
+export type ClaraLoadTaskType = {
+    result: ClaraTaskType;
+    cursor: number;
 };
