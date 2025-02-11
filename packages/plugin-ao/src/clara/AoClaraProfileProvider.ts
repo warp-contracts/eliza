@@ -4,7 +4,7 @@ import { ClaraProfile } from "redstone-clara-sdk";
 
 let aoClaraMarket: AoClaraMarket = null;
 
-export const claraProfileProvider: Provider = {
+export const aoClaraProfileProvider: Provider = {
     get: async (
         runtime: IAgentRuntime,
         _message: Memory,
