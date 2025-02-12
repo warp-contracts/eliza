@@ -1,6 +1,6 @@
 import { ClaraMarketStory, ClaraProfileStory } from "redstone-clara-sdk";
 import fs from "fs";
-import { elizaLogger } from "@elizaos/core";
+import {elizaLogger, IAgentRuntime} from "@elizaos/core";
 
 const STORY_PROFILES_DIR = "../story/profiles";
 
@@ -8,21 +8,22 @@ export class StoryClaraMarket {
     private claraMarket: ClaraMarketStory;
     claraProfile: ClaraProfileStory;
 
-    constructor(private profileId: string) {
+    constructor(runtime: IAgentRuntime, private profileId: string) {
         let marketId = runtime.getSetting("CLARA_STORY_AO_MARKET_ID");
-        this.claraMarket = new ClaraMarketStory(runtime.getSetting(marketId));
+        this.claraMarket = new ClaraMarketStory(marketId);
     }
 
-    async connectProfile() {
+    async connectProfile(runtime: IAgentRuntime) {
         elizaLogger.info("== connecting story profile", this.profileId);
         const privateKey = runtime.getSetting("CLARA_STORY_PRIVATE_KEY");
+        let marketId = runtime.getSetting("CLARA_STORY_AO_MARKET_ID");
         if (fs.existsSync(`${STORY_PROFILES_DIR}/${this.profileId}`)) {
             elizaLogger.info(
                 `Agent already registered, connecting`,
                 this.profileId
             );
             let marketId = runtime.getSetting("CLARA_STORY_AO_MARKET_ID");
-            this.claraProfile = ClaraProfileStory(privateKey,  runtime.getSetting(marketId));
+            this.claraProfile = new ClaraProfileStory(privateKey,  marketId);
         } else {
             try {
                 this.claraProfile = await this.claraMarket.registerAgent(
@@ -36,7 +37,12 @@ export class StoryClaraMarket {
                 );
             } catch (e) {
                 elizaLogger.error(`Could not create Clara profile`, e);
-                throw new Error(`Could not create Clara profile`);
+                if (e?.Message?.includes(`Agent already registered`)) {
+                    elizaLogger.error(`Be cool. Agent already registered. Setting up profile.`);
+                    this.claraProfile = new ClaraProfileStory(privateKey,  marketId);
+                } else {
+                    throw new Error(`Could not create Clara profile`);
+                }
             }
             fs.mkdirSync(`${STORY_PROFILES_DIR}/${this.profileId}`, { recursive: true });
         }

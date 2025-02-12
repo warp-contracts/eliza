@@ -12,12 +12,13 @@ export const storyClaraProfileProvider: Provider = {
     ): Promise<ClaraProfileStory | null> => {
         try {
             if (!storyClaraMarket) {
+                let agentId = runtime?.agentId || 'agent'
                 let userName = runtime.getSetting("CLARA_STORY_USERNAME");
-                const profileId = `${runtime?.agentId}_${userName}`
+                const profileId = `${agentId}_${userName}`
                 elizaLogger.log("Setting Story Clara market and profile ", profileId);
 
-                storyClaraMarket = new StoryClaraMarket(profileId);
-                await storyClaraMarket.connectProfile();
+                storyClaraMarket = new StoryClaraMarket(runtime, profileId);
+                await storyClaraMarket.connectProfile(runtime);
             }
             return storyClaraMarket.claraProfile;
         } catch (error) {

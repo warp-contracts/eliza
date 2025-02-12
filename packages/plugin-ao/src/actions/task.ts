@@ -11,7 +11,9 @@ import {
     type Action,
 } from "@elizaos/core";
 import { z } from "zod";
-import { claraProfileProvider } from "../clara/ClaraProfileProvider.ts";
+import { aoClaraProfileProvider } from "../clara/AoClaraProfileProvider.ts";
+import { storyClaraProfileProvider } from "../clara/StoryClaraProfileProvider.ts";
+import { formatTaskAssigment, formatTaskResult, formatTwitterMessage } from "./utils.ts";
 import { TOPICS, MATCHERS } from "redstone-clara-sdk";
 
 const claraTaskTemplate = `
@@ -62,9 +64,10 @@ export const task: Action = {
     validate: async (runtime: IAgentRuntime, message: Memory) => {
         elizaLogger.debug("Validating :", message.userId);
         try {
-            await claraProfileProvider.get(runtime, message);
-        } catch {
-            elizaLogger.error("Failed to load ao client profile");
+            await aoClaraProfileProvider.get(runtime, message);
+            await storyClaraProfileProvider.get(runtime, message);
+        } catch (e) {
+            elizaLogger.error("Failed to load ao client profile", e);
             return false;
         }
         return true;
@@ -80,7 +83,13 @@ export const task: Action = {
     ): Promise<boolean> => {
         elizaLogger.log("Starting CLARA_TASK handler...");
 
-        const claraProfile = await claraProfileProvider.get(
+        const claraProfile = await aoClaraProfileProvider.get(
+            runtime,
+            message,
+            state
+        );
+
+        const claraStoryProfile = await storyClaraProfileProvider.get(
             runtime,
             message,
             state
@@ -131,26 +140,71 @@ export const task: Action = {
         }
 
         // Sending request using CLARA SDK
-        const responses = {};
+        const responses = {
+            ao: {},
+            story: {}
+        };
         let tasksCount = taskObject.action_count || 1;
         if (tasksCount > 5) {
             tasksCount = 5;
         }
-        if (tasksCount < 0) {
+        if (tasksCount <= 0) {
             tasksCount = 1;
         }
+        tasksCount = tasksCount || 1
+        if (tasksCount == null) {
+            tasksCount = 1;
+        }
+        console.log(`tasksCount`, tasksCount);
         try {
             for (let i = 1; i <= tasksCount; i++) {
-                const result = await claraProfile.registerTask({
+                console.log(`registerTask`, taskObject);
+                // const result = await claraProfile.registerTask({
+                //     topic: taskObject.action,
+                //     reward: 4_000_000_000_000_000_000,
+                //     matchingStrategy: taskObject.strategy,
+                //     payload: taskObject.payload,
+                // });
+                // elizaLogger.debug(`${i} AO task registered`, result);
+                // responses.ao[result.originalMsgId] = {
+                //     numberOfAgents: result.numberOfAgents,
+                //     assignment: formatTaskAssigment(i, result),
+                // };
+            }
+        } catch (e) {
+            console.log(e);
+            elizaLogger.error(
+                `AO plugin: failed to send request using CLARA SDK`,
+                message.content,
+                e
+            );
+            if (callback) {
+                callback({
+                    text: `Cannot send CLARA request`,
+                    content: "",
+                });
+            }
+        }
+
+        try {
+            console.log(`claraStoryProfile`, claraStoryProfile);
+            for (let i = 1; i <= tasksCount; i++) {
+                console.log(`== + == registerTask`, {
                     topic: taskObject.action,
-                    reward: 100000000,
+                    reward: 5000000000000000000,
                     matchingStrategy: taskObject.strategy,
                     payload: taskObject.payload,
                 });
-                elizaLogger.debug(`${i} task registered`, result);
-                responses[result.originalMsgId] = {
-                    numberOfAgents: result.numberOfAgents,
-                    assignment: formatTaskAssigment(i, result),
+                const storyResult = await claraStoryProfile.registerTask({
+                    topic: taskObject.action,
+                    reward: 5000000000000000000,
+                    matchingStrategy: taskObject.strategy,
+                    payload: taskObject.payload,
+                });
+                elizaLogger.debug(`${i} Story task registered`, storyResult);
+                responses.story[result.originalMsgId] = {
+                    numberOfAgents: storyResult.numberOfAgents,
+                    assignment: formatTaskAssigment(i, storyResult),
                 };
             }
         } catch (e) {
@@ -168,6 +222,8 @@ export const task: Action = {
             }
             return false;
         }
+
+        console.log(`responses`, responses);
 
         try {
             await pollTaskResult(claraProfile, responses).then((res) => {
@@ -269,24 +325,7 @@ export const task: Action = {
     ] as ActionExample[][],
 } as Action;
 
-function formatTaskAssigment(i: number, result): string {
-    if (result?.numberOfAgents && result.numberOfAgents > 1) {
-        return `-- Task ${i} \Assigned to: ${result.numberOfAgents} agents\n`;
-    } else {
-        return `-- Task ${i} \nReward: ${result?.fee}
-            \nC.L.A.R.A. req: https://www.ao.link/#/message/${result?.originalMsgId}\n`;
-    }
-}
 
-function formatTaskResult(taskResultId: string, result): string {
-    return `\n-- Task: ${result?.originalTaskId}
-        \nResult ${taskResultId} \nAssigned to ${result?.assignedAgentId}\nFee: ${result?.fee}
-        \nC.L.A.R.A. req: https://www.ao.link/#/message/${result?.originalTaskId}\n`;
-}
-
-function formatTwitterMessage(res): string {
-    return `\nX: https://x.com/${res?.userName}/status/${res?.id}\n`;
-}
 
 async function pollTaskResult(
     claraProfile,
