@@ -1,6 +1,6 @@
 {
     "name": "Agent Smith",
-    "clients": ["ao"],
+    "clients": ["clara"],
     "modelProvider": "llama_local",
     "settings": {
         "voice": {
