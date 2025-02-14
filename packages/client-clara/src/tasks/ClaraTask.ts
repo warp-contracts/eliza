@@ -1,7 +1,7 @@
 import { IAgentRuntime, UUID } from "@elizaos/core";
 import { ClientBase } from "../base";
 
-export abstract class AoTask {
+export abstract class ClaraTask {
     protected walletId: string;
     protected agentId: UUID;
     constructor(

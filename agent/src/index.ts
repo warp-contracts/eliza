@@ -157,7 +157,7 @@ import { ankrPlugin } from "@elizaos/plugin-ankr";
 import { formPlugin } from "@elizaos/plugin-form";
 import { MongoClient } from "mongodb";
 import { quickIntelPlugin } from "@elizaos/plugin-quick-intel";
-import AoTheComputerClientInterface from "@elizaos/client-ao";
+import ClaraClientInterface from "@elizaos/client-clara";
 import { aoPlugin } from "@elizaos/plugin-ao";
 import twitterPlugin from "@elizaos/plugin-twitter";
 
@@ -815,9 +815,9 @@ export async function initializeClients(
         if (xmtpClient) clients.xmtp = xmtpClient;
     }
 
-    if (clientTypes.includes(Clients.AO)) {
-        const aoTheComputer = await AoTheComputerClientInterface.start(runtime);
-        if (aoTheComputer) clients.aoTheComputer = aoTheComputer;
+    if (clientTypes.includes(Clients.CLARA)) {
+        const claraClient = await ClaraClientInterface.start(runtime);
+        if (claraClient) clients.clara = claraClient;
     }
 
     if (clientTypes.includes(Clients.DISCORD)) {

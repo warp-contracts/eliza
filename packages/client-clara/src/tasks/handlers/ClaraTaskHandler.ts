@@ -11,23 +11,23 @@ import {
     UUID,
 } from "@elizaos/core";
 import { ClientBase } from "../../base";
-import { AoTaskType } from "../../ao_types";
-import { AoStateCompositionHandler } from "./AoStateCompositionHandler";
-import { wait } from "../../utils";
-import { AoTask } from "../AoTask";
+import { ClaraTaskType } from "../../utils/claraTypes";
+import { ClaraStateCompositionHandler } from "./ClaraStateCompositionHandler";
+import { wait } from "../../utils/utils";
+import { ClaraTask } from "../ClaraTask";
 
-export class AoTaskHandler extends AoTask {
-    private stateCompositionHandler: AoStateCompositionHandler;
+export class ClaraTaskHandler extends ClaraTask {
+    private stateCompositionHandler: ClaraStateCompositionHandler;
     constructor(client: ClientBase, runtime: IAgentRuntime) {
         super(client, runtime);
-        this.stateCompositionHandler = new AoStateCompositionHandler(
+        this.stateCompositionHandler = new ClaraStateCompositionHandler(
             this.runtime,
             this.client
         );
     }
 
-    async handle({ aoMessage, aoMessageId, aoRoomId }): Promise<void> {
-        const { payload, id, topic, requester } = aoMessage;
+    async handle({ claraMessage, claraMessageId, claraRoomId }): Promise<void> {
+        const { payload, id, topic, requester } = claraMessage;
         if (!payload || typeof payload !== "string") {
             elizaLogger.error(`Task id ${id}, invalid payload : `, payload);
             return;
@@ -46,55 +46,55 @@ export class AoTaskHandler extends AoTask {
             )
         ) {
             elizaLogger.log(
-                `AO task could not be processed, no action with name ${topic}.`
+                `Clara task could not be processed, no action with name ${topic}.`
             );
         }
         const userIdUUID = this.buildUserUUID(requester);
         await this.runtime.ensureConnection(
             userIdUUID,
-            aoRoomId,
+            claraRoomId,
             requester,
             requester,
-            "ao"
+            "clara"
         );
-        const memory = this.buildMemory(prompt, aoRoomId, userIdUUID);
+        const memory = this.buildMemory(prompt, claraRoomId, userIdUUID);
         const state = await this.stateCompositionHandler.handle(
-            aoMessage,
+            claraMessage,
             prompt,
             memory
         );
-        await this.saveAoTaskIfNeeded(
-            aoMessage,
-            aoRoomId,
-            aoMessageId,
+        await this.saveClaraTaskIfNeeded(
+            claraMessage,
+            claraRoomId,
+            claraMessageId,
             prompt,
             state
         );
         await this.processTaskInActions(
             state,
             memory,
-            aoMessage,
-            aoRoomId,
-            aoMessageId,
+            claraMessage,
+            claraRoomId,
+            claraMessageId,
             prompt,
             topic,
             id
         );
     }
 
-    private async saveAoTaskIfNeeded(
-        aoMessage: AoTaskType,
+    private async saveClaraTaskIfNeeded(
+        claraMessage: ClaraTaskType,
         roomId: UUID,
         messageId: UUID,
         prompt: string,
         state: State
     ) {
-        const { timestamp, requester } = aoMessage;
-        const aoMessageExists =
+        const { timestamp, requester } = claraMessage;
+        const claraMessageExists =
             await this.runtime.messageManager.getMemoryById(messageId);
 
-        if (!aoMessageExists) {
-            elizaLogger.log("AO message does not exist, saving");
+        if (!claraMessageExists) {
+            elizaLogger.log("Clara message does not exist, saving");
             const userIdUUID = stringToUuid(requester);
 
             const message = {
@@ -115,18 +115,18 @@ export class AoTaskHandler extends AoTask {
     private async processTaskInActions(
         state: any,
         memory: any,
-        aoMessage: AoTaskType,
+        claraMessage: ClaraTaskType,
         roomId: UUID,
         messageId: UUID,
         prompt: string,
         task: string,
         taskId: string
     ) {
-        const { id } = aoMessage;
+        const { id } = claraMessage;
         const self = this;
         try {
             const callback: HandlerCallback = async (content: Content) => {
-                await self.client.aoClient.sendTaskResult(taskId, content);
+                await self.client.claraClient.sendTaskResult(taskId, content);
                 return [];
             };
             const responseMessage: Memory = {
@@ -137,8 +137,8 @@ export class AoTaskHandler extends AoTask {
                 content: {
                     text: prompt,
                     action: task,
-                    source: "AoTheComputer",
-                    url: `https://www.ao.link/#/message/${id}`,
+                    source: "Clara",
+                    // url: `https://www.ao.link/#/message/${id}`,
                     // inReplyTo: stringToUuid(
                     //     id + "-" + this.client.runtime.agentId
                     // ),
@@ -162,12 +162,12 @@ export class AoTaskHandler extends AoTask {
         }
     }
 
-    private buildMemory(prompt: string, aoRoomId: UUID, userIdUUID: UUID) {
+    private buildMemory(prompt: string, claraRoomId: UUID, userIdUUID: UUID) {
         return {
             content: { text: prompt },
             agentId: this.runtime.agentId,
             userId: userIdUUID,
-            roomId: aoRoomId,
+            roomId: claraRoomId,
         };
     }
 
