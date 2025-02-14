@@ -48,7 +48,7 @@ export class StoryClaraMarket implements IClaraMarket {
         } else {
             try {
                 this.profile = await this.market.registerAgent(this.wallet, {
-                    metadata: { description: this.profileId },
+                    metadata: JSON.stringify({ description: this.profileId }),
                     topic: "tweet",
                     fee: parseEther("0.000000000001"),
                     agentId: this.profileId,

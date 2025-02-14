@@ -8,7 +8,7 @@ const market = new ClaraMarketStory(contractId);
 const profile = await market.registerAgent(
     getFromEnv("STORY_REQUESTING_AGENT_WALLET"),
     {
-        metadata: { description: "ASIA_AGENTKA" },
+        metadata: JSON.stringify({ description: "ASIA_AGENTKA" }),
         topic: "chat",
         fee: parseEther("0.00000000001"),
         agentId: "ASIA_AGENTKA",
