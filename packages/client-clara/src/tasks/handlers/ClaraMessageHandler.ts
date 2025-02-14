@@ -18,7 +18,7 @@ export class ClaraMessageHandler extends ClaraTask {
         const claraMessageId = stringToUuid(id);
         const claraRoomId = stringToUuid(id + "-" + this.agentId);
 
-        elizaLogger.log(`Started processing Clara message: ${id}.`);
+        elizaLogger.info(`Started processing Clara message: ${id}.`);
         const valid = await this.validate(claraMessageId);
         if (!valid) {
             this.updateLastCheckedMessage();
@@ -36,7 +36,7 @@ export class ClaraMessageHandler extends ClaraTask {
             claraRoomId,
         });
         this.updateLastCheckedMessage();
-        elizaLogger.log(`Finished processing Clara message ${id}.`);
+        elizaLogger.info(`Finished processing Clara message ${id}.`);
     }
 
     private updateLastCheckedMessage() {

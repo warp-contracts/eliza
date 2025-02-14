@@ -31,7 +31,7 @@ export class ClaraTaskClient {
     }
 
     private async handleTasks() {
-        elizaLogger.log("Checking CLARA tasks");
+        elizaLogger.info("Checking CLARA tasks");
         try {
             const messageToProcess = await this.getMessageToProcess();
             if (messageToProcess) {
@@ -40,7 +40,7 @@ export class ClaraTaskClient {
             await this.client.cacheLatestCheckedMessage(
                 this.client.claraConfig.CLARA_IMPL
             );
-            elizaLogger.log("Finished checking Clara tasks");
+            elizaLogger.info("Finished checking Clara tasks");
         } catch (error) {
             console.log(error);
             elizaLogger.error("Error handling Clara tasks:", error);
