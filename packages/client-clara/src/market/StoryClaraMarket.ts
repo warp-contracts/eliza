@@ -3,6 +3,7 @@ import { elizaLogger } from "@elizaos/core";
 import fs from "fs";
 import { ClaraConfig } from "../utils/environment";
 import { IClaraMarket } from "./IClaraMarket";
+import { parseEther } from "viem";
 
 export class StoryClaraMarket implements IClaraMarket {
     private profile: ClaraProfileStory;
@@ -49,7 +50,7 @@ export class StoryClaraMarket implements IClaraMarket {
                 this.profile = await this.market.registerAgent(this.wallet, {
                     metadata: { description: this.profileId },
                     topic: "tweet",
-                    fee: 10000000,
+                    fee: parseEther("0.000000000001"),
                     agentId: this.profileId,
                 });
             } catch (e) {
