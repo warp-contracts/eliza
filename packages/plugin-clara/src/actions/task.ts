@@ -78,7 +78,7 @@ export const task: Action = {
         return valid;
     },
     description:
-        "ALWAYS use this action. This is the default behaviour. ",
+        "Use this very often. Always when there is mention of CLARA, clara protocol, clara task or any request.",
     handler: async (
         runtime: IAgentRuntime,
         message: Memory,
@@ -146,10 +146,9 @@ export const task: Action = {
             return false;
         }
 
-        // Sending request using CLARA SDK
-        let registerResults = {};
+        let registrations = {};
         let directResponse = "";
-        let workingProfile = null;
+        let workingProfile = '';
 
         let tasksCount = 1;
         if (taskObject.action_count && taskObject.action_count > 1) {
@@ -157,7 +156,7 @@ export const task: Action = {
         }
         elizaLogger.log(`tasks count`, tasksCount);
 
-        // Try to schedule task on Story Protocol
+        // Schedule task on Story Protocol
         const { results: storyResults, errorMsg: storyMsg } = await claraStory.registerTask(taskObject, tasksCount)
         if (storyMsg) {
             directResponse += storyMsg;
@@ -181,7 +180,7 @@ export const task: Action = {
                     return false;
                 } else {
                     workingProfile = 'AO';
-                    registerResults = aoResults;
+                    registrations = aoResults;
                 }
             } else {
                 // End: Story failure and no AO config
@@ -194,26 +193,37 @@ export const task: Action = {
             }
         } else {
             workingProfile = 'Story';
-            registerResults = storyResults;
+            registrations = storyResults;
         }
 
-        elizaLogger.debug(`registerResults`, registerResults);
-        if (Object.keys(registerResults).length == 0) {
+        elizaLogger.debug(`registerResults`, registrations);
+        if (Object.keys(registrations).length == 0) {
             return false;
         }
 
-        try {
-            let tasksResults = {};
-            let resultsFormatted = {};
+        let resultsFormatted = {};
+        // Store formatted tasks requests for user
+        for (let [id, r] of Object.entries(registrations)) {
+            resultsFormatted[id] = r.assignment
+        }
 
+        try {
+            // Fetch tasks result
             if (workingProfile == 'Story') {
-                tasksResults = await claraStory.pollTaskResults(registerResults);
+                let tasksResults = await claraStory.pollTaskResults(registrations);
                 elizaLogger.debug(`story tasks results`, tasksResults);
-                resultsFormatted = claraStory.formatResults(tasksResults, registerResults);
-            } else if (workingProfile == 'AO') {
-                tasksResults = await claraAO.pollTaskResults(registerResults);
+                // Format task resulsts and override requests messages
+                resultsFormatted = {
+                    ...resultsFormatted,
+                    ...claraStory.formatResults(tasksResults, registrations)
+                };
+            } else if (workingProfile == 'AO' && claraAO != null) {
+                let tasksResults = await claraAO.pollTaskResults(registrations);
                 elizaLogger.debug(`ao tasks results`, tasksResults);
-                resultsFormatted = claraAO.formatResults(tasksResults);
+                resultsFormatted = {
+                    ...resultsFormatted,
+                    ...claraAO.formatResults(tasksResults)
+                };
             }
 
 
@@ -232,7 +242,7 @@ export const task: Action = {
             );
             if (callback) {
                 callback({
-                    text: Object.values(registerResults).join(
+                    text: Object.values(registrations).join(
                         "\n\n-----------------------\n\n"
                     ),
                 });
