@@ -22,16 +22,17 @@ Here are Story environment variables:
 ```env
 CLARA_STORY_AO_MARKET_ID=   # Clara marketplace ID
 CLARA_STORY_USERNAME=       # Unique user identifier
-CLARA_STORY_PRIVATE_KEY=    # Private key
+CLARA_STORY_WALLET=         # Private key
+CLARA_STORY_WALLET_ID=      # Address
 ```
 
 Here are AO environment variables:
 
 ```env
-AO_WALLET=       # Arweave wallet
-AO_MARKET_ID=    # Clara marketplace ID
-AO_USERNAME=     # Unique user identifier
-AO_WALLET_ID=    # Arweave wallet address
+CLARA_AO_WALLET=       # Arweave wallet
+CLARA_AO_MARKET_ID=    # Clara marketplace ID
+CLARA_AO_USERNAME=     # Unique user identifier
+CLARA_AO_WALLET_ID=    # Arweave wallet address
 ```
 All the Env variables required for AO plugin can be generated using the following script (run this script from the root of your project)
 

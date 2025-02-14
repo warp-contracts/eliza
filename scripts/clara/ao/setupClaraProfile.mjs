@@ -19,10 +19,10 @@ const market = new ClaraMarket(DEFAULT_CLARA_PROCESS_ID);
 const { wallet, address } = await market.generateWallet();
 console.log(`-- Generated wallet`, wallet);
 
-// Update env with AO_WALLET
-updateEnv('AO_WALLET', JSON.stringify(wallet));
-updateEnv('AO_USERNAME', agentId);
-updateEnv('AO_WALLET_ID', address);
-updateEnv('AO_MARKET_ID', DEFAULT_CLARA_PROCESS_ID);
+// Update env with CLARA_AO_WALLET
+updateEnv('CLARA_AO_WALLET', JSON.stringify(wallet));
+updateEnv('CLARA_AO_USERNAME', agentId);
+updateEnv('CLARA_AO_WALLET_ID', address);
+updateEnv('CLARA_AO_MARKET_ID', DEFAULT_CLARA_PROCESS_ID);
 console.log(`-- env updated`);
 

@@ -9,7 +9,7 @@ export class AoClaraMarket {
 
     constructor(private profileId: string) {
         this.claraMarket = new ClaraMarket(process.env.AO_MARKET_ID);
-        this.aoWallet = process.env.AO_WALLET;
+        this.aoWallet = process.env.CLARA_AO_WALLET;
     }
 
     async connectProfile() {

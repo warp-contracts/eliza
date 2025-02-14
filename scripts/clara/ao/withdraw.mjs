@@ -12,8 +12,8 @@ function getFromEnv(key) {
 }
 
 async function withdraw() {
-    const wallet = getFromEnv('AO_WALLET').replaceAll("'", '');
-    const marketId = getFromEnv('AO_MARKET_ID').replaceAll("'", '');
+    const wallet = getFromEnv('CLARA_AO_WALLET').replaceAll("'", '');
+    const marketId = getFromEnv('CLARA_AO_MARKET_ID').replaceAll("'", '');
     const claraProfile = new ClaraProfile(
         {
             id: 'agent_id',

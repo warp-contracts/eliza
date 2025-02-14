@@ -20,7 +20,7 @@ class ClaraManager {
 export const ClaraClientInterface: Client = {
     async start(runtime: IAgentRuntime) {
         let claraConfig: ClaraConfig;
-        if (runtime.getSetting("AO_WALLET") || process.env.AO_WALLET) {
+        if (runtime.getSetting("CLARA_AO_WALLET") || process.env.CLARA_AO_WALLET) {
             claraConfig = await validateAoConfig(runtime);
         } else {
             claraConfig = await validateStoryConfig(runtime);

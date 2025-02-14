@@ -15,7 +15,7 @@ export const storyClaraProfileProvider: Provider = {
         elizaLogger.log("Setting Story Clara market and profile ", profileId);
 
         const marketId = runtime.getSetting("CLARA_STORY_MARKET_ID");
-        const privateKey = runtime.getSetting("CLARA_STORY_PRIVATE_KEY");
+        const privateKey = runtime.getSetting("CLARA_STORY_WALLET");
 
         if (fs.existsSync(`${STORY_PROFILES_DIR}/${profileId}`)) {
             elizaLogger.info(`Agent already registered, connecting`, profileId);

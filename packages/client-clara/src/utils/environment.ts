@@ -18,20 +18,20 @@ export async function validateAoConfig(
     try {
         const aoConfig = {
             CLARA_USERNAME:
-                runtime.getSetting("AO_USERNAME") || process.env.AO_USERNAME,
+                runtime.getSetting("CLARA_AO_USERNAME") || process.env.CLARA_AO_USERNAME,
 
             CLARA_WALLET:
-                runtime.getSetting("AO_WALLET") || process.env.AO_WALLET,
+                runtime.getSetting("CLARA_AO_WALLET") || process.env.CLARA_AO_WALLET,
 
             CLARA_WALLET_ID:
-                runtime.getSetting("AO_WALLET_ID") || process.env.AO_WALLET_ID,
+                runtime.getSetting("CLARA_AO_WALLET_ID") || process.env.CLARA_AO_WALLET_ID,
 
             CLARA_MARKET_ID:
-                runtime.getSetting("AO_MARKET_ID") || process.env.AO_MARKET_ID,
+                runtime.getSetting("CLARA_AO_MARKET_ID") || process.env.CLARA_AO_MARKET_ID,
 
             CLARA_POLL_INTERVAL: safeParseInt(
-                runtime.getSetting("AO_POLL_INTERVAL") ||
-                    process.env.AO_POLL_INTERVAL,
+                runtime.getSetting("CLARA_AO_POLL_INTERVAL") ||
+                    process.env.CLARA_AO_POLL_INTERVAL,
                 120 // 2m
             ),
         };
@@ -59,23 +59,23 @@ export async function validateStoryConfig(
     try {
         const storyConfig = {
             CLARA_USERNAME:
-                runtime.getSetting("STORY_USERNAME") ||
-                process.env.STORY_USERNAME,
+                runtime.getSetting("CLARA_STORY_USERNAME") ||
+                process.env.CLARA_STORY_USERNAME,
 
             CLARA_WALLET:
-                runtime.getSetting("STORY_WALLET") || process.env.STORY_WALLET,
+                runtime.getSetting("CLARA_STORY_WALLET") || process.env.CLARA_STORY_WALLET,
 
             CLARA_WALLET_ID:
-                runtime.getSetting("STORY_WALLET_ID") ||
-                process.env.STORY_WALLET_ID,
+                runtime.getSetting("CLARA_STORY_WALLET_ID") ||
+                process.env.CLARA_STORY_WALLET_ID,
 
             CLARA_MARKET_ID:
-                runtime.getSetting("STORY_MARKET_ID") ||
-                process.env.STORY_MARKET_ID,
+                runtime.getSetting("CLARA_STORY_MARKET_ID") ||
+                process.env.CLARA_STORY_MARKET_ID,
 
             CLARA_POLL_INTERVAL: safeParseInt(
-                runtime.getSetting("AO_POLL_INTERVAL") ||
-                    process.env.AO_POLL_INTERVAL,
+                runtime.getSetting("CLARA_AO_POLL_INTERVAL") ||
+                    process.env.CLARA_AO_POLL_INTERVAL,
                 120 // 2m
             ),
         };

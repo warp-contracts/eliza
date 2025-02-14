@@ -15,7 +15,7 @@ function getFromEnv(key) {
 }
 
 async function transfer() {
-    const wallet = getFromEnv('AO_WALLET').replaceAll("'", '')
+    const wallet = getFromEnv('CLARA_AO_WALLET').replaceAll("'", '')
     const signer = createDataItemSigner(JSON.parse(wallet));
     const id = await message({
       process: TOKEN_ID,
