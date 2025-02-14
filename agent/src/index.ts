@@ -158,7 +158,7 @@ import { formPlugin } from "@elizaos/plugin-form";
 import { MongoClient } from "mongodb";
 import { quickIntelPlugin } from "@elizaos/plugin-quick-intel";
 import ClaraClientInterface from "@elizaos/client-clara";
-import { aoPlugin } from "@elizaos/plugin-ao";
+import { claraPlugin } from "@elizaos/plugin-clara";
 import twitterPlugin from "@elizaos/plugin-twitter";
 
 import { trikonPlugin } from "@elizaos/plugin-trikon";
@@ -1026,7 +1026,6 @@ export async function createAgent(
         character,
         // character.plugins are handled when clients are added
         plugins: [
-            twitterPlugin,
             parseBooleanFromText(getSecret(character, "BITMIND")) &&
             getSecret(character, "BITMIND_API_TOKEN")
                 ? bittensorPlugin
@@ -1054,7 +1053,7 @@ export async function createAgent(
                 ? confluxPlugin
                 : null,
             nodePlugin,
-            getSecret(character, "AO_WALLET") ? aoPlugin : null,
+            (getSecret(character, "AO_WALLET") || getSecret(character, "CLARA_STORY_PRIVATE_KEY")) ? claraPlugin : null,
             getSecret(character, "ROUTER_NITRO_EVM_PRIVATE_KEY") &&
             getSecret(character, "ROUTER_NITRO_EVM_ADDRESS")
                 ? nitroPlugin

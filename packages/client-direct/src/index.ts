@@ -290,7 +290,7 @@ export class DirectClient {
                 const response = await generateMessageResponse({
                     runtime: runtime,
                     context,
-                    modelClass: ModelClass.MEDIUM,
+                    modelClass: ModelClass.LARGE,
                 });
 
                 if (!response) {
@@ -502,7 +502,7 @@ export class DirectClient {
                 const response = await generateObject({
                     runtime,
                     context,
-                    modelClass: ModelClass.SMALL, // 1s processing time on openai small
+                    modelClass: ModelClass.LARGE, // 1s processing time on openai small
                     schema: hyperfiOutSchema,
                 });
 
@@ -805,7 +805,7 @@ export class DirectClient {
                 const response = await generateMessageResponse({
                     runtime: runtime,
                     context,
-                    modelClass: ModelClass.MEDIUM,
+                    modelClass: ModelClass.LARGE,
                 });
 
                 // save response to memory

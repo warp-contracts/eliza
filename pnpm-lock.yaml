@@ -223,9 +223,6 @@ importers:
       '@elizaos/plugin-ankr':
         specifier: workspace:*
         version: link:../packages/plugin-ankr
-      '@elizaos/plugin-ao':
-        specifier: workspace:*
-        version: link:../packages/plugin-ao
       '@elizaos/plugin-aptos':
         specifier: workspace:*
         version: link:../packages/plugin-aptos
@@ -265,6 +262,9 @@ importers:
       '@elizaos/plugin-chainbase':
         specifier: workspace:*
         version: link:../packages/plugin-chainbase
+      '@elizaos/plugin-clara':
+        specifier: workspace:*
+        version: link:../packages/plugin-clara
       '@elizaos/plugin-coinbase':
         specifier: workspace:*
         version: link:../packages/plugin-coinbase
@@ -1937,33 +1937,6 @@ importers:
         specifier: ^3.0.0
         version: 3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(jsdom@25.0.1(bufferutil@4.0.9)(canvas@2.11.2(encoding@0.1.13))(utf-8-validate@6.0.5))(terser@5.38.0)
 
-  packages/plugin-ao:
-    dependencies:
-      '@elizaos/core':
-        specifier: workspace:*
-        version: link:../core
-      '@permaweb/aoconnect':
-        specifier: ^0.0.62
-        version: 0.0.62
-      form-data:
-        specifier: 4.0.1
-        version: 4.0.1
-      node-cache:
-        specifier: 5.1.2
-        version: 5.1.2
-      redstone-clara-sdk:
-        specifier: ^0.0.21
-        version: 0.0.21
-      tsup:
-        specifier: 8.3.5
-        version: 8.3.5(@swc/core@1.10.14(@swc/helpers@0.5.15))(jiti@2.4.2)(postcss@8.5.1)(tsx@4.19.2)(typescript@5.7.3)(yaml@2.7.0)
-      vitest:
-        specifier: 2.1.4
-        version: 2.1.4(@types/node@22.13.1)(jsdom@25.0.1(bufferutil@4.0.9)(canvas@2.11.2(encoding@0.1.13))(utf-8-validate@6.0.5))(terser@5.38.0)
-      whatwg-url:
-        specifier: 7.1.0
-        version: 7.1.0
-
   packages/plugin-apro:
     dependencies:
       '@elizaos/core':
@@ -2427,6 +2400,33 @@ importers:
       vitest:
         specifier: ^3.0.5
         version: 3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(jsdom@25.0.1(bufferutil@4.0.9)(canvas@2.11.2(encoding@0.1.13))(utf-8-validate@6.0.5))(terser@5.38.0)
+
+  packages/plugin-clara:
+    dependencies:
+      '@elizaos/core':
+        specifier: workspace:*
+        version: link:../core
+      '@permaweb/aoconnect':
+        specifier: ^0.0.62
+        version: 0.0.62
+      form-data:
+        specifier: 4.0.1
+        version: 4.0.1
+      node-cache:
+        specifier: 5.1.2
+        version: 5.1.2
+      redstone-clara-sdk:
+        specifier: ^0.0.25
+        version: 0.0.25(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.24.1)
+      tsup:
+        specifier: 8.3.5
+        version: 8.3.5(@swc/core@1.10.14(@swc/helpers@0.5.15))(jiti@2.4.2)(postcss@8.5.1)(tsx@4.19.2)(typescript@5.7.3)(yaml@2.7.0)
+      vitest:
+        specifier: 2.1.4
+        version: 2.1.4(@types/node@22.13.1)(jsdom@25.0.1(bufferutil@4.0.9)(canvas@2.11.2(encoding@0.1.13))(utf-8-validate@6.0.5))(terser@5.38.0)
+      whatwg-url:
+        specifier: 7.1.0
+        version: 7.1.0
 
   packages/plugin-coinbase:
     dependencies:
@@ -24883,12 +24883,12 @@ packages:
     resolution: {integrity: sha512-DJnGAeenTdpMEH6uAJRK/uiyEIH9WVsUmoLwzudwGJUwZPp80PDBWPHXSAGNPwNvIXAbe7MSUB1zQFugFml66A==}
     engines: {node: '>=4'}
 
-  redstone-clara-sdk@0.0.21:
-    resolution: {integrity: sha512-BU2djdj8d/kH6SOYLpr/159n7bwgTe9/CmxO6AYBs2PjiX89zjsyiP0i+pwpYu01VXeyqR169QPG/hcB1avZQQ==}
-    engines: {node: '>=20'}
-
   redstone-clara-sdk@0.0.23:
     resolution: {integrity: sha512-1d44YnUyhbJy6/UsNU4if9jwf2/cTrDjOWRdI8nC3sobAGIGENajeF2VPdnApMz9Dc8kaYMC8x6KAvM0zsn+Hg==}
+    engines: {node: '>=20'}
+
+  redstone-clara-sdk@0.0.25:
+    resolution: {integrity: sha512-6aROcu07+l2u1Kd0bwwT8w4Ws0JUcuQSsWnXRynEbHMV2RkNjbORxd/wygIbji3LLZm2jRNWW065ut20smzX9A==}
     engines: {node: '>=20'}
 
   reflect-metadata@0.1.13:
@@ -62724,20 +62724,25 @@ snapshots:
     dependencies:
       redis-errors: 1.2.0
 
-  redstone-clara-sdk@0.0.21:
-    dependencies:
-      '@permaweb/aoconnect': 0.0.62
-      arweave: 1.15.5
-      exponential-backoff: 3.1.1
-    transitivePeerDependencies:
-      - supports-color
-
   redstone-clara-sdk@0.0.23(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.23.8):
     dependencies:
       '@permaweb/aoconnect': 0.0.62
       arweave: 1.15.5
       exponential-backoff: 3.1.1
       viem: 2.21.58(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.23.8)
+    transitivePeerDependencies:
+      - bufferutil
+      - supports-color
+      - typescript
+      - utf-8-validate
+      - zod
+
+  redstone-clara-sdk@0.0.25(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.24.1):
+    dependencies:
+      '@permaweb/aoconnect': 0.0.62
+      arweave: 1.15.5
+      exponential-backoff: 3.1.1
+      viem: 2.21.58(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.24.1)
     transitivePeerDependencies:
       - bufferutil
       - supports-color

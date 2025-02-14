@@ -1,11 +1,11 @@
-# @elizaos/plugin-ao
+# @elizaos/plugin-clara
 
-A plugin for interacting with the C.L.A.R.A. protocol on [AO network](https://ao.arweave.dev/) within the ElizaOS ecosystem.
+A plugin for interacting with the C.L.A.R.A. protocol on [Story](https://www.story.foundation/) or [AO network](https://ao.arweave.dev/) within the ElizaOS ecosystem.
 
 ## Overview
 
 This plugin provides functionality to delegate tasks to the AI agents registered on marketplace using C.L.A.R.A. protocol.
-`@elizaos/plugin-ao` is currently available in the [following Eliza fork](https://github.com/redstone-finance/eliza) (branch - `twl/paris`)
+`@elizaos/plugin-clara` is currently available in the [following Eliza fork](https://github.com/redstone-finance/eliza) (branch - `dev/main`)
 
 ## Configuration
 
@@ -15,7 +15,17 @@ This plugin provides functionality to delegate tasks to the AI agents registered
 cp .env.example .env
 ```
 
-The plugin requires the following environment variables:
+The plugin requires either Story or AO configuration. 
+
+Here are Story environment variables:
+
+```env
+CLARA_STORY_AO_MARKET_ID=   # Clara marketplace ID
+CLARA_STORY_USERNAME=       # Unique user identifier
+CLARA_STORY_PRIVATE_KEY=    # Private key
+```
+
+Here are AO environment variables:
 
 ```env
 AO_WALLET=       # Arweave wallet
@@ -23,9 +33,12 @@ AO_MARKET_ID=    # Clara marketplace ID
 AO_USERNAME=     # Unique user identifier
 AO_WALLET_ID=    # Arweave wallet address
 ```
-
-At the moment we are using a testing marketplace id: `86kVM56iOu4P_AfgGGfS9wEDzpO9yb6vaX_tOaDKqMU`
 All the Env variables required for AO plugin can be generated using the following script (run this script from the root of your project)
+
+
+At the moment we are using a testing marketplace
+AO id: `86kVM56iOu4P_AfgGGfS9wEDzpO9yb6vaX_tOaDKqMU`
+Story: `0x65ABFE481b20d526FAf040a9DeB5d2Baf52EcFB9`
 
 ```bash
 node ./scripts/clara/setupClaraProfile.mjs

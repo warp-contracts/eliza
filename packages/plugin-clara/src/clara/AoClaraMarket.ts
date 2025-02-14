@@ -15,6 +15,10 @@ export class AoClaraMarket {
     async connectProfile() {
         elizaLogger.info("connecting profile", this.profileId);
         const parsedWallet = JSON.parse(this.aoWallet);
+        if (this.aoWallet == null) {
+            elizaLogger.error(`ao wallet not configured`);
+            return;
+        }
         if (fs.existsSync(`../profiles/${this.profileId}`)) {
             elizaLogger.info(
                 `Agent already registered, connecting`,
@@ -43,7 +47,6 @@ export class AoClaraMarket {
                 throw new Error(`Could not create Clara profile`);
             }
             fs.mkdirSync(`../profiles/${this.profileId}`, { recursive: true });
-            console.log(this.claraProfile);
         }
     }
 }

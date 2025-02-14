@@ -1,5 +1,5 @@
-import {elizaLogger, IAgentRuntime, Memory, Provider, State} from "@elizaos/core";
-import {AoClaraMarket} from "./AoClaraMarket.ts";
+import { elizaLogger, IAgentRuntime, Memory, Provider, State } from "@elizaos/core";
+import { AoClaraMarket } from "./AoClaraMarket.ts";
 import { ClaraProfile } from "redstone-clara-sdk";
 
 let aoClaraMarket: AoClaraMarket = null;
@@ -20,7 +20,7 @@ export const aoClaraProfileProvider: Provider = {
             }
             return aoClaraMarket.claraProfile;
         } catch (error) {
-            console.error("Error in wallet provider:", error);
+            elizaLogger.error("Failed to setup ao wallet:", error);
             return null;
         }
     },
