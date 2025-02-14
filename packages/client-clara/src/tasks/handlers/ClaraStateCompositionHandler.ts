@@ -1,22 +1,22 @@
 import { elizaLogger, IAgentRuntime, Memory, State } from "@elizaos/core";
-import { AoTaskType } from "../../ao_types";
+import { ClaraTaskType } from "../../utils/claraTypes";
 import { ClientBase } from "../../base";
-import { AoTask } from "../AoTask";
-import { buildConversationThread } from "../../utils";
+import { ClaraTask } from "../ClaraTask";
+import { buildConversationThread } from "../../utils/utils";
 
-export class AoStateCompositionHandler extends AoTask {
+export class ClaraStateCompositionHandler extends ClaraTask {
     constructor(runtime: IAgentRuntime, client: ClientBase) {
         super(client, runtime);
     }
 
     async handle(
-        aoMessage: AoTaskType,
+        claraMessage: ClaraTaskType,
         prompt: string,
         memory: Memory
     ): Promise<State> {
-        const currentMessage = this.formatMessage(aoMessage, prompt);
+        const currentMessage = this.formatMessage(claraMessage, prompt);
         const thread = await buildConversationThread(
-            aoMessage,
+            claraMessage,
             prompt,
             this.client
         );
@@ -36,21 +36,21 @@ export class AoStateCompositionHandler extends AoTask {
             .join("\n\n");
 
         elizaLogger.info(
-            `Formated conversation for message id: ${aoMessage.id}`,
+            `Formated conversation for message id: ${claraMessage.id}`,
             formattedConversation
         );
         return await this.runtime.composeState(memory, {
-            aoClient: this.client.aoClient,
-            aoUserName: this.client.aoConfig.AO_USERNAME,
+            claraClient: this.client.claraClient,
+            claraUserName: this.client.claraConfig.CLARA_USERNAME,
             currentMessage,
             formattedConversation,
             recentPostInteractions: [formattedConversation],
         });
     }
 
-    formatMessage(aoMessage: AoTaskType, prompt: string) {
-        return `  ID: ${aoMessage.id}
-  From: ${aoMessage.requester} (@${aoMessage.requester})
+    formatMessage(claraMessage: ClaraTaskType, prompt: string) {
+        return `  ID: ${claraMessage.id}
+  From: ${claraMessage.requester} (@${claraMessage.requester})
   Text: ${prompt}`;
     }
 }

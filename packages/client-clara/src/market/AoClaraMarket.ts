@@ -1,15 +1,27 @@
 import { ClaraMarket, ClaraProfile } from "redstone-clara-sdk";
 import { elizaLogger } from "@elizaos/core";
 import fs from "fs";
+import { ClaraConfig } from "../utils/environment";
+import { IClaraMarket } from "./IClaraMarket";
+import { parseEther } from "viem";
 
-export class AoClaraMarket {
-    profile: ClaraProfile;
+export class AoClaraMarket implements IClaraMarket {
+    private profile: ClaraProfile;
     private market: ClaraMarket;
-    private aoWallet: string;
+    private wallet: string;
 
-    constructor(private profileId: string) {
-        this.market = new ClaraMarket(process.env.AO_MARKET_ID);
-        this.aoWallet = process.env.AO_WALLET;
+    constructor(private profileId: string, private claraConfig: ClaraConfig) {
+        this.market = new ClaraMarket(this.claraConfig.CLARA_MARKET_ID);
+        this.wallet = this.claraConfig.CLARA_WALLET;
+    }
+    getProfile() {
+        return this.profile;
+    }
+    getMarket() {
+        return this.market;
+    }
+    getWallet(): string {
+        return this.wallet;
     }
 
     async init() {
@@ -18,7 +30,7 @@ export class AoClaraMarket {
 
     async connectProfile(): Promise<void> {
         elizaLogger.info("connecting profile", this.profileId);
-        const parsedWallet = JSON.parse(this.aoWallet);
+        const parsedWallet = JSON.parse(this.wallet);
         if (fs.existsSync(`../profiles/${this.profileId}`)) {
             elizaLogger.info(
                 `Agent already registered, connecting`,
@@ -36,7 +48,7 @@ export class AoClaraMarket {
                 this.profile = await this.market.registerAgent(parsedWallet, {
                     metadata: { description: this.profileId },
                     topic: "tweet",
-                    fee: 100000000,
+                    fee: parseEther("0.000000000001"),
                     agentId: this.profileId,
                 });
             } catch (e) {

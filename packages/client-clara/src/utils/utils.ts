@@ -1,8 +1,8 @@
 import { getEmbeddingZeroVector } from "@elizaos/core";
 import { stringToUuid } from "@elizaos/core";
-import { ClientBase } from "./base";
+import { ClientBase } from "../base.ts";
 import { elizaLogger } from "@elizaos/core";
-import { AoTaskType, NodeType } from "./ao_types.ts";
+import { ClaraTaskType } from "./claraTypes.ts";
 
 export const wait = (minTime: number = 1000, maxTime: number = 3000) => {
     const waitTime =
@@ -11,16 +11,16 @@ export const wait = (minTime: number = 1000, maxTime: number = 3000) => {
 };
 
 export async function buildConversationThread(
-    aoMessage: AoTaskType,
+    aoMessage: ClaraTaskType,
     prompt: string,
     client: ClientBase,
     maxReplies: number = 10
-): Promise<AoTaskType[]> {
-    const thread: AoTaskType[] = [];
+): Promise<ClaraTaskType[]> {
+    const thread: ClaraTaskType[] = [];
     const visited: Set<string> = new Set();
 
     async function processThread(
-        currentMessage: AoTaskType,
+        currentMessage: ClaraTaskType,
         depth: number = 0
     ) {
         elizaLogger.debug("Processing message:", {
@@ -54,7 +54,7 @@ export async function buildConversationThread(
                 roomId,
                 currentMessage.requester,
                 currentMessage.requester,
-                "ao"
+                "clara"
             );
 
             await client.runtime.messageManager.createMemory({
@@ -64,7 +64,7 @@ export async function buildConversationThread(
                 agentId: client.runtime.agentId,
                 content: {
                     text: prompt,
-                    source: "AoTheComputer",
+                    source: "Clara",
                     url: currentMessage.id,
                 },
                 createdAt: currentMessage.timestamp,
