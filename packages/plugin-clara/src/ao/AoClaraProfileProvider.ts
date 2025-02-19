@@ -1,5 +1,5 @@
 import { elizaLogger, IAgentRuntime, Memory, Provider, State } from "@elizaos/core";
-import { AoClaraMarket } from "./AoClaraMarket.ts";
+import { AoClaraMarket } from "../ao/AoClaraMarket.ts";
 import { ClaraProfile } from "redstone-clara-sdk";
 
 let aoClaraMarket: AoClaraMarket = null;

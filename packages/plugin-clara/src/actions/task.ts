@@ -11,8 +11,8 @@ import {
     type Action,
 } from "@elizaos/core";
 import { z } from "zod";
-import { aoClaraProfileProvider } from "../clara/AoClaraProfileProvider.ts";
-import { storyClaraProfileProvider } from "../clara/StoryClaraProfileProvider.ts";
+import { aoClaraProfileProvider } from "../ao/AoClaraProfileProvider.ts";
+import { storyClaraProfileProvider } from "../story/StoryClaraProfileProvider.ts";
 import { TOPICS, MATCHERS } from "redstone-clara-sdk";
 import { ClaraStoryProtocol } from "../story/ClaraStoryProtocol.ts";
 import { ClaraAoProtocol } from "../ao/ClaraAoProtocol.ts";
@@ -235,14 +235,10 @@ export const task: Action = {
             }
             return true;
         } catch (e) {
-            elizaLogger.error(
-                `AO plugin: failed to fetch request result using CLARA SDK`,
-                message.content,
-                e
-            );
+            elizaLogger.error(`CLARA plugin: failed to fetch request result using CLARA SDK: ${e}`);
             if (callback) {
                 callback({
-                    text: Object.values(registrations).join(
+                    text: Object.values(resultsFormatted).join(
                         "\n\n-----------------------\n\n"
                     ),
                 });

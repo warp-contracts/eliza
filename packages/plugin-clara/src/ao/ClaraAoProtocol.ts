@@ -1,13 +1,13 @@
-import { ClaraProfile } from "redstone-clara-sdk";
+import { ClaraProfileAO } from "redstone-clara-sdk";
 import {
     elizaLogger,
 } from "@elizaos/core";
 import { formatTwitterMessage } from "../actions/utils";
 
 export class ClaraAoProtocol {
-    readonly profile: ClaraProfile;
+    readonly profile: ClaraProfileAO;
 
-    constructor(claraStoryProfile: ClaraProfile) {
+    constructor(claraStoryProfile: ClaraProfileAO) {
         this.profile = claraStoryProfile;
     }
 
@@ -30,8 +30,7 @@ export class ClaraAoProtocol {
                 };
             }
         } catch (e) {
-            console.log(e);
-            elizaLogger.error(`CLARA plugin: failed to send request using CLARA SDK on AO`, e);
+            elizaLogger.error(`CLARA plugin: failed to send request using CLARA SDK on AO: ${e}`, e);
             errorMsg += `Failed to schedule CLARA tasks on AO`
         }
         return { results, errorMsg }

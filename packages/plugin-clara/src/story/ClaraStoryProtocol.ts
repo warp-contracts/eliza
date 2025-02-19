@@ -44,8 +44,7 @@ export class ClaraStoryProtocol {
                 };
             }
         } catch (e) {
-            console.log(e);
-            elizaLogger.error(`CLARA plugin: failed to send request using CLARA SDK on Story`, e);
+            elizaLogger.error(`CLARA plugin: failed to send request using CLARA SDK on Story: ${e}`);
             errorMsg = `Failed to schedule CLARA tasks on Story`;
         }
         return { results, errorMsg }
@@ -64,21 +63,21 @@ export class ClaraStoryProtocol {
     async pollTaskResults(responses: any, interval = 10, duration = 300) {
         const startTime = Date.now();
         let total = 0;
-        let cursor = 0;
+        let blockNumber = 0;
         const reqTaskId = Object.keys(responses);
-        console.log("reqTaskId", reqTaskId);
+        elizaLogger.debug("Requested tasks ids", reqTaskId);
         reqTaskId.forEach((key: string) => {
             total += parseInt(responses[key].numberOfAgents);
-            if (cursor == 0) {
-                cursor = responses[key].blockNumber;
-            } else if (responses[key].blockNumber < cursor) {
-                cursor = responses[key].blockNumber;
+            if (blockNumber == 0) {
+                blockNumber = responses[key].blockNumber;
+            } else if (responses[key].blockNumber < blockNumber) {
+                blockNumber = responses[key].blockNumber;
             }
         });
-        console.log("total", total);
         const results = {};
 
         return new Promise((resolve, reject) => {
+            let cursor = blockNumber;
             const intervalId = setInterval(async () => {
                 const elapsedTime = Date.now() - startTime;
 
@@ -89,22 +88,24 @@ export class ClaraStoryProtocol {
                 }
 
                 try {
-                    const loadTaskResult = (await this.profile.loadNextTaskResult(cursor));
-                    cursor = loadTaskResult.cursor;
-                    elizaLogger.debug(`next task `, loadTaskResult);
-                    if (loadTaskResult.result) {
-                        if (reqTaskId.includes(loadTaskResult.result.id.toString())) {
-                            elizaLogger.debug(`found req task`, loadTaskResult.result.id);
+                    const { cursor: nextCursor, txHash, result: loadedTask } = (await this.profile.loadNextTaskResult(cursor));
+                    cursor = nextCursor;
+                    elizaLogger.debug(`next task, hash ${txHash}: `, loadedTask);
+                    if (loadedTask) {
+                        if (reqTaskId.includes(loadedTask.id.toString())) {
+                            elizaLogger.debug(`found req task`, loadedTask.id);
                             total -= 1;
-
                         }
-                        let taskResult = {};
+                        let result = {};
                         try {
-                            taskResult = JSON.parse(loadTaskResult.result.result);
+                            result = JSON.parse(loadedTask.result);
                         } catch (e) {
-                            elizaLogger.error(`Failed to parse task result`, loadTaskResult)
+                            elizaLogger.error(`Failed to parse task result`, loadedTask.result)
                         }
-                        results[loadTaskResult.result.id] = taskResult;
+                        results[loadedTask.id] = {
+                            result,
+                            txHash
+                        };
 
                         if (total <= 0) {
                             clearInterval(intervalId);
@@ -124,15 +125,17 @@ export class ClaraStoryProtocol {
         for (const [key, value] of Object.entries(tasks)) {
             elizaLogger.debug(`key value`, key, value, registerResults[key]);
             responses[key] =
-                formatTwitterMessage(value) +
-                this.formatTaskResult(key, registerResults[key]);
+                `\n-- Task Result \n` +
+                formatTwitterMessage(value.result) +
+                this.formatTaskResult(registerResults[key], value);
         }
         return responses;
     }
 
-    formatTaskResult(taskResultId: string, result): string {
-        return `\n-- Task Result: ${taskResultId}
-            \nAssigned to\nhttps://aeneid.storyscan.xyz/address/${result?.agentId}\n\nFee: ${result?.reward}
-            \nC.L.A.R.A. req: https://aeneid.storyscan.xyz/tx/${result?.txHash}\n`;
+    formatTaskResult(registration, result): string {
+        return `
+            \nAssigned to\nhttps://aeneid.storyscan.xyz/address/${registration?.agentId}\n\nFee: ${registration?.reward}
+            \nResult: https://aeneid.storyscan.xyz/tx/${result?.txHash}
+            \nReq: https://aeneid.storyscan.xyz/tx/${registration?.txHash}\n`;
     }
 }

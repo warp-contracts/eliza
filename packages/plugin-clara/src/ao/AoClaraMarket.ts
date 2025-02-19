@@ -1,14 +1,14 @@
-import { ClaraMarket, ClaraProfile } from "redstone-clara-sdk";
+import { ClaraMarketAO, ClaraProfileAO } from "redstone-clara-sdk";
 import fs from "fs";
 import { elizaLogger } from "@elizaos/core";
 
 export class AoClaraMarket {
-    private claraMarket: ClaraMarket;
-    claraProfile: ClaraProfile;
+    private claraMarket: ClaraMarketAO;
+    claraProfile: ClaraProfileAO;
     private aoWallet: string;
 
     constructor(private profileId: string) {
-        this.claraMarket = new ClaraMarket(process.env.AO_MARKET_ID);
+        this.claraMarket = new ClaraMarketAO(process.env.AO_MARKET_ID);
         this.aoWallet = process.env.CLARA_AO_WALLET;
     }
 
@@ -24,7 +24,7 @@ export class AoClaraMarket {
                 `Agent already registered, connecting`,
                 this.profileId
             );
-            this.claraProfile = new ClaraProfile(
+            this.claraProfile = new ClaraProfileAO(
                 {
                     id: this.profileId,
                     jwk: parsedWallet,
