@@ -6,10 +6,34 @@ import fs from "fs";
 const STORY_PROFILES_DIR = `../story/profiles`;
 
 
+function storyProfileProvider(claraProfile): Provider {
+    return {
+        get: async (
+            runtime: IAgentRuntime,
+            _message: Memory,
+            _: State
+        ): Promise<ClaraProfileStory | null> => {
+            return claraProfile;
+        },
+    }
+}
+
 export async function initializeClaraProfileProvider(): Provider {
+    const pluginEnabled = process.env.ENABLE_CLARA_PROTOCOL_PLUGIN;
+    if (!pluginEnabled) {
+        elizaLogger.info(`Clara protocol plugin is disabled`);
+        return storyProfileProvider(null);
+    }
+
     const privateKey = process.env.CLARA_STORY_PRIVATE_KEY;
     const userName = process.env.CLARA_STORY_USERNAME;
     const marketId = process.env.CLARA_STORY_MARKET_ID;
+
+    if (!privateKey || !userName || !marketId) {
+        elizaLogger.error(`Missing Clara protocol plugin settings`);
+        return storyProfileProvider(null);
+    }
+
     elizaLogger.log(`Setting Story Clara profile ${userName} for market ${marketId}`);
 
     const storyAccount = privateKeyToAccount(privateKey);
@@ -38,16 +62,7 @@ export async function initializeClaraProfileProvider(): Provider {
         }
         fs.mkdirSync(`${STORY_PROFILES_DIR}/${userName}`, { recursive: true });
     }
-
-    return {
-        get: async (
-            runtime: IAgentRuntime,
-            _message: Memory,
-            _: State
-        ): Promise<ClaraProfileStory | null> => {
-            return claraProfile;
-        },
-    }
+    storyProfileProvider(claraProfile);
 }
 
 export const storyClaraProfileProvider = await initializeClaraProfileProvider();

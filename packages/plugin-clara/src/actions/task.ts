@@ -64,6 +64,10 @@ export const task: Action = {
     suppressInitialMessage: true,
     validate: async (runtime: IAgentRuntime, message: Memory) => {
         elizaLogger.debug("Validating :", message.userId);
+        const pluginEnabled = runtime.getSetting("ENABLE_CLARA_PROTOCOL_PLUGIN");
+        if (!pluginEnabled) {
+            return false;
+        }
         let valid = false;
         try {
             valid = valid || (await aoClaraProfileProvider.get(runtime, message) != null);
