@@ -1,4 +1,4 @@
-import {elizaLogger, IAgentRuntime, Memory, Provider, State} from "@elizaos/core";
+import {elizaLogger, IAgentRuntime, Memory, Provider, State, parseBooleanFromText} from "@elizaos/core";
 import { ClaraMarketStory, ClaraProfileStory } from "redstone-clara-sdk";
 import { privateKeyToAccount } from "viem/accounts";
 import fs from "fs";
@@ -19,7 +19,7 @@ function storyProfileProvider(claraProfile): Provider {
 }
 
 export async function initializeClaraProfileProvider(): Provider {
-    const pluginEnabled = process.env.ENABLE_CLARA_PROTOCOL_PLUGIN;
+    const pluginEnabled = parseBooleanFromText(process.env.ENABLE_CLARA_PROTOCOL_PLUGIN);
     if (!pluginEnabled) {
         elizaLogger.info(`Clara protocol plugin is disabled`);
         return storyProfileProvider(null);

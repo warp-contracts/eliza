@@ -9,6 +9,7 @@ import {
     elizaLogger,
     generateObject,
     type Action,
+    parseBooleanFromText,
 } from "@elizaos/core";
 import { z } from "zod";
 import { aoClaraProfileProvider } from "../ao/AoClaraProfileProvider.ts";
@@ -64,7 +65,7 @@ export const task: Action = {
     suppressInitialMessage: true,
     validate: async (runtime: IAgentRuntime, message: Memory) => {
         elizaLogger.debug("Validating :", message.userId);
-        const pluginEnabled = runtime.getSetting("ENABLE_CLARA_PROTOCOL_PLUGIN");
+        const pluginEnabled = parseBooleanFromText(runtime.getSetting("ENABLE_CLARA_PROTOCOL_PLUGIN"));
         if (!pluginEnabled) {
             return false;
         }
