@@ -122,6 +122,11 @@ const sidebars = {
                     id: "advanced/verified-inference",
                     label: "Verified Inference",
                 },
+                {
+                    type: "doc",
+                    id: "advanced/clara-protocol",
+                    label: "CLARA Protocol",
+                },
             ],
         },
         {
