@@ -1026,6 +1026,7 @@ export async function createAgent(
         character,
         // character.plugins are handled when clients are added
         plugins: [
+            twitterPlugin,
             parseBooleanFromText(getSecret(character, "BITMIND")) &&
             getSecret(character, "BITMIND_API_TOKEN")
                 ? bittensorPlugin
@@ -1053,7 +1054,9 @@ export async function createAgent(
                 ? confluxPlugin
                 : null,
             nodePlugin,
-            parseBooleanFromText(getSecret(character, "ENABLE_CLARA_PROTOCOL_PLUGIN"))
+            parseBooleanFromText(
+                getSecret(character, "ENABLE_CLARA_PROTOCOL_PLUGIN")
+            )
                 ? claraPlugin
                 : null,
             getSecret(character, "ROUTER_NITRO_EVM_PRIVATE_KEY") &&
@@ -1080,8 +1083,8 @@ export async function createAgent(
                 getSecret(character, "WALLET_PUBLIC_KEY")?.startsWith("0x"))
                 ? evmPlugin
                 : null,
-            (getSecret(character, "EVM_PRIVATE_KEY") ||
-                getSecret(character, "SOLANA_PRIVATE_KEY"))
+            getSecret(character, "EVM_PRIVATE_KEY") ||
+            getSecret(character, "SOLANA_PRIVATE_KEY")
                 ? edwinPlugin
                 : null,
             (getSecret(character, "EVM_PUBLIC_KEY") ||

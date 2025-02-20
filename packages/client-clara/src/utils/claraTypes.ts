@@ -12,10 +12,4 @@ export type ClaraTaskType = {
     payload: string;
     block?: number;
     blockNumber?: number;
-    cursor?: number;
-};
-
-export type ClaraLoadTaskType = {
-    result: ClaraTaskType;
-    cursor: number;
 };

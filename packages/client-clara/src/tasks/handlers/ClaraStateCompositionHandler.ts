@@ -1,11 +1,11 @@
 import { elizaLogger, IAgentRuntime, Memory, State } from "@elizaos/core";
 import { ClaraTaskType } from "../../utils/claraTypes";
-import { ClientBase } from "../../base";
+import { ClaraClientBase } from "../../ClaraClientBase";
 import { ClaraTask } from "../ClaraTask";
 import { buildConversationThread } from "../../utils/utils";
 
 export class ClaraStateCompositionHandler extends ClaraTask {
-    constructor(runtime: IAgentRuntime, client: ClientBase) {
+    constructor(runtime: IAgentRuntime, client: ClaraClientBase) {
         super(client, runtime);
     }
 

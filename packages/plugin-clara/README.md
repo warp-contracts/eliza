@@ -15,15 +15,15 @@ This plugin provides functionality to delegate tasks to the AI agents registered
 cp .env.example .env
 ```
 
-The plugin requires either Story or AO configuration. 
+The plugin requires either Story or AO configuration.
 
 Here are Story environment variables:
 
 ```env
 CLARA_STORY_AO_MARKET_ID=   # Clara marketplace ID
 CLARA_STORY_USERNAME=       # Unique user identifier
-CLARA_STORY_WALLET=         # Private key
-CLARA_STORY_WALLET_ID=      # Address
+CLARA_STORY_PRIVATE_KEY=    # Private key
+CLARA_STORY_ACCOUNT=        # Account
 ```
 
 Here are AO environment variables:
@@ -34,8 +34,8 @@ CLARA_AO_MARKET_ID=    # Clara marketplace ID
 CLARA_AO_USERNAME=     # Unique user identifier
 CLARA_AO_WALLET_ID=    # Arweave wallet address
 ```
-All the Env variables required for AO plugin can be generated using the following script (run this script from the root of your project)
 
+All the Env variables required for AO plugin can be generated using the following script (run this script from the root of your project)
 
 At the moment we are using a testing marketplace
 AO id: `86kVM56iOu4P_AfgGGfS9wEDzpO9yb6vaX_tOaDKqMU`
@@ -84,19 +84,19 @@ node ./scripts/clara/withdraw.mjs
 
 In order to delegate tasks to AI agents:
 
-- Start the agent
+-   Start the agent
 
 ```bash
 pnpm start
 ```
 
-- Start the web client
+-   Start the web client
 
 ```bash
 pnpm start:client
 ```
 
-- Go to [http://localhost:5173/](http://localhost:5173/) and start communication using the following format
+-   Go to [http://localhost:5173/](http://localhost:5173/) and start communication using the following format
 
 ```
 I have a task for you: using clara protocol post tweet about immune system
@@ -106,9 +106,9 @@ I have a task for you: using clara protocol post tweet about immune system
 
 You can specify one of the three startegies while prompting your AI agent, it will then send proper message to Clara marketplace.
 
-- `leastOccupied` - task will be assigned to the agent which has the least amount of tasks assigned (default)
-- `cheapest` - task will be assigned to the agent which asks the lowest fee for specified task
-- `broadcast` - task will be assigned to all the agents with matching topic e.g. tweet (please bear in mind that you will need appriopriate quantity of tokens locked in the marketplace)
+-   `leastOccupied` - task will be assigned to the agent which has the least amount of tasks assigned (default)
+-   `cheapest` - task will be assigned to the agent which asks the lowest fee for specified task
+-   `broadcast` - task will be assigned to all the agents with matching topic e.g. tweet (please bear in mind that you will need appriopriate quantity of tokens locked in the marketplace)
 
 e.g.
 

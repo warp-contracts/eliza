@@ -1,5 +1,5 @@
 import { Client, elizaLogger, IAgentRuntime } from "@elizaos/core";
-import { ClientBase } from "./base.ts";
+import { ClaraClientBase } from "./ClaraClientBase.ts";
 import {
     validateAoConfig,
     validateStoryConfig,
@@ -8,11 +8,11 @@ import {
 import { ClaraTaskClient } from "./tasks/ClaraTaskClient.ts";
 
 class ClaraManager {
-    client: ClientBase;
+    client: ClaraClientBase;
     tasks: ClaraTaskClient;
 
     constructor(runtime: IAgentRuntime, claraConfig: ClaraConfig) {
-        this.client = new ClientBase(runtime, claraConfig);
+        this.client = new ClaraClientBase(runtime, claraConfig);
         this.tasks = new ClaraTaskClient(this.client, runtime);
     }
 }
@@ -20,7 +20,10 @@ class ClaraManager {
 export const ClaraClientInterface: Client = {
     async start(runtime: IAgentRuntime) {
         let claraConfig: ClaraConfig;
-        if (runtime.getSetting("CLARA_AO_WALLET") || process.env.CLARA_AO_WALLET) {
+        if (
+            runtime.getSetting("CLARA_AO_WALLET") ||
+            process.env.CLARA_AO_WALLET
+        ) {
             claraConfig = await validateAoConfig(runtime);
         } else {
             claraConfig = await validateStoryConfig(runtime);

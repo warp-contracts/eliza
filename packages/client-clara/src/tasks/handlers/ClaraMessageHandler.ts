@@ -1,13 +1,13 @@
 import { elizaLogger, IAgentRuntime, stringToUuid, UUID } from "@elizaos/core";
 import { ClaraTaskType } from "../../utils/claraTypes";
-import { ClientBase } from "../../base";
+import { ClaraClientBase } from "../../ClaraClientBase";
 import { ClaraTaskHandler } from "./ClaraTaskHandler";
 import { ClaraTask } from "../ClaraTask";
 
 export class ClaraMessageHandler extends ClaraTask {
     private claraTaskHandler: ClaraTaskHandler;
     private claraMessage: ClaraTaskType;
-    constructor(runtime: IAgentRuntime, client: ClientBase) {
+    constructor(runtime: IAgentRuntime, client: ClaraClientBase) {
         super(client, runtime);
         this.claraTaskHandler = new ClaraTaskHandler(this.client, this.runtime);
     }
@@ -46,7 +46,7 @@ export class ClaraMessageHandler extends ClaraTask {
                 break;
             case "story":
                 this.client.lastCheckedMessage = Number(
-                    this.claraMessage.cursor
+                    this.claraMessage.blockNumber
                 );
                 break;
             default:

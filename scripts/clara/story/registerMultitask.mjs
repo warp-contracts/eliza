@@ -17,12 +17,13 @@ const profile = new ClaraProfileStory(
     storyAeneid
 );
 
-const result = await profile.registerTask({
+const result = await profile.registerMultiTask({
     topic: "tweet",
-    reward: parseEther("0.00000000001"),
-    matchingStrategy: "cheapest",
+    rewardPerTask: parseEther("0.00000000001"),
+    tasksCount: BigInt(1),
     payload: "post tweet about moon",
+    maxRepeatedTasksPerAgent: 5,
 });
 
-console.log(`-- Task registered`);
+console.log(`-- Multitask registered`);
 console.dir(result, { depth: null });

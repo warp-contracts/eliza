@@ -1,9 +1,10 @@
 import { IAgentRuntime } from "@elizaos/core";
+import { privateKeyToAccount } from "viem/accounts";
 import { z, ZodError } from "zod";
 
 export const claraEnvSchema = z.object({
     CLARA_USERNAME: z.string().min(1, "CLARA username is required"),
-    CLARA_WALLET: z.string().min(1, "CLARA wallet is required"),
+    CLARA_PRIVATE_KEY: z.string().min(1, "CLARA wallet is required"),
     CLARA_WALLET_ID: z.string().min(1, "CLARA wallet id is required"),
     CLARA_MARKET_ID: z.string().min(1, "CLARA market protocol id is required"),
     CLARA_POLL_INTERVAL: z.number().int(),
@@ -18,16 +19,20 @@ export async function validateAoConfig(
     try {
         const aoConfig = {
             CLARA_USERNAME:
-                runtime.getSetting("CLARA_AO_USERNAME") || process.env.CLARA_AO_USERNAME,
+                runtime.getSetting("CLARA_AO_USERNAME") ||
+                process.env.CLARA_AO_USERNAME,
 
-            CLARA_WALLET:
-                runtime.getSetting("CLARA_AO_WALLET") || process.env.CLARA_AO_WALLET,
+            CLARA_PRIVATE_KEY:
+                runtime.getSetting("CLARA_AO_WALLET") ||
+                process.env.CLARA_AO_WALLET,
 
             CLARA_WALLET_ID:
-                runtime.getSetting("CLARA_AO_WALLET_ID") || process.env.CLARA_AO_WALLET_ID,
+                runtime.getSetting("CLARA_AO_WALLET_ID") ||
+                process.env.CLARA_AO_WALLET_ID,
 
             CLARA_MARKET_ID:
-                runtime.getSetting("CLARA_AO_MARKET_ID") || process.env.CLARA_AO_MARKET_ID,
+                runtime.getSetting("CLARA_AO_MARKET_ID") ||
+                process.env.CLARA_AO_MARKET_ID,
 
             CLARA_POLL_INTERVAL: safeParseInt(
                 runtime.getSetting("CLARA_AO_POLL_INTERVAL") ||
@@ -62,12 +67,14 @@ export async function validateStoryConfig(
                 runtime.getSetting("CLARA_STORY_USERNAME") ||
                 process.env.CLARA_STORY_USERNAME,
 
-            CLARA_WALLET:
-                runtime.getSetting("CLARA_STORY_WALLET") || process.env.CLARA_STORY_WALLET,
+            CLARA_PRIVATE_KEY:
+                runtime.getSetting("CLARA_STORY_PRIVATE_KEY") ||
+                process.env.CLARA_STORY_PRIVATE_KEY,
 
-            CLARA_WALLET_ID:
-                runtime.getSetting("CLARA_STORY_WALLET_ID") ||
-                process.env.CLARA_STORY_WALLET_ID,
+            CLARA_WALLET_ID: privateKeyToAccount(
+                (runtime.getSetting("CLARA_STORY_PRIVATE_KEY") ||
+                    process.env.CLARA_STORY_PRIVATE_KEY) as `0x${string}`
+            ).address,
 
             CLARA_MARKET_ID:
                 runtime.getSetting("CLARA_STORY_MARKET_ID") ||

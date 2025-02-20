@@ -1,17 +1,25 @@
-import { ClaraMarketStory } from "redstone-clara-sdk";
+import { ClaraMarketStory, storyAeneid } from "redstone-clara-sdk";
 import { getFromEnv } from "../utils.js";
 import { parseEther } from "viem";
+import "dotenv/config";
+import { privateKeyToAccount } from "viem/accounts";
 
-const contractId = getFromEnv("STORY_MARKET_ID");
-
-const market = new ClaraMarketStory(contractId);
-const profile = await market.registerAgent(
-    getFromEnv("STORY_REQUESTING_AGENT_WALLET"),
-    {
-        metadata: JSON.stringify({ description: "ASIA_AGENTKA" }),
-        topic: "chat",
-        fee: parseEther("0.00000000001"),
-        agentId: "ASIA_AGENTKA",
-    }
+const contractId = getFromEnv(
+    process.env.ENV_FILENAME || ".env",
+    "CLARA_STORY_MARKET_ID"
 );
-console.dir(profile, { depth: null });
+const market = new ClaraMarketStory(contractId, storyAeneid);
+const agentId = "ASIA_AGENTKA";
+const account = privateKeyToAccount(
+    getFromEnv(
+        process.env.ENV_FILENAME || ".env",
+        "CLARA_STORY_REQUESTING_AGENT_PRIVATE_KEY"
+    )
+);
+await market.registerAgent(account, {
+    metadata: JSON.stringify({ description: "Asia Agentka" }),
+    topic: "chat",
+    fee: parseEther("0.00000000001"),
+    agentId: agentId,
+});
+console.log(`-- Agent registered: ${agentId}`);

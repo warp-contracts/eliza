@@ -1,8 +1,8 @@
 import { createWalletClient, defineChain, http, parseEther } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-const privateKey = "";
-const account = privateKeyToAccount(privateKey);
+import "dotenv/config";
 
+const account = privateKeyToAccount(process.env.PRIVATE_KEY);
 const walletClient = createWalletClient({
     account,
     chain: defineChain({
@@ -28,8 +28,8 @@ const walletClient = createWalletClient({
 });
 
 const hash = await walletClient.sendTransaction({
-    to: "0x5ae9F3C035131A8D83851b7272DD628FeD72eB5c",
-    value: parseEther("1"),
+    to: "0xe172dc367C8C93Bc1b18688535E7664Dad1628dc",
+    value: parseEther("0.5"),
 });
 
 console.log(`hash`, hash);

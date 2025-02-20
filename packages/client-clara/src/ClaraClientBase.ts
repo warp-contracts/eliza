@@ -7,18 +7,22 @@ import {
 } from "@elizaos/core";
 import { EventEmitter } from "events";
 import { ClaraConfig } from "./utils/environment.ts";
+import { IClaraMarket } from "./market/IClaraMarket.ts";
+import { AoClaraMarket } from "./market/AoClaraMarket.ts";
+import { StoryClaraMarket } from "./market/StoryClaraMarket.ts";
 import { ClaraClient } from "./ClaraClient.ts";
 
-export class ClientBase extends EventEmitter {
+export class ClaraClientBase extends EventEmitter {
     static _claraClients: { [accountIdentifier: string]: ClaraClient } = {};
     claraClient: ClaraClient;
+    claraMarket: IClaraMarket;
     runtime: IAgentRuntime;
     claraConfig: ClaraConfig;
     directions: string;
     lastCheckedMessage: number | null = null;
     profileId: string;
     walletId: string;
-    callback: (self: ClientBase) => any = null;
+    callback: (self: ClaraClientBase) => any = null;
 
     onReady() {
         throw new Error(
@@ -31,15 +35,17 @@ export class ClientBase extends EventEmitter {
         this.runtime = runtime;
         this.claraConfig = claraConfig;
         this.profileId = `${this.runtime.agentId}_${claraConfig.CLARA_USERNAME}`;
+        elizaLogger.info(this.profileId);
         this.walletId = claraConfig.CLARA_WALLET_ID;
-        if (ClientBase._claraClients[this.profileId]) {
-            this.claraClient = ClientBase._claraClients[this.profileId];
+        elizaLogger.log(ClaraClientBase._claraClients);
+        if (ClaraClientBase._claraClients[this.profileId]) {
+            this.claraClient = ClaraClientBase._claraClients[this.profileId];
         } else {
             this.claraClient = new ClaraClient(
                 this.profileId,
                 this.claraConfig
             );
-            ClientBase._claraClients[this.profileId] = this.claraClient;
+            ClaraClientBase._claraClients[this.profileId] = this.claraClient;
         }
 
         this.directions =
@@ -47,10 +53,14 @@ export class ClientBase extends EventEmitter {
             this.runtime.character.style.all.join("\n- ") +
             "- " +
             this.runtime.character.style.post.join();
+        this.claraMarket =
+            this.claraConfig.CLARA_IMPL == "ao"
+                ? new AoClaraMarket(this.profileId, this.claraConfig)
+                : new StoryClaraMarket(this.profileId, this.claraConfig);
     }
 
     async init() {
-        await this.claraClient.init();
+        await this.claraMarket.init();
         if (this.profileId) {
             elizaLogger.log("Clara profile ID:", this.profileId);
         } else {

@@ -1,16 +1,17 @@
 import { IAgentRuntime, elizaLogger } from "@elizaos/core";
-import { ClientBase } from "../base.ts";
+import { ClaraClientBase } from "../ClaraClientBase.ts";
 import { ClaraMessageHandler } from "./handlers/ClaraMessageHandler.ts";
-import { ClaraLoadTaskType, ClaraTaskType } from "../utils/claraTypes.ts";
+import { ClaraTaskType } from "../utils/claraTypes.ts";
+import { StoryClaraMarket } from "../market/StoryClaraMarket.ts";
 
 export const CLARA_TASK_ASSIGNMENT_TAG_NAME = "Task-Assignment";
 
 export class ClaraTaskClient {
-    client: ClientBase;
+    client: ClaraClientBase;
     runtime: IAgentRuntime;
     messageHandler: ClaraMessageHandler;
 
-    constructor(client: ClientBase, runtime: IAgentRuntime) {
+    constructor(client: ClaraClientBase, runtime: IAgentRuntime) {
         this.client = client;
         this.runtime = runtime;
         this.messageHandler = new ClaraMessageHandler(
@@ -42,7 +43,7 @@ export class ClaraTaskClient {
             );
             elizaLogger.info("Finished checking Clara tasks");
         } catch (error) {
-            console.log(error);
+            elizaLogger.log(error);
             elizaLogger.error("Error handling Clara tasks:", error);
         }
     }
@@ -50,7 +51,7 @@ export class ClaraTaskClient {
     private async getMessageToProcess(): Promise<ClaraTaskType> {
         switch (this.client.claraConfig.CLARA_IMPL) {
             case "ao": {
-                const message = (await this.client.claraClient.claraMarket
+                const message = (await this.client.claraMarket
                     .getProfile()
                     .loadNextAssignedTask()) as ClaraTaskType;
                 if (
@@ -62,24 +63,15 @@ export class ClaraTaskClient {
                 }
             }
             case "story": {
-                const cursor = this.client.lastCheckedMessage;
-                const loadTaskResult = cursor
-                    ? ((await this.client.claraClient.claraMarket
-                          .getProfile()
-                          .loadNextAssignedTask(
-                              BigInt(cursor)
-                          )) as ClaraLoadTaskType)
-                    : ((await this.client.claraClient.claraMarket
-                          .getProfile()
-                          .loadNextAssignedTask()) as ClaraLoadTaskType);
-                if (loadTaskResult?.result) {
+                const market = this.client.claraMarket as StoryClaraMarket;
+                const loadTaskResult = await market.getProfile().loadNextTask();
+                if (loadTaskResult) {
                     const message: ClaraTaskType = {
-                        ...loadTaskResult.result,
-                        id: loadTaskResult.result.id.toString(),
-                        timestamp: Number(loadTaskResult.result.timestamp),
-                        contextId: loadTaskResult.result.contextId.toString(),
-                        cursor: loadTaskResult.cursor,
-                        reward: loadTaskResult.result.reward.toString(),
+                        ...loadTaskResult,
+                        id: loadTaskResult.id.toString(),
+                        timestamp: Number(loadTaskResult.timestamp),
+                        contextId: loadTaskResult.contextId.toString(),
+                        reward: loadTaskResult.reward.toString(),
                     };
                     return message;
                 } else {

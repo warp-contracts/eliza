@@ -1,18 +1,34 @@
-import { ClaraMarketStory, ClaraProfileStory } from "redstone-clara-sdk";
+import {
+    ClaraMarketStory,
+    ClaraProfileStory,
+    storyAeneid,
+    storyMainnet,
+} from "redstone-clara-sdk";
 import { elizaLogger } from "@elizaos/core";
 import fs from "fs";
 import { ClaraConfig } from "../utils/environment";
 import { IClaraMarket } from "./IClaraMarket";
-import { parseEther } from "viem";
+import { Chain, parseEther, PrivateKeyAccount } from "viem";
+import { privateKeyToAccount } from "viem/accounts";
 
 export class StoryClaraMarket implements IClaraMarket {
     private profile: ClaraProfileStory;
     private market: ClaraMarketStory;
-    private wallet: string;
+    private account: PrivateKeyAccount;
+    private chain: Chain;
 
     constructor(private profileId: string, private claraConfig: ClaraConfig) {
-        this.market = new ClaraMarketStory(this.claraConfig.CLARA_MARKET_ID);
-        this.wallet = this.claraConfig.CLARA_WALLET;
+        this.chain =
+            process.env.CLARA_STORY_CHAIN == "mainnet"
+                ? storyMainnet
+                : storyAeneid;
+        this.market = new ClaraMarketStory(
+            this.claraConfig.CLARA_MARKET_ID,
+            this.chain
+        );
+        this.account = privateKeyToAccount(
+            this.claraConfig.CLARA_PRIVATE_KEY as `0x${string}`
+        );
     }
 
     async init() {
@@ -20,13 +36,14 @@ export class StoryClaraMarket implements IClaraMarket {
     }
 
     getProfile() {
+        if (!this.profile) this.connectProfile();
         return this.profile;
     }
     getMarket() {
         return this.market;
     }
     getWallet(): string {
-        return this.wallet;
+        return JSON.stringify(this.account);
     }
 
     async connectProfile(): Promise<void> {
@@ -36,18 +53,18 @@ export class StoryClaraMarket implements IClaraMarket {
                 `Agent already registered, connecting`,
                 this.profileId
             );
-            elizaLogger.info(this.wallet, this.claraConfig.CLARA_MARKET_ID);
             try {
                 this.profile = new ClaraProfileStory(
-                    this.wallet,
-                    this.claraConfig.CLARA_MARKET_ID
+                    this.account,
+                    this.claraConfig.CLARA_MARKET_ID,
+                    storyAeneid
                 );
             } catch (e) {
                 console.log(e);
             }
         } else {
             try {
-                this.profile = await this.market.registerAgent(this.wallet, {
+                this.profile = await this.market.registerAgent(this.account, {
                     metadata: JSON.stringify({ description: this.profileId }),
                     topic: "tweet",
                     fee: parseEther("0.000000000001"),

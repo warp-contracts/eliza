@@ -1029,8 +1029,8 @@ importers:
         specifier: 11.0.0
         version: 11.0.0
       redstone-clara-sdk:
-        specifier: ^0.0.23
-        version: 0.0.23(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.23.8)
+        specifier: ^0.1.1
+        version: 0.1.1(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.23.8)
       whatwg-url:
         specifier: 7.1.0
         version: 7.1.0
@@ -2416,8 +2416,8 @@ importers:
         specifier: 5.1.2
         version: 5.1.2
       redstone-clara-sdk:
-        specifier: ^0.0.25
-        version: 0.0.25(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.24.1)
+        specifier: ^0.1.1
+        version: 0.1.1(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.24.1)
       tsup:
         specifier: 8.3.5
         version: 8.3.5(@swc/core@1.10.14(@swc/helpers@0.5.15))(jiti@2.4.2)(postcss@8.5.1)(tsx@4.19.2)(typescript@5.7.3)(yaml@2.7.0)
@@ -3530,7 +3530,7 @@ importers:
         version: 7.0.5(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)
       '@lit-protocol/aw-tool':
         specifier: '*'
-        version: 0.1.0-19(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)
+        version: 0.1.0-23(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)
       '@lit-protocol/constants':
         specifier: ^7.0.4
         version: 7.0.5(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)
@@ -9624,9 +9624,6 @@ packages:
   '@lit-protocol/accs-schemas@0.0.19':
     resolution: {integrity: sha512-O7hrDPUA6x5fgOx8HKRAV1k/8VMzwehfNHUwb2UGMbw4g3kKpokbR/ne7OPdIUYMgvRATc0WjL5gbh/w33pkOQ==}
 
-  '@lit-protocol/accs-schemas@0.0.20':
-    resolution: {integrity: sha512-JHHX0q45nq1uQ4olkg4VIGLW9lzMnRRldeTDuOrOaoPVztz+2iSOjwzb+QmuSuKFQpP5SOej2zoQB+K8b22KDw==}
-
   '@lit-protocol/accs-schemas@0.0.22':
     resolution: {integrity: sha512-c3LPDE8g8COt8FdXx+Nfv4CvEvP+QcHh94HZcukcttjZyu6jjICecq/XMXWVUSMGhAVWRMH8tBbjpHzElB45QQ==}
 
@@ -9653,8 +9650,8 @@ packages:
   '@lit-protocol/auth-helpers@7.0.5':
     resolution: {integrity: sha512-074fV8H3MiySlyePuNCxpE3f4lv1cufwbU+8OE5JhXGY266UZvddE6gSajrFsV1+RP+31dqBAZzLaUECBDqvkA==}
 
-  '@lit-protocol/aw-tool@0.1.0-19':
-    resolution: {integrity: sha512-CxxlsZcdTdYZNvPV1hORJ4X9BdNdJu8x7o8G6o07auPUVsKrFlbY5ZhAbhQsBnvY5ydWDqOQV/uUCAX1zyN4SQ==}
+  '@lit-protocol/aw-tool@0.1.0-23':
+    resolution: {integrity: sha512-1comgyTqhYt4irT4+sJJoMSBUvJovw8MYhIzU/H2plHI5OYpWj3M4jZd5xjDiPgv7uc4RpPbEFxYRv4Kth953g==}
 
   '@lit-protocol/bls-sdk@2.1.62':
     resolution: {integrity: sha512-UjNjycoNXOEoLH/foIJx1L9PLL5OxmHcCD/mFXr4KSeQV/v4srvGNpY/4ng7+k9sJEbvwRwv+FB07ng3/Ihacg==}
@@ -9670,11 +9667,11 @@ packages:
   '@lit-protocol/constants@6.11.3':
     resolution: {integrity: sha512-sd+jRWlXd9RMBsqXewLU4rU0dGuwgVDghsWHQlVRKTCePb4Hm0PPLit0bTZ9X+d14PF9p/jnbml0rLACqw2kWg==}
 
-  '@lit-protocol/constants@7.0.2':
-    resolution: {integrity: sha512-A2tpsB7pCGHiC+VrPAHBaEGyb/9crCkcSIj8BtGPrLRszFZO8EHKWziM7WiMM2c2mYb+B4dKtGGUkxxCAarqaQ==}
-
   '@lit-protocol/constants@7.0.5':
     resolution: {integrity: sha512-BDqdrBFjwGdf38cvOkWG7mnp0QDZXOgd1QNa8GliuscTLvFJq20c2VRuyVoyc0kA7JtKDQG4S3Btjoc3M7Oggw==}
+
+  '@lit-protocol/constants@7.0.6':
+    resolution: {integrity: sha512-ZU0V3Ixw/xzHtPnRCK6lf8PdU9P6PyfhQQ8AEeQ7Eygh5dOBA0IFC7hArTa/If/+BssWPdsj5vwIdwKOgIbTMQ==}
 
   '@lit-protocol/contracts-sdk@6.11.3':
     resolution: {integrity: sha512-5vwdMRVSo+SDD6ZFWNm4m4kLuyDj4pX6gwXw2lj6trD66zT2ODby2lRv8K7m0OVk0HnWONDhWe3933bgu4ltQQ==}
@@ -9816,11 +9813,11 @@ packages:
   '@lit-protocol/types@6.11.4':
     resolution: {integrity: sha512-UBPb6y+Zsi+G2aG30D8aewLYI5tUxpW2OqxhtMagBl87aMiVcmobA/8EUQDdj1qxmBmlEG+6g/mhaWPT2ZCrpg==}
 
-  '@lit-protocol/types@7.0.2':
-    resolution: {integrity: sha512-rEBZoeSByaMxXiP7w3g6/d180d8AbL4xpLqIlZchfJfAcSFkTseByV1d4h/J3LHl+3Q10wQsJT0N+qIi9kZbqA==}
-
   '@lit-protocol/types@7.0.5':
     resolution: {integrity: sha512-npdN0bmRcv6GFBR1xvOjAWIs3FequQL4Hs4dVCX5bPP01AeSz9+beGoRfN9A07rOaBF4+uVCq6z9iggzQ4Uu1Q==}
+
+  '@lit-protocol/types@7.0.6':
+    resolution: {integrity: sha512-PT0m2hQuPhaXoDURsJkeUF8Nq8s4JGeamGmxLMLSLCoctXrFWBiCjw5GDOYLoFe3cEHPQSj19rm9mzyjxkqQ8g==}
 
   '@lit-protocol/uint8arrays@2.1.62':
     resolution: {integrity: sha512-Q9Leppzyb9Y2jwe+i8btAUkTXqgnu21PFql83v6N70dkELSC+fKBzRSRqUpFqruW7dcrG8mNWsOCQbQ0kL/w/w==}
@@ -24883,12 +24880,8 @@ packages:
     resolution: {integrity: sha512-DJnGAeenTdpMEH6uAJRK/uiyEIH9WVsUmoLwzudwGJUwZPp80PDBWPHXSAGNPwNvIXAbe7MSUB1zQFugFml66A==}
     engines: {node: '>=4'}
 
-  redstone-clara-sdk@0.0.23:
-    resolution: {integrity: sha512-1d44YnUyhbJy6/UsNU4if9jwf2/cTrDjOWRdI8nC3sobAGIGENajeF2VPdnApMz9Dc8kaYMC8x6KAvM0zsn+Hg==}
-    engines: {node: '>=20'}
-
-  redstone-clara-sdk@0.0.25:
-    resolution: {integrity: sha512-6aROcu07+l2u1Kd0bwwT8w4Ws0JUcuQSsWnXRynEbHMV2RkNjbORxd/wygIbji3LLZm2jRNWW065ut20smzX9A==}
+  redstone-clara-sdk@0.1.1:
+    resolution: {integrity: sha512-DXFleEus2vIDsnQE8HwiL4IavH2nUEC3NkvlM6MNVPBUxEwFo2ZgYhH7D6XAYjIAOtppC2ee1g/NG2k0ZRYoNw==}
     engines: {node: '>=20'}
 
   reflect-metadata@0.1.13:
@@ -37403,10 +37396,6 @@ snapshots:
     dependencies:
       ajv: 8.17.1
 
-  '@lit-protocol/accs-schemas@0.0.20':
-    dependencies:
-      ajv: 8.17.1
-
   '@lit-protocol/accs-schemas@0.0.22':
     dependencies:
       ajv: 8.17.1
@@ -37566,9 +37555,9 @@ snapshots:
       - typescript
       - utf-8-validate
 
-  '@lit-protocol/aw-tool@0.1.0-19(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)':
+  '@lit-protocol/aw-tool@0.1.0-23(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)':
     dependencies:
-      '@lit-protocol/constants': 7.0.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)
+      '@lit-protocol/constants': 7.0.6(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)
       tslib: 2.8.1
       zod: 3.24.1
     transitivePeerDependencies:
@@ -37604,12 +37593,12 @@ snapshots:
       - typescript
       - utf-8-validate
 
-  '@lit-protocol/constants@7.0.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)':
+  '@lit-protocol/constants@7.0.5(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)':
     dependencies:
       '@ethersproject/abstract-provider': 5.7.0
-      '@lit-protocol/accs-schemas': 0.0.20
+      '@lit-protocol/accs-schemas': 0.0.22
       '@lit-protocol/contracts': 0.0.74(typescript@5.7.3)
-      '@lit-protocol/types': 7.0.2(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+      '@lit-protocol/types': 7.0.5(bufferutil@4.0.9)(utf-8-validate@5.0.10)
       '@openagenda/verror': 3.1.4
       depd: 2.0.0
       ethers: 5.7.2(bufferutil@4.0.9)(utf-8-validate@5.0.10)
@@ -37620,12 +37609,12 @@ snapshots:
       - typescript
       - utf-8-validate
 
-  '@lit-protocol/constants@7.0.5(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)':
+  '@lit-protocol/constants@7.0.6(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)':
     dependencies:
       '@ethersproject/abstract-provider': 5.7.0
       '@lit-protocol/accs-schemas': 0.0.22
       '@lit-protocol/contracts': 0.0.74(typescript@5.7.3)
-      '@lit-protocol/types': 7.0.5(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+      '@lit-protocol/types': 7.0.6(bufferutil@4.0.9)(utf-8-validate@5.0.10)
       '@openagenda/verror': 3.1.4
       depd: 2.0.0
       ethers: 5.7.2(bufferutil@4.0.9)(utf-8-validate@5.0.10)
@@ -38980,10 +38969,10 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  '@lit-protocol/types@7.0.2(bufferutil@4.0.9)(utf-8-validate@5.0.10)':
+  '@lit-protocol/types@7.0.5(bufferutil@4.0.9)(utf-8-validate@5.0.10)':
     dependencies:
       '@ethersproject/abstract-provider': 5.7.0
-      '@lit-protocol/accs-schemas': 0.0.20
+      '@lit-protocol/accs-schemas': 0.0.22
       depd: 2.0.0
       ethers: 5.7.2(bufferutil@4.0.9)(utf-8-validate@5.0.10)
       siwe: 2.3.2(ethers@5.7.2(bufferutil@4.0.9)(utf-8-validate@5.0.10))
@@ -38992,7 +38981,7 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  '@lit-protocol/types@7.0.5(bufferutil@4.0.9)(utf-8-validate@5.0.10)':
+  '@lit-protocol/types@7.0.6(bufferutil@4.0.9)(utf-8-validate@5.0.10)':
     dependencies:
       '@ethersproject/abstract-provider': 5.7.0
       '@lit-protocol/accs-schemas': 0.0.22
@@ -62724,7 +62713,7 @@ snapshots:
     dependencies:
       redis-errors: 1.2.0
 
-  redstone-clara-sdk@0.0.23(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.23.8):
+  redstone-clara-sdk@0.1.1(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.23.8):
     dependencies:
       '@permaweb/aoconnect': 0.0.62
       arweave: 1.15.5
@@ -62737,7 +62726,7 @@ snapshots:
       - utf-8-validate
       - zod
 
-  redstone-clara-sdk@0.0.25(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.24.1):
+  redstone-clara-sdk@0.1.1(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5)(zod@3.24.1):
     dependencies:
       '@permaweb/aoconnect': 0.0.62
       arweave: 1.15.5

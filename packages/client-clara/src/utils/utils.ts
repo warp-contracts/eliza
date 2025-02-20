@@ -1,6 +1,6 @@
 import { getEmbeddingZeroVector } from "@elizaos/core";
 import { stringToUuid } from "@elizaos/core";
-import { ClientBase } from "../base.ts";
+import { ClaraClientBase } from "../ClaraClientBase.ts";
 import { elizaLogger } from "@elizaos/core";
 import { ClaraTaskType } from "./claraTypes.ts";
 
@@ -13,7 +13,7 @@ export const wait = (minTime: number = 1000, maxTime: number = 3000) => {
 export async function buildConversationThread(
     aoMessage: ClaraTaskType,
     prompt: string,
-    client: ClientBase,
+    client: ClaraClientBase,
     maxReplies: number = 10
 ): Promise<ClaraTaskType[]> {
     const thread: ClaraTaskType[] = [];

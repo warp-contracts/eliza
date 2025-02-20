@@ -10,7 +10,7 @@ import {
     stringToUuid,
     UUID,
 } from "@elizaos/core";
-import { ClientBase } from "../../base";
+import { ClaraClientBase } from "../../ClaraClientBase";
 import { ClaraTaskType } from "../../utils/claraTypes";
 import { ClaraStateCompositionHandler } from "./ClaraStateCompositionHandler";
 import { wait } from "../../utils/utils";
@@ -18,7 +18,7 @@ import { ClaraTask } from "../ClaraTask";
 
 export class ClaraTaskHandler extends ClaraTask {
     private stateCompositionHandler: ClaraStateCompositionHandler;
-    constructor(client: ClientBase, runtime: IAgentRuntime) {
+    constructor(client: ClaraClientBase, runtime: IAgentRuntime) {
         super(client, runtime);
         this.stateCompositionHandler = new ClaraStateCompositionHandler(
             this.runtime,
@@ -34,7 +34,19 @@ export class ClaraTaskHandler extends ClaraTask {
         }
 
         const prompt = payload;
-
+        elizaLogger.info(this.runtime.actions.map((a) => a.name.toLowerCase()));
+        elizaLogger.info(this.runtime.actions.map((a) => a.similes));
+        elizaLogger.info(
+            "is it true?",
+            JSON.stringify(
+                this.runtime.actions.find((action: Action) =>
+                    action.similes.find(
+                        (simly: any) =>
+                            simly.toLowerCase() == topic.toLowerCase()
+                    )
+                )
+            )
+        );
         if (
             !this.runtime.actions.find(
                 (a: Action) => a.name.toLowerCase() == topic.toLowerCase()
@@ -48,6 +60,7 @@ export class ClaraTaskHandler extends ClaraTask {
             elizaLogger.log(
                 `Clara task could not be processed, no action with name ${topic}.`
             );
+            return;
         }
         const userIdUUID = this.buildUserUUID(requester);
         await this.runtime.ensureConnection(
@@ -122,7 +135,6 @@ export class ClaraTaskHandler extends ClaraTask {
         task: string,
         taskId: string
     ) {
-        const { id } = claraMessage;
         const self = this;
         try {
             const callback: HandlerCallback = async (content: Content) => {
