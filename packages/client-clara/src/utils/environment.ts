@@ -7,6 +7,7 @@ export const claraEnvSchema = z.object({
     CLARA_PRIVATE_KEY: z.string().min(1, "CLARA wallet is required"),
     CLARA_WALLET_ID: z.string().min(1, "CLARA wallet id is required"),
     CLARA_MARKET_ID: z.string().min(1, "CLARA market protocol id is required"),
+    CLARA_FEE: z.string().min(1, "CLARA market fee is required"),
     CLARA_POLL_INTERVAL: z.number().int(),
 });
 
@@ -33,6 +34,9 @@ export async function validateAoConfig(
             CLARA_MARKET_ID:
                 runtime.getSetting("CLARA_AO_MARKET_ID") ||
                 process.env.CLARA_AO_MARKET_ID,
+
+            CLARA_FEE:
+                runtime.getSetting("CLARA_AO_FEE") || process.env.CLARA_AO_FEE,
 
             CLARA_POLL_INTERVAL: safeParseInt(
                 runtime.getSetting("CLARA_AO_POLL_INTERVAL") ||
@@ -79,6 +83,10 @@ export async function validateStoryConfig(
             CLARA_MARKET_ID:
                 runtime.getSetting("CLARA_STORY_MARKET_ID") ||
                 process.env.CLARA_STORY_MARKET_ID,
+
+            CLARA_FEE:
+                runtime.getSetting("CLARA_STORY_FEE") ||
+                process.env.CLARA_STORY_FEE,
 
             CLARA_POLL_INTERVAL: safeParseInt(
                 runtime.getSetting("CLARA_AO_POLL_INTERVAL") ||

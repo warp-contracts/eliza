@@ -1,29 +1,12 @@
 import { createWalletClient, defineChain, http, parseEther } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import "dotenv/config";
+import { storyAeneid } from "redstone-clara-sdk";
 
 const account = privateKeyToAccount(process.env.PRIVATE_KEY);
 const walletClient = createWalletClient({
     account,
-    chain: defineChain({
-        id: 1315,
-        name: "Story Aeneid",
-        nativeCurrency: {
-            decimals: 18,
-            name: "IP",
-            symbol: "IP",
-        },
-        rpcUrls: {
-            default: { http: ["https://aeneid.storyrpc.io"] },
-        },
-        blockExplorers: {
-            default: {
-                name: "Story Aeneid Explorer",
-                url: "https://aeneid.storyscan.xyz",
-            },
-        },
-        testnet: true,
-    }),
+    chain: storyAeneid, // can be replaced with storyMainnet
     transport: http(),
 });
 

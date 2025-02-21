@@ -21,7 +21,7 @@ const result = await profile.registerTask({
     topic: "tweet",
     reward: parseEther("0.00000000001"),
     matchingStrategy: "cheapest",
-    payload: "post tweet about moon",
+    payload: "post tweet with informations about RedStone Oracles",
 });
 
 console.log(`-- Task registered`);
