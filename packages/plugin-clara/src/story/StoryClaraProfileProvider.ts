@@ -18,8 +18,8 @@ function storyProfileProvider(claraProfile): Provider {
     }
 }
 
-export async function initializeClaraProfileProvider(): Provider {
-    const pluginEnabled = parseBooleanFromText(process.env.ENABLE_CLARA_PROTOCOL_PLUGIN);
+export async function initializeClaraProfileProvider(): Promise<Provider> {
+    const pluginEnabled = parseBooleanFromText(process.env.CLARA_PROTOCOL_ENABLE_PLUGIN);
     if (!pluginEnabled) {
         elizaLogger.info(`Clara protocol plugin is disabled`);
         return storyProfileProvider(null);
@@ -62,7 +62,8 @@ export async function initializeClaraProfileProvider(): Provider {
         }
         fs.mkdirSync(`${STORY_PROFILES_DIR}/${userName}`, { recursive: true });
     }
-    storyProfileProvider(claraProfile);
+    return storyProfileProvider(claraProfile);
 }
 
 export const storyClaraProfileProvider = await initializeClaraProfileProvider();
+console.log(`==== ${typeof storyClaraProfileProvider}`, storyClaraProfileProvider)

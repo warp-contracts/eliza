@@ -1054,9 +1054,7 @@ export async function createAgent(
                 ? confluxPlugin
                 : null,
             nodePlugin,
-            parseBooleanFromText(
-                getSecret(character, "ENABLE_CLARA_PROTOCOL_PLUGIN")
-            )
+            parseBooleanFromText(getSecret(character, "CLARA_PROTOCOL_ENABLE_PLUGIN"))
                 ? claraPlugin
                 : null,
             getSecret(character, "ROUTER_NITRO_EVM_PRIVATE_KEY") &&

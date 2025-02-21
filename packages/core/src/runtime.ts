@@ -370,10 +370,10 @@ export class AgentRuntime implements IAgentRuntime {
 
         this.imageModelProvider =
             this.character.imageModelProvider ?? this.modelProvider;
-        
+
         this.imageVisionModelProvider =
             this.character.imageVisionModelProvider ?? this.modelProvider;
-            
+
         elizaLogger.info(
           `${this.character.name}(${this.agentId}) - Selected model provider:`,
           this.modelProvider
@@ -1626,7 +1626,6 @@ Text: ${attachment.text}
             ...additionalKeys,
         } as State;
 
-        console.log(`== validate`);
         const actionPromises = this.actions.map(async (action: Action) => {
             const result = await action.validate(this, message, initialState);
             if (result) {
@@ -1777,12 +1776,12 @@ const formatKnowledge = (knowledge: KnowledgeItem[]) => {
     return knowledge.map(item => {
         // Get the main content text
         const text = item.content.text;
-        
+
         // Clean up formatting but maintain natural text flow
         const cleanedText = text
             .trim()
             .replace(/\n{3,}/g, '\n\n'); // Replace excessive newlines
-            
+
         return cleanedText;
     }).join('\n\n'); // Separate distinct pieces with double newlines
 };

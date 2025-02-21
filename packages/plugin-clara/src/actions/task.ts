@@ -65,7 +65,7 @@ export const task: Action = {
     suppressInitialMessage: true,
     validate: async (runtime: IAgentRuntime, message: Memory) => {
         elizaLogger.debug("Validating :", message.userId);
-        const pluginEnabled = parseBooleanFromText(runtime.getSetting("ENABLE_CLARA_PROTOCOL_PLUGIN"));
+        const pluginEnabled = parseBooleanFromText(runtime.getSetting("CLARA_PROTOCOL_ENABLE_PLUGIN"));
         if (!pluginEnabled) {
             return false;
         }
@@ -257,15 +257,14 @@ export const task: Action = {
             {
                 user: "{{user1}}",
                 content: {
-                    text: "Clara task: post tweet about ants",
-                    action: "CLARA_TASK",
+                    text: "Clara task: post tweet about ants"
                 },
             },
             {
                 user: "{{user2}}",
                 content: {
                     text: "Crete a tweet about ants",
-                    action: "TWEET",
+                    action: "CLARA_TASK",
                     strategy: "leastOccupied",
                     action_count: 1,
                 },
@@ -273,15 +272,15 @@ export const task: Action = {
             {
                 user: "{{user1}}",
                 content: {
-                    text: "I have a task for you: using least occupied strategy, post tweet about immune system",
-                    action: "CLARA_TASK",
+                    text: "I have a task for you, using clara protocol and least occupied strategy, " +
+                        "post tweet about immune system"
                 },
             },
             {
                 user: "{{user2}}",
                 content: {
                     text: "post tweet about immune system",
-                    action: "TWEET",
+                    action: "CLARA_TASK",
                     strategy: "leastOccupied",
                     action_count: 1,
                 },
@@ -289,17 +288,15 @@ export const task: Action = {
             {
                 user: "{{user1}}",
                 content: {
-                    text: "I have a task for you: using cheapest strategy, post 3 tweets about immune system",
-                    action: "CLARA_TASK",
+                    text: "Using clara prtocol and cheapest strategy, " +
+                        "post 3 tweets about immune system"
                 },
             },
             {
                 user: "{{user2}}",
                 content: {
-                    text: "post tweet about immune system",
-                    action: "TWEET",
-                    strategy: "cheapest",
-                    action_count: 3,
+                    text: "post 3 tweets about immune system",
+                    action: "CLARA_TASK"
                 },
             },
         ],
