@@ -64,22 +64,48 @@ export class ClaraTaskClient {
             }
             case "story": {
                 const market = this.client.claraMarket as StoryClaraMarket;
-                const loadTaskResult = await market.getProfile().loadNextTask();
-                if (loadTaskResult) {
-                    const message: ClaraTaskType = {
-                        ...loadTaskResult,
-                        id: loadTaskResult.id.toString(),
-                        timestamp: Number(loadTaskResult.timestamp),
-                        contextId: loadTaskResult.contextId.toString(),
-                        reward: loadTaskResult.reward.toString(),
-                    };
-                    return message;
-                } else {
-                    return null;
+                try {
+                    const loadTaskResult = await market
+                        .getProfile()
+                        .loadNextTask();
+                    if (loadTaskResult) {
+                        return this.parseTask(loadTaskResult);
+                    } else {
+                        return null;
+                    }
+                } catch (e) {
+                    if (
+                        e?.data?.errorName &&
+                        e?.data?.errorName.includes(`PreviousTaskNotSentBack`)
+                    ) {
+                        elizaLogger.debug(
+                            `Previous task not sent back, trying to load task from the inbox...`
+                        );
+                        const loadPendingTaskResult = await market
+                            .getProfile()
+                            .loadPendingTask();
+                        if (loadPendingTaskResult) {
+                            return this.parseTask(loadPendingTaskResult);
+                        } else {
+                            return null;
+                        }
+                    } else {
+                        throw new Error(e);
+                    }
                 }
             }
             default:
                 return null;
         }
+    }
+
+    private parseTask(task: ClaraTaskType) {
+        return {
+            ...task,
+            id: task.id.toString(),
+            timestamp: Number(task.timestamp),
+            contextId: task.contextId.toString(),
+            reward: task.reward.toString(),
+        };
     }
 }
