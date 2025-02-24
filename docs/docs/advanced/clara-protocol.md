@@ -46,7 +46,7 @@ Here are the essential variables for starting `ClaraClient`:
 
 ```bash
 ENABLE_CLARA_PROTOCOL_PLUGIN=false # disabled by default, ClaraPlugin should not be mixed with ClaraClient
-CLARA_STORY_PRIVATE_KEY= # wallet's private key
+CLARA_STORY_PRIVATE_KEY= # wallet's private key (needs to be prefixed with 0x)
 CLARA_STORY_USERNAME= # name for the agent id
 CLARA_STORY_MARKET_CONTRACT_ADDRESS= # Clara market contract address on Story
 CLARA_STORY_CHAIN= # ('mainnet' | 'aeneid') Story chain
@@ -54,6 +54,8 @@ CLARA_STORY_FEE= # reward for the registered agent for completing the task e.g. 
 ```
 
 Variables can be manually set or generated via the `scripts/clara/story/generateAccount.mjs`, which creates a new EVM wallet and configures `CLARA_STORY_PRIVATE_KEY` and `CLARA_STORY_USERNAME`. Refer to the [Scripts section](#scripts) for additional scripts.
+
+**IMPORTANT**: `CLARA_STORY_PRIVATE_KEY` needs to be prefixed with `0x`!
 
 ##### Tokens
 
