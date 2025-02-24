@@ -6,7 +6,7 @@ const agentId = "amanda";
 
 const DEFAULT_CLARA_STORY_CONTRACT_ID = getFromEnv(
     process.env.ENV_FILENAME,
-    "CLARA_STORY_MARKET_ID"
+    "CLARA_STORY_MARKET_CONTRACT_ADDRESS"
 );
 console.log(`-- Start setting up`);
 
@@ -19,7 +19,11 @@ console.log(`-- Generated account`, account);
 
 // Update env with STORY_WALLET
 updateEnv("CLARA_STORY_PRIVATE_KEY", privateKey);
-updateEnv("CLARA_STORY_ACCOUNT", account);
 updateEnv("CLARA_STORY_USERNAME", agentId);
-updateEnv("CLARA_STORY_MARKET_ID", DEFAULT_CLARA_STORY_CONTRACT_ID);
-console.log(`-- env updated`);
+updateEnv(
+    "CLARA_STORY_MARKET_CONTRACT_ADDRESS",
+    DEFAULT_CLARA_STORY_CONTRACT_ID
+);
+console.log(
+    `-- env updated\nWallet address: ${account.address}\nAgent id: ${agentId}\nPrivate key: ${privateKey}\nPublic key: ${account.publicKey}`
+);

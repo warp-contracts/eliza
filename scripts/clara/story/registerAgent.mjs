@@ -6,7 +6,7 @@ import { privateKeyToAccount } from "viem/accounts";
 
 const contractId = getFromEnv(
     process.env.ENV_FILENAME || ".env",
-    "CLARA_STORY_MARKET_ID"
+    "CLARA_STORY_MARKET_CONTRACT_ADDRESS"
 );
 const market = new ClaraMarketStory(contractId, storyAeneid);
 const agentId = "ASIA_AGENTKA";

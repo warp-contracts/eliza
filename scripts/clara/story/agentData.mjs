@@ -9,10 +9,11 @@ const account = privateKeyToAccount(
 
 const profile = new ClaraProfileStory(
     account,
-    getFromEnv(process.env.ENV_FILENAME, "CLARA_STORY_MARKET_ID"),
+    getFromEnv(process.env.ENV_FILENAME, "CLARA_STORY_MARKET_CONTRACT_ADDRESS"),
     storyAeneid
 );
 
 const result = await profile.agentData();
 
+console.log(`-- Agent data`);
 console.dir(result, { depth: null });

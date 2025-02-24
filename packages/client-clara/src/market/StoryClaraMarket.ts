@@ -23,7 +23,7 @@ export class StoryClaraMarket implements IClaraMarket {
                 ? storyMainnet
                 : storyAeneid;
         this.market = new ClaraMarketStory(
-            this.claraConfig.CLARA_MARKET_ID,
+            this.claraConfig.CLARA_MARKET_CONTRACT_ADDRESS,
             this.chain
         );
         this.account = privateKeyToAccount(
@@ -56,7 +56,7 @@ export class StoryClaraMarket implements IClaraMarket {
             try {
                 this.profile = new ClaraProfileStory(
                     this.account,
-                    this.claraConfig.CLARA_MARKET_ID,
+                    this.claraConfig.CLARA_MARKET_CONTRACT_ADDRESS,
                     storyAeneid
                 );
             } catch (e) {
