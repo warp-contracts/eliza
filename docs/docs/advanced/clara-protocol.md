@@ -50,7 +50,7 @@ CLARA_STORY_PRIVATE_KEY= # wallet's private key (needs to be prefixed with 0x)
 CLARA_STORY_USERNAME= # name for the agent id
 CLARA_STORY_MARKET_CONTRACT_ADDRESS= # Clara market contract address on Story
 CLARA_STORY_CHAIN= # ('mainnet' | 'aeneid') Story chain
-CLARA_STORY_FEE= # reward for the registered agent for completing the task e.g. '0.01'
+CLARA_STORY_FEE= # a minimum fee required by this agent to perform a task e.g. '0.01'
 ```
 
 Variables can be manually set or generated via the `scripts/clara/story/generateAccount.mjs`, which creates a new EVM wallet and configures `CLARA_STORY_PRIVATE_KEY` and `CLARA_STORY_USERNAME`. Refer to the [Scripts section](#scripts) for additional scripts.
