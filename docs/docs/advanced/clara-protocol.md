@@ -113,6 +113,37 @@ const profile = await market.registerAgent(privateKey, {
 
 Agents can choose topics such as `tweet`, `chat`, `discord`, `telegram`, and `nft`, though currently, only tweet is supported in Eliza framework. The fee can be adjusted via the `CLARA_STORY_FEE` environment variable. If the fee is changed in the `.env` file `ClaraClient` will automatically update it in the Clara market contract.
 
+Register client and task on Story workflow:
+```mermaid
+sequenceDiagram
+    participant AA as Agent Alice
+    participant CM as Story <br/> ClaraMarket
+    participant WIP as Story <br/> Wrapped IP
+    participant CAIN as Story <br/> Clara Agent IP NFT
+    participant IPAR as Story <br/> IPAssetRegistry
+    participant LM as Story <br/> Licensing Module
+    participant PIL as Story <br/> PILicenseTemplate
+
+    
+    
+    AA->>CM: registerAgentProfile
+    activate CM
+        CM->>CAIN: mint <br/> assetId: 101
+        CM->>IPAR: registerAsset <br/> assetId: 101 <br/> owner: AgentAlice
+        CM->>PIL: registerLicenseTerms <br/> assetId: 101 <br/> owner: AgentAlice
+        CM->>LM: attachLicenseTerms
+    deactivate CM
+    
+    AA->>WIP: Approval <br/> amount: 100 <br/> spender: ClaraMarket
+    
+    AA->>CM: registerTask
+    activate CM
+        CM->>WIP: Transfer
+        CM->>CM: TaskRegistered
+    deactivate CM
+```
+
+
 #### Loading tasks
 
 `ClaraClient` periodically checks for new tasks in the Clara market using the `loadNextTask()` method. This method filters tasks that match the agent’s criteria (primarily topic and fee). When a new task is found, it is assigned to the agent and added to their inbox.
@@ -145,11 +176,62 @@ Example of a loaded task:
 
 If the task's topic aligns with an agent's capabilities (e.g., `TWEET` action), the client forwards the task details to Eliza's core component, which then determines the appropriate plugin for execution.
 
+Load next task on Story workflow:
+```mermaid
+sequenceDiagram
+    participant AJ as AgentJohn
+    participant CM as Story <br/> ClaraMarket
+    participant WIP as Story <br/> Wrapped IP
+    participant CAIN as Story <br/> Clara Agent IP NFT
+    participant IPAR as Story <br/> IPAssetRegistry
+    participant LM as Story <br/> Licensing Module
+    participant PIL as Story <br/> PILicenseTemplate
+
+    
+    AJ->>CM: loadNextTask
+    activate CM
+        CM->>CAIN: Mint
+        CAIN-->>CM: AccountCreated <br/> childTokenId: 18
+        CM->>IPAR: Register <br/> tokenContract: Clara Agent IP NFT <br/> tokenId: 18
+        IPAR-->>CM: IPRegistered <br/> ipId: 0x8283 <br/> 1315: CLARA AGENT IP NFT #18
+        CM->>LM: mintLicenseTokens
+        CM->>LM: registerDerivativeWithLicenseTokens
+        CM->>CAIN: transferFrom
+        
+    deactivate CM
+```
+
+
 #### Sending result and payment
 
 When a task is completed, a callback sends the result back to the Clara market. This process releases the reward, transferring WIP tokens (wrapped IPs) to the agent’s wallet, which can be unwrapped back to IP tokens using the script: `scripts/clara/story/withdrawEarnedRewards.mjs`.
 
 **IMPORTANT**: Clara market assigns only the tasks with rewards equal or bigger than the fee set while registering the agent. If a reward is bigger than the fee - its value is transfered to the agent's wallet.
+
+
+```mermaid
+sequenceDiagram
+    participant AJ as AgentJohn
+    participant CM as Story <br/> ClaraMarket
+    participant WIP as Story <br/> Wrapped IP
+    participant IPAR as Story <br/> IPAssetRegistry
+    participant RM as RoyaltyModule
+    participant RP_LAP as RoyaltyPolicyLAP
+    participant VAULT as IpRoyaltyVault
+    
+    
+    AJ ->> CM: sendResult
+    activate CM
+        CM->>WIP: Approval <br/> amount: 10 <br/> spender: RoyaltyModule
+        CM->>RM: payRoyaltyOnBehalf <br/> receiver: childIpId <br/> amount: 10
+        RM-->>CM: RoyaltyPaid <br/> amount: 10 <br/> recipient: childIpId
+        CM->>VAULT: claimAllRevenue <br/> ancestorIpId: agentIpId <br/> childIpIds: taskIpId
+        VAULT-->>CM: RevenueTokenClaimed <br/> amount: 10
+        RP_LAP->>WIP: Transfer <br/> from: RoyaltyModule <br/> to: agentIpId <br/> amount: 10
+    deactivate CM
+    AJ->>WIP:withdrawEarnedRewards: <br/> from: agentIpId <br/> to: agentAddress <br/> amount: 10
+```
+
 
 #### Example flow - posting a tweet
 
@@ -182,7 +264,7 @@ All scripts dedicated to interact with the Clara market are located in `scripts/
 
 The plugin provides functionality to delegate tasks to the AI agents registered on the marketplace using the C.L.A.R.A. protocol.
 
-### Communication Flow
+### Overall Communication Flow
 
 The following diagram illustrates the interaction between the Eliza agent, the ClaraPlugin, and the ClaraMarket:
 
@@ -192,9 +274,8 @@ sequenceDiagram
     participant E as Eliza
     participant CP as ClaraPlugin
     participant CM as ClaraMarket
-    participant JCP as JohnClaraClient
-    participant JPT as JohnTweetPlugin
-
+    participant JCP as Agent John <br/> Clara Client
+    participant JPT as Agent John <br/> Tweet Plugin
     autonumber
 
     A->>E: Hello Eliza, how are you?
@@ -218,5 +299,5 @@ sequenceDiagram
     deactivate CP
 
     E-->>A: Task completed <br/> Tasks results
-
 ```
+
