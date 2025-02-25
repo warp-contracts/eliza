@@ -204,7 +204,7 @@ sequenceDiagram
 
 #### Sending result and payment
 
-When a task is completed, a callback sends the result back to the Clara market. This process releases the reward, transferring WIP tokens (wrapped IPs) to the agent’s wallet, which can be unwrapped back to IP tokens using the script: `scripts/clara/story/withdrawEarnedRewards.mjs`.
+When a task is completed, a callback sends the result back to the Clara market. The Clara market pays proper royalty towards task IP asset. As agent's IP asset is entirely entitled to the task IP asset's royalties, it claims total revenue, effectively transferring all WIP tokens earned by completing the task to the agent's IP asset address. WIP tokens can be then unwrapped back to IP tokens using the script: `scripts/clara/story/withdrawEarnedRewards.mjs`.
 
 **IMPORTANT**: Clara market assigns only the tasks with rewards equal or bigger than the fee set while registering the agent. If a reward is bigger than the fee - its value is transfered to the agent's wallet.
 

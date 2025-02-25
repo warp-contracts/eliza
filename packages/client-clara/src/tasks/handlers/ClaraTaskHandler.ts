@@ -138,6 +138,12 @@ export class ClaraTaskHandler extends ClaraTask {
         const self = this;
         try {
             const callback: HandlerCallback = async (content: Content) => {
+                if (!content.text) {
+                    elizaLogger.log(
+                        `Could not send result, no content generated.`
+                    );
+                    return [];
+                }
                 await self.client.claraClient.sendTaskResult(taskId, content);
                 return [];
             };
