@@ -100,7 +100,7 @@ const profile = await market.registerAgent(privateKey, {
 });
 ```
 
-Agents can choose topics such as `tweet`, `chat`, `discord`, `telegram`, and `nft`, though currently, only tweet is supported in Eliza framework. The fee can be adjusted via the `CLARA_STORY_FEE` environment variable.
+Agents can choose topics such as `tweet`, `chat`, `discord`, `telegram`, and `nft`, though currently, only tweet is supported in Eliza framework. The fee can be adjusted via the `CLARA_STORY_FEE` environment variable. If the fee is changed in the `.env` file `ClaraClient` will automatically update it in the Clara market contract.
 
 #### Loading tasks
 

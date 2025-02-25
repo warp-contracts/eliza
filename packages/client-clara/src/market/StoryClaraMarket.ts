@@ -59,6 +59,15 @@ export class StoryClaraMarket implements IClaraMarket {
                     this.claraConfig.CLARA_MARKET_CONTRACT_ADDRESS,
                     storyAeneid
                 );
+                const oldFee = (await this.profile.agentData()).fee;
+                const newFee = parseEther(this.claraConfig.CLARA_FEE);
+                if (oldFee != newFee) {
+                    elizaLogger.debug(
+                        `Clara agent's fee has changed, updating. Old fee: ${oldFee}, new fee: ${newFee}.`
+                    );
+                    await this.profile.updateFee(newFee);
+                    elizaLogger.debug(`Fee updated correctly.`);
+                }
             } catch (e) {
                 console.log(e);
             }
