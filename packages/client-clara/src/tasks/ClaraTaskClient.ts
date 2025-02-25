@@ -64,34 +64,11 @@ export class ClaraTaskClient {
             }
             case "story": {
                 const market = this.client.claraMarket as StoryClaraMarket;
-                try {
-                    const loadTaskResult = await market
-                        .getProfile()
-                        .loadNextTask();
-                    if (loadTaskResult) {
-                        return this.parseTask(loadTaskResult);
-                    } else {
-                        return null;
-                    }
-                } catch (e) {
-                    if (
-                        e?.data?.errorName &&
-                        e?.data?.errorName.includes(`PreviousTaskNotSentBack`)
-                    ) {
-                        elizaLogger.debug(
-                            `Previous task not sent back, trying to load task from the inbox...`
-                        );
-                        const loadPendingTaskResult = await market
-                            .getProfile()
-                            .loadPendingTask();
-                        if (loadPendingTaskResult) {
-                            return this.parseTask(loadPendingTaskResult);
-                        } else {
-                            return null;
-                        }
-                    } else {
-                        throw new Error(e);
-                    }
+                const loadTaskResult = await market.getProfile().loadNextTask();
+                if (loadTaskResult) {
+                    return this.parseTask(loadTaskResult);
+                } else {
+                    return null;
                 }
             }
             default:

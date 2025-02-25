@@ -34,19 +34,6 @@ export class ClaraTaskHandler extends ClaraTask {
         }
 
         const prompt = payload;
-        elizaLogger.info(this.runtime.actions.map((a) => a.name.toLowerCase()));
-        elizaLogger.info(this.runtime.actions.map((a) => a.similes));
-        elizaLogger.info(
-            "is it true?",
-            JSON.stringify(
-                this.runtime.actions.find((action: Action) =>
-                    action.similes.find(
-                        (simly: any) =>
-                            simly.toLowerCase() == topic.toLowerCase()
-                    )
-                )
-            )
-        );
         if (
             !this.runtime.actions.find(
                 (a: Action) => a.name.toLowerCase() == topic.toLowerCase()
@@ -76,13 +63,6 @@ export class ClaraTaskHandler extends ClaraTask {
             prompt,
             memory
         );
-        await this.saveClaraTaskIfNeeded(
-            claraMessage,
-            claraRoomId,
-            claraMessageId,
-            prompt,
-            state
-        );
         await this.processTaskInActions(
             state,
             memory,
@@ -93,36 +73,6 @@ export class ClaraTaskHandler extends ClaraTask {
             topic,
             id
         );
-    }
-
-    private async saveClaraTaskIfNeeded(
-        claraMessage: ClaraTaskType,
-        roomId: UUID,
-        messageId: UUID,
-        prompt: string,
-        state: State
-    ) {
-        const { timestamp, requester } = claraMessage;
-        const claraMessageExists =
-            await this.runtime.messageManager.getMemoryById(messageId);
-
-        if (!claraMessageExists) {
-            elizaLogger.log("Clara message does not exist, saving");
-            const userIdUUID = stringToUuid(requester);
-
-            const message = {
-                id: messageId,
-                agentId: this.runtime.agentId,
-                content: {
-                    text: prompt,
-                    url: "",
-                },
-                userId: userIdUUID,
-                roomId,
-                createdAt: timestamp,
-            };
-            this.client.saveRequestMessage(message, state);
-        }
     }
 
     private async processTaskInActions(
@@ -145,6 +95,7 @@ export class ClaraTaskHandler extends ClaraTask {
                     return [];
                 }
                 await self.client.claraClient.sendTaskResult(taskId, content);
+                self.client.updateLastCheckedMessage(claraMessage);
                 return [];
             };
             const responseMessage: Memory = {

@@ -11,6 +11,7 @@ import { IClaraMarket } from "./market/IClaraMarket.ts";
 import { AoClaraMarket } from "./market/AoClaraMarket.ts";
 import { StoryClaraMarket } from "./market/StoryClaraMarket.ts";
 import { ClaraClient } from "./ClaraClient.ts";
+import { ClaraTaskType } from "./utils/claraTypes.ts";
 
 export class ClaraClientBase extends EventEmitter {
     static _claraClients: { [accountIdentifier: string]: ClaraClient } = {};
@@ -112,6 +113,21 @@ export class ClaraClientBase extends EventEmitter {
                 `${claraImpl}/${this.profileId}/latest_checked_message`,
                 this.lastCheckedMessage
             );
+        }
+    }
+
+    updateLastCheckedMessage(message: ClaraTaskType) {
+        switch (this.claraConfig.CLARA_IMPL) {
+            case "ao":
+                this.lastCheckedMessage = message.timestamp;
+                break;
+            case "story":
+                this.lastCheckedMessage = Number(message.blockNumber);
+                break;
+            default:
+                throw new Error(
+                    `Unknown Clara impl: ${this.claraConfig.CLARA_IMPL}`
+                );
         }
     }
 }
