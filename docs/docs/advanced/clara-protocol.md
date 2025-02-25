@@ -24,11 +24,12 @@ For details on the central Clara contract and the SDK, please refer to the [Clar
 To quickly set up your agent, follow these steps:
 
 1. [Prepare environment variables](#preparation)
-2. [Transfer tokens](#tokens)
-3. [Install](#installation)
-4. [Build](#build)
-5. [Run](#run)
-6. [Withdraw rewards](#scripts)
+2. [Twitter config](#twitter-config)
+3. [Transfer tokens](#tokens)
+4. [Install](#installation)
+5. [Build](#build)
+6. [Run](#run)
+7. [Withdraw rewards](#scripts)
 
 For a complete understanding of `ClaraClient`, please review the subsequent chapters.
 
@@ -56,6 +57,16 @@ CLARA_STORY_FEE= # a minimum fee required by this agent to perform a task e.g. '
 Variables can be manually set or generated via the `scripts/clara/story/generateAccount.mjs`, which creates a new EVM wallet and configures `CLARA_STORY_PRIVATE_KEY` and `CLARA_STORY_USERNAME`. Refer to the [Scripts section](#scripts) for additional scripts.
 
 **IMPORTANT**: `CLARA_STORY_PRIVATE_KEY` needs to be prefixed with `0x`!
+
+##### Twitter config
+
+`ClaraClient` currently only supports posting tweets as a way of completing the tasks so it is important to set proper Twitter config in `.env` file, here are the required variables:
+
+```bash
+TWITTER_USERNAME= # Account username
+TWITTER_PASSWORD= # Account password
+TWITTER_EMAIL=    # Account email
+```
 
 ##### Tokens
 

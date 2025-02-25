@@ -47,18 +47,19 @@ export class StoryClaraMarket implements IClaraMarket {
     }
 
     async connectProfile(): Promise<void> {
-        elizaLogger.info("connecting profile", this.profileId);
-        if (fs.existsSync(`../profiles/${this.profileId}`)) {
+        elizaLogger.info("Connecting profile", this.profileId);
+        this.profile = new ClaraProfileStory(
+            this.account,
+            this.claraConfig.CLARA_MARKET_CONTRACT_ADDRESS,
+            storyAeneid
+        );
+        const agentData = await this.profile.agentData();
+        if (agentData.exists) {
             elizaLogger.info(
                 `Agent already registered, connecting`,
                 this.profileId
             );
             try {
-                this.profile = new ClaraProfileStory(
-                    this.account,
-                    this.claraConfig.CLARA_MARKET_CONTRACT_ADDRESS,
-                    storyAeneid
-                );
                 const oldFee = (await this.profile.agentData()).fee;
                 const newFee = parseEther(this.claraConfig.CLARA_FEE);
                 if (oldFee != newFee) {
@@ -73,7 +74,7 @@ export class StoryClaraMarket implements IClaraMarket {
             }
         } else {
             try {
-                this.profile = await this.market.registerAgent(this.account, {
+                await this.market.registerAgent(this.account, {
                     metadata: JSON.stringify({ description: this.profileId }),
                     topic: "tweet",
                     fee: parseEther(this.claraConfig.CLARA_FEE),
@@ -83,7 +84,6 @@ export class StoryClaraMarket implements IClaraMarket {
                 elizaLogger.error(`Could not create Clara profile`, e);
                 throw new Error(e);
             }
-            fs.mkdirSync(`../profiles/${this.profileId}`, { recursive: true });
         }
     }
 }

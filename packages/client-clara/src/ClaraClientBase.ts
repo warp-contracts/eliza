@@ -35,9 +35,7 @@ export class ClaraClientBase extends EventEmitter {
         this.runtime = runtime;
         this.claraConfig = claraConfig;
         this.profileId = `${this.runtime.agentId}_${claraConfig.CLARA_USERNAME}`;
-        elizaLogger.info(this.profileId);
         this.walletId = claraConfig.CLARA_WALLET_ID;
-        elizaLogger.log(ClaraClientBase._claraClients);
         if (ClaraClientBase._claraClients[this.profileId]) {
             this.claraClient = ClaraClientBase._claraClients[this.profileId];
         } else {
