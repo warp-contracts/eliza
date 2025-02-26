@@ -22,10 +22,7 @@ export class StoryClaraMarket implements IClaraMarket {
             process.env.CLARA_STORY_CHAIN == "mainnet"
                 ? storyMainnet
                 : storyAeneid;
-        this.market = new ClaraMarketStory(
-            this.claraConfig.CLARA_MARKET_CONTRACT_ADDRESS,
-            this.chain
-        );
+        this.market = new ClaraMarketStory(this.chain);
         this.account = privateKeyToAccount(
             this.claraConfig.CLARA_PRIVATE_KEY as `0x${string}`
         );
@@ -48,11 +45,7 @@ export class StoryClaraMarket implements IClaraMarket {
 
     async connectProfile(): Promise<void> {
         elizaLogger.info("Connecting profile", this.profileId);
-        this.profile = new ClaraProfileStory(
-            this.account,
-            this.claraConfig.CLARA_MARKET_CONTRACT_ADDRESS,
-            storyAeneid
-        );
+        this.profile = new ClaraProfileStory(this.account, storyAeneid);
         const agentData = await this.profile.agentData();
         if (agentData.exists) {
             elizaLogger.info(

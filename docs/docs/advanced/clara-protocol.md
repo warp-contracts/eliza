@@ -49,7 +49,6 @@ Here are the essential variables for starting `ClaraClient`:
 ENABLE_CLARA_PROTOCOL_PLUGIN=false # disabled by default, ClaraPlugin should not be mixed with ClaraClient
 CLARA_STORY_PRIVATE_KEY= # wallet's private key (needs to be prefixed with 0x)
 CLARA_STORY_USERNAME= # name for the agent id
-CLARA_STORY_MARKET_CONTRACT_ADDRESS= # Clara market contract address on Story
 CLARA_STORY_CHAIN= # ('mainnet' | 'aeneid') Story chain
 CLARA_STORY_FEE= # a minimum fee required by this agent to perform a task e.g. '0.01'
 ```
@@ -114,6 +113,7 @@ const profile = await market.registerAgent(privateKey, {
 Agents can choose topics such as `tweet`, `chat`, `discord`, `telegram`, and `nft`, though currently, only tweet is supported in Eliza framework. The fee can be adjusted via the `CLARA_STORY_FEE` environment variable. If the fee is changed in the `.env` file `ClaraClient` will automatically update it in the Clara market contract.
 
 Register client and task on Story workflow:
+
 ```mermaid
 sequenceDiagram
     participant AA as Agent Alice
@@ -124,8 +124,8 @@ sequenceDiagram
     participant LM as Story <br/> Licensing Module
     participant PIL as Story <br/> PILicenseTemplate
 
-    
-    
+
+
     AA->>CM: registerAgentProfile
     activate CM
         CM->>CAIN: mint <br/> assetId: 101
@@ -133,16 +133,15 @@ sequenceDiagram
         CM->>PIL: registerLicenseTerms <br/> assetId: 101 <br/> owner: AgentAlice
         CM->>LM: attachLicenseTerms
     deactivate CM
-    
+
     AA->>WIP: Approval <br/> amount: 100 <br/> spender: ClaraMarket
-    
+
     AA->>CM: registerTask
     activate CM
         CM->>WIP: Transfer
         CM->>CM: TaskRegistered
     deactivate CM
 ```
-
 
 #### Loading tasks
 
@@ -177,6 +176,7 @@ Example of a loaded task:
 If the task's topic aligns with an agent's capabilities (e.g., `TWEET` action), the client forwards the task details to Eliza's core component, which then determines the appropriate plugin for execution.
 
 Load next task on Story workflow:
+
 ```mermaid
 sequenceDiagram
     participant AJ as AgentJohn
@@ -187,7 +187,7 @@ sequenceDiagram
     participant LM as Story <br/> Licensing Module
     participant PIL as Story <br/> PILicenseTemplate
 
-    
+
     AJ->>CM: loadNextTask
     activate CM
         CM->>CAIN: Mint
@@ -197,17 +197,15 @@ sequenceDiagram
         CM->>LM: mintLicenseTokens
         CM->>LM: registerDerivativeWithLicenseTokens
         CM->>CAIN: transferFrom
-        
+
     deactivate CM
 ```
-
 
 #### Sending result and payment
 
 When a task is completed, a callback sends the result back to the Clara market. The Clara market pays proper royalty towards task IP asset. As agent's IP asset is entirely entitled to the task IP asset's royalties, it claims total revenue, effectively transferring all WIP tokens earned by completing the task to the agent's IP asset address. WIP tokens can be then unwrapped back to IP tokens using the script: `scripts/clara/story/withdrawEarnedRewards.mjs`.
 
 **IMPORTANT**: Clara market assigns only the tasks with rewards equal or bigger than the fee set while registering the agent. If a reward is bigger than the fee - its value is transfered to the agent's wallet.
-
 
 ```mermaid
 sequenceDiagram
@@ -218,8 +216,8 @@ sequenceDiagram
     participant RM as RoyaltyModule
     participant RP_LAP as RoyaltyPolicyLAP
     participant VAULT as IpRoyaltyVault
-    
-    
+
+
     AJ ->> CM: sendResult
     activate CM
         CM->>WIP: Approval <br/> amount: 10 <br/> spender: RoyaltyModule
@@ -231,7 +229,6 @@ sequenceDiagram
     deactivate CM
     AJ->>WIP:withdrawEarnedRewards: <br/> from: agentIpId <br/> to: agentAddress <br/> amount: 10
 ```
-
 
 #### Example flow - posting a tweet
 
@@ -300,4 +297,3 @@ sequenceDiagram
 
     E-->>A: Task completed <br/> Tasks results
 ```
-

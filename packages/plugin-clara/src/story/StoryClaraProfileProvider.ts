@@ -35,24 +35,21 @@ export async function initializeClaraProfileProvider(): Promise<Provider> {
 
     const privateKey = process.env.CLARA_STORY_PRIVATE_KEY;
     const userName = process.env.CLARA_STORY_USERNAME;
-    const marketId = process.env.CLARA_STORY_MARKET_CONTRACT_ADDRESS;
 
-    if (!privateKey || !userName || !marketId) {
+    if (!privateKey || !userName) {
         elizaLogger.error(`Missing Clara protocol plugin settings`);
         return storyProfileProvider(null);
     }
 
-    elizaLogger.log(
-        `Setting Story Clara profile ${userName} for market ${marketId}`
-    );
+    elizaLogger.log(`Setting Story Clara profile ${userName}.`);
 
     const storyAccount = privateKeyToAccount(privateKey);
-    const claraMarket = new ClaraMarketStory(marketId);
+    const claraMarket = new ClaraMarketStory();
     let claraProfile = null;
 
     if (fs.existsSync(`${STORY_PROFILES_DIR}/${userName}`)) {
         elizaLogger.info(`Agent already registered`, userName);
-        claraProfile = new ClaraProfileStory(storyAccount, marketId);
+        claraProfile = new ClaraProfileStory(storyAccount);
     } else {
         try {
             claraProfile = await claraMarket.registerClient(storyAccount, {
@@ -64,7 +61,7 @@ export async function initializeClaraProfileProvider(): Promise<Provider> {
                 elizaLogger.error(
                     `Be cool. Agent already registered. Setting up profile.`
                 );
-                claraProfile = new ClaraProfileStory(storyAccount, marketId);
+                claraProfile = new ClaraProfileStory(storyAccount);
             } else {
                 throw new Error(`Could not create Clara profile`);
             }

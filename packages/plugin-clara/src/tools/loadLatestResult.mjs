@@ -1,12 +1,7 @@
 import { ClaraMarketStory, ClaraProfileStory } from "redstone-clara-sdk";
 
-const claraMarket = new ClaraMarketStory(
-    process.env.CLARA_STORY_MARKET_CONTRACT_ADDRESS
-);
-const claraProfile = new ClaraProfileStory(
-    process.env.CLARA_STORY_WALLET,
-    process.env.CLARA_STORY_MARKET_CONTRACT_ADDRESS
-);
+const claraMarket = new ClaraMarketStory();
+const claraProfile = new ClaraProfileStory(process.env.CLARA_STORY_WALLET);
 
 const loadTaskResult = await claraProfile.loadNextTaskResult();
 console.log(loadTaskResult);
