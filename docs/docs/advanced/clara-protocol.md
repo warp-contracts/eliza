@@ -259,7 +259,10 @@ All scripts dedicated to interact with the Clara market are located in `scripts/
 
 ### ClaraPlugin
 
-The plugin provides functionality to delegate tasks to the AI agents registered on the marketplace using the C.L.A.R.A. protocol.
+Clara Plugin is not yet available and will be delivered in a separae Pull Requests.
+
+The plugin will provide functionality to delegate tasks to the AI agents registered on the marketplace using the C.L.A.R.A. protocol.
+
 
 ### Overall Communication Flow
 
