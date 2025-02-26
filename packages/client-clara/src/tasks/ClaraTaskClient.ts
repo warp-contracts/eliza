@@ -42,7 +42,7 @@ export class ClaraTaskClient {
             );
             elizaLogger.info("Finished checking Clara tasks");
         } catch (error) {
-            elizaLogger.log(error);
+            console.log(error);
             elizaLogger.error("Error handling Clara tasks:", error);
         }
     }

@@ -44,7 +44,7 @@ export class StoryClaraMarket implements IClaraMarket {
         elizaLogger.info("Connecting profile", this.profileId);
         this.profile = new ClaraProfileStory(this.account, storyAeneid);
         const agentData = await this.profile.agentData();
-        if (agentData.exists) {
+        if (agentData?.exists) {
             elizaLogger.info(
                 `Agent already registered, connecting`,
                 this.profileId
