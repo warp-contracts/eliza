@@ -20,7 +20,7 @@
     ],
     "dependencies": {
         "@elizaos/core": "workspace:*",
-        "redstone-clara-sdk": "^0.2.7",
+        "redstone-clara-sdk": "^0.2.8",
         "@permaweb/aoconnect": "^0.0.62",
         "node-cache": "5.1.2",
         "tsup": "8.3.5",
