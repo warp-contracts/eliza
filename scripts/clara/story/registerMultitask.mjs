@@ -11,11 +11,7 @@ const account = privateKeyToAccount(
     )
 );
 
-const profile = new ClaraProfileStory(
-    account,
-    getFromEnv(process.env.ENV_FILENAME, "CLARA_STORY_MARKET_ID"),
-    storyAeneid
-);
+const profile = new ClaraProfileStory(account, storyAeneid);
 
 const result = await profile.registerMultiTask({
     topic: "tweet",

@@ -1,17 +1,16 @@
 import { IAgentRuntime, elizaLogger } from "@elizaos/core";
-import { ClaraClientBase } from "../ClaraClientBase.ts";
+import { ClaraClient } from "../ClaraClient.ts";
 import { ClaraMessageHandler } from "./handlers/ClaraMessageHandler.ts";
 import { ClaraTaskType } from "../utils/claraTypes.ts";
-import { StoryClaraMarket } from "../market/StoryClaraMarket.ts";
 
 export const CLARA_TASK_ASSIGNMENT_TAG_NAME = "Task-Assignment";
 
 export class ClaraTaskClient {
-    client: ClaraClientBase;
+    client: ClaraClient;
     runtime: IAgentRuntime;
     messageHandler: ClaraMessageHandler;
 
-    constructor(client: ClaraClientBase, runtime: IAgentRuntime) {
+    constructor(client: ClaraClient, runtime: IAgentRuntime) {
         this.client = client;
         this.runtime = runtime;
         this.messageHandler = new ClaraMessageHandler(
@@ -43,17 +42,16 @@ export class ClaraTaskClient {
             );
             elizaLogger.info("Finished checking Clara tasks");
         } catch (error) {
-            elizaLogger.log(error);
+            console.log(error);
             elizaLogger.error("Error handling Clara tasks:", error);
         }
     }
 
     private async getMessageToProcess(): Promise<ClaraTaskType> {
+        const profile = await this.client.claraMarket.getProfile();
         switch (this.client.claraConfig.CLARA_IMPL) {
             case "ao": {
-                const message = (await this.client.claraMarket
-                    .getProfile()
-                    .loadNextAssignedTask()) as ClaraTaskType;
+                const message = await profile.loadNextAssignedTask();
                 if (
                     message &&
                     (!this.client.lastCheckedMessage ||
@@ -63,35 +61,11 @@ export class ClaraTaskClient {
                 }
             }
             case "story": {
-                const market = this.client.claraMarket as StoryClaraMarket;
-                try {
-                    const loadTaskResult = await market
-                        .getProfile()
-                        .loadNextTask();
-                    if (loadTaskResult) {
-                        return this.parseTask(loadTaskResult);
-                    } else {
-                        return null;
-                    }
-                } catch (e) {
-                    if (
-                        e?.data?.errorName &&
-                        e?.data?.errorName.includes(`PreviousTaskNotSentBack`)
-                    ) {
-                        elizaLogger.debug(
-                            `Previous task not sent back, trying to load task from the inbox...`
-                        );
-                        const loadPendingTaskResult = await market
-                            .getProfile()
-                            .loadPendingTask();
-                        if (loadPendingTaskResult) {
-                            return this.parseTask(loadPendingTaskResult);
-                        } else {
-                            return null;
-                        }
-                    } else {
-                        throw new Error(e);
-                    }
+                const loadTaskResult = await profile.loadNextTask();
+                if (loadTaskResult) {
+                    return this.parseTask(loadTaskResult);
+                } else {
+                    return null;
                 }
             }
             default:

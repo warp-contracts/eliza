@@ -123,8 +123,7 @@ async function postTweet(
             if (content.length > DEFAULT_MAX_TWEET_LENGTH) {
                 res = await scraper.sendNoteTweet(content);
                 elizaLogger.debug("Note tweet result:", res);
-                if (
-                    res.errors && res.errors.length > 0) {
+                if (res.errors && res.errors.length > 0) {
                     // Note Tweet failed due to authorization. Falling back to standard Tweet.
                     res = await sendTweet(scraper, content);
                 } else {
@@ -135,11 +134,10 @@ async function postTweet(
             }
             return {
                 userName:
-                res?.data?.create_tweet?.tweet_results?.result?.core
-                    ?.user_results?.result?.legacy?.screen_name,
+                    res?.data?.create_tweet?.tweet_results?.result?.core
+                        ?.user_results?.result?.legacy?.screen_name,
                 id: res?.data?.create_tweet?.tweet_results?.result?.rest_id,
             };
-
         } catch (error) {
             throw new Error(`Note Tweet failed: ${error}`);
         }
@@ -161,9 +159,9 @@ export const postAction: Action = {
     description: "Post a tweet to Twitter",
     validate: async (
         runtime: IAgentRuntime,
-// eslint-disable-next-line
+        // eslint-disable-next-line
         _message: Memory,
-// eslint-disable-next-line
+        // eslint-disable-next-line
         _state?: State
     ) => {
         const username = runtime.getSetting("TWITTER_USERNAME");
@@ -190,7 +188,10 @@ export const postAction: Action = {
             if (!tweetContent) {
                 elizaLogger.error("No content generated for tweet");
                 callback({
-                    text: `No content generated for tweet`,
+                    text: null,
+                    model: null,
+                    tweetId: null,
+                    url: null,
                 });
                 return false;
             }
@@ -206,7 +207,10 @@ export const postAction: Action = {
                     `Dry run: would have posted tweet: ${tweetContent}`
                 );
                 callback({
-                    text: `No content generated for tweet.`,
+                    text: null,
+                    model: null,
+                    tweetId: null,
+                    url: null,
                 });
                 return true;
             }
@@ -215,19 +219,26 @@ export const postAction: Action = {
             if (result) {
                 callback({
                     text: tweetContent,
+                    model: runtime.modelProvider,
                     id: result.id,
                     userName: result.userName,
                 });
             } else {
                 callback({
-                    text: `Could not post tweet.`,
+                    text: null,
+                    model: null,
+                    tweetId: null,
+                    url: null,
                 });
             }
             return !!result;
         } catch (error) {
             elizaLogger.error("Error in post action:", error);
             callback({
-                text: `Could not post tweet.`,
+                text: null,
+                model: null,
+                tweetId: null,
+                url: null,
             });
             return false;
         }

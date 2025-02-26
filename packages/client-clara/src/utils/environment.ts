@@ -6,7 +6,8 @@ export const claraEnvSchema = z.object({
     CLARA_USERNAME: z.string().min(1, "CLARA username is required"),
     CLARA_PRIVATE_KEY: z.string().min(1, "CLARA wallet is required"),
     CLARA_WALLET_ID: z.string().min(1, "CLARA wallet id is required"),
-    CLARA_MARKET_ID: z.string().min(1, "CLARA market protocol id is required"),
+    CLARA_MARKET_CONTRACT_ADDRESS: z.string().optional(),
+    CLARA_FEE: z.string().min(1, "CLARA market fee is required"),
     CLARA_POLL_INTERVAL: z.number().int(),
 });
 
@@ -30,9 +31,12 @@ export async function validateAoConfig(
                 runtime.getSetting("CLARA_AO_WALLET_ID") ||
                 process.env.CLARA_AO_WALLET_ID,
 
-            CLARA_MARKET_ID:
+            CLARA_MARKET_CONTRACT_ADDRESS:
                 runtime.getSetting("CLARA_AO_MARKET_ID") ||
                 process.env.CLARA_AO_MARKET_ID,
+
+            CLARA_FEE:
+                runtime.getSetting("CLARA_AO_FEE") || process.env.CLARA_AO_FEE,
 
             CLARA_POLL_INTERVAL: safeParseInt(
                 runtime.getSetting("CLARA_AO_POLL_INTERVAL") ||
@@ -76,9 +80,9 @@ export async function validateStoryConfig(
                     process.env.CLARA_STORY_PRIVATE_KEY) as `0x${string}`
             ).address,
 
-            CLARA_MARKET_ID:
-                runtime.getSetting("CLARA_STORY_MARKET_ID") ||
-                process.env.CLARA_STORY_MARKET_ID,
+            CLARA_FEE:
+                runtime.getSetting("CLARA_STORY_FEE") ||
+                process.env.CLARA_STORY_FEE,
 
             CLARA_POLL_INTERVAL: safeParseInt(
                 runtime.getSetting("CLARA_AO_POLL_INTERVAL") ||
@@ -97,7 +101,7 @@ export async function validateStoryConfig(
                 .map((err) => `${err.path.join(".")}: ${err.message}`)
                 .join("\n");
             throw new Error(
-                `X/AO configuration validation failed:\n${errorMessages}`
+                `Story configuration validation failed:\n${errorMessages}`
             );
         }
         throw error;

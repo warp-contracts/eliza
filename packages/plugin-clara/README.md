@@ -23,7 +23,6 @@ Here are Story environment variables:
 CLARA_STORY_AO_MARKET_ID=   # Clara marketplace ID
 CLARA_STORY_USERNAME=       # Unique user identifier
 CLARA_STORY_PRIVATE_KEY=    # Private key
-CLARA_STORY_ACCOUNT=        # Account
 ```
 
 Here are AO environment variables:

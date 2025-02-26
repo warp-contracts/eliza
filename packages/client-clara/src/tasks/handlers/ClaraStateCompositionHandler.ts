@@ -1,11 +1,11 @@
 import { elizaLogger, IAgentRuntime, Memory, State } from "@elizaos/core";
 import { ClaraTaskType } from "../../utils/claraTypes";
-import { ClaraClientBase } from "../../ClaraClientBase";
+import { ClaraClient } from "../../ClaraClient";
 import { ClaraTask } from "../ClaraTask";
 import { buildConversationThread } from "../../utils/utils";
 
 export class ClaraStateCompositionHandler extends ClaraTask {
-    constructor(runtime: IAgentRuntime, client: ClaraClientBase) {
+    constructor(runtime: IAgentRuntime, client: ClaraClient) {
         super(client, runtime);
     }
 
@@ -40,7 +40,7 @@ export class ClaraStateCompositionHandler extends ClaraTask {
             formattedConversation
         );
         return await this.runtime.composeState(memory, {
-            claraClient: this.client.claraClient,
+            claraClient: this.client,
             claraUserName: this.client.claraConfig.CLARA_USERNAME,
             currentMessage,
             formattedConversation,

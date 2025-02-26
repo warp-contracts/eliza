@@ -8,11 +8,7 @@ const account = privateKeyToAccount(
     getFromEnv(process.env.ENV_FILENAME || ".env", "CLARA_STORY_PRIVATE_KEY")
 );
 
-const profile = new ClaraProfileStory(
-    account,
-    getFromEnv(process.env.ENV_FILENAME, "CLARA_STORY_MARKET_ID"),
-    storyAeneid
-);
+const profile = new ClaraProfileStory(account, storyAeneid);
 
 const result = await profile.updateFee(parseEther("0.00001"));
 
