@@ -14,10 +14,16 @@ import { ClaraClient } from "../../ClaraClient";
 import { ClaraTaskType } from "../../utils/claraTypes";
 import { wait } from "../../utils/utils";
 import { ClaraTask } from "../ClaraTask";
+import { ClaraStateCompositionHandler } from "./ClaraStateCompositionHandler";
 
 export class ClaraTaskHandler extends ClaraTask {
+    private stateCompositionHandler: ClaraStateCompositionHandler;
     constructor(client: ClaraClient, runtime: IAgentRuntime) {
         super(client, runtime);
+        this.stateCompositionHandler = new ClaraStateCompositionHandler(
+            this.runtime,
+            this.client
+        );
     }
 
     async handle({ claraMessage, claraMessageId, claraRoomId }): Promise<void> {
@@ -50,12 +56,11 @@ export class ClaraTaskHandler extends ClaraTask {
             "clara"
         );
         const memory = this.buildMemory(payload, claraRoomId, userIdUUID);
-        const currentMessage = this.formatMessage(claraMessage, payload);
-        const state = await this.runtime.composeState(memory, {
-            claraClient: this.client,
-            claraUserName: this.client.claraConfig.CLARA_USERNAME,
-            currentMessage,
-        });
+        const state = await this.stateCompositionHandler.handle(
+            claraMessage,
+            payload,
+            memory
+        );
         await this.processTaskInActions(
             state,
             memory,
@@ -131,11 +136,5 @@ export class ClaraTaskHandler extends ClaraTask {
 
     private buildUserUUID(owner: string): UUID {
         return stringToUuid(owner);
-    }
-
-    private formatMessage(claraMessage: ClaraTaskType, prompt: string) {
-        return `  ID: ${claraMessage.id}
-  From: ${claraMessage.requester} (@${claraMessage.requester})
-  Text: ${prompt}`;
     }
 }
