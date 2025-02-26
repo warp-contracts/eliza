@@ -1,11 +1,11 @@
 import { IAgentRuntime, UUID } from "@elizaos/core";
-import { ClaraClientBase } from "../ClaraClientBase";
+import { ClaraClient } from "../ClaraClient";
 
 export abstract class ClaraTask {
     protected walletId: string;
     protected agentId: UUID;
     constructor(
-        protected client: ClaraClientBase,
+        protected client: ClaraClient,
         protected runtime: IAgentRuntime
     ) {
         this.walletId = this.client.walletId;

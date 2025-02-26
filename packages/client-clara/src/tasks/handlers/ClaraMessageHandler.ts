@@ -1,13 +1,13 @@
 import { elizaLogger, IAgentRuntime, stringToUuid, UUID } from "@elizaos/core";
 import { ClaraTaskType } from "../../utils/claraTypes";
-import { ClaraClientBase } from "../../ClaraClientBase";
+import { ClaraClient } from "../../ClaraClient";
 import { ClaraTaskHandler } from "./ClaraTaskHandler";
 import { ClaraTask } from "../ClaraTask";
 
 export class ClaraMessageHandler extends ClaraTask {
     private claraTaskHandler: ClaraTaskHandler;
     private claraMessage: ClaraTaskType;
-    constructor(runtime: IAgentRuntime, client: ClaraClientBase) {
+    constructor(runtime: IAgentRuntime, client: ClaraClient) {
         super(client, runtime);
         this.claraTaskHandler = new ClaraTaskHandler(this.client, this.runtime);
     }
@@ -17,7 +17,6 @@ export class ClaraMessageHandler extends ClaraTask {
         const { id, payload } = this.claraMessage;
         const claraMessageId = stringToUuid(id);
         const claraRoomId = stringToUuid(id + "-" + this.agentId);
-
         elizaLogger.info(`Started processing Clara message: ${id}.`);
         const valid = await this.validate();
         if (!valid) {
@@ -29,7 +28,6 @@ export class ClaraMessageHandler extends ClaraTask {
             this.client.updateLastCheckedMessage(this.claraMessage);
             return;
         }
-
         await this.claraTaskHandler.handle({
             claraMessage,
             claraMessageId,

@@ -1,6 +1,6 @@
 import { getEmbeddingZeroVector } from "@elizaos/core";
 import { stringToUuid } from "@elizaos/core";
-import { ClaraClientBase } from "../ClaraClientBase.ts";
+import { ClaraClientBase } from "../ClaraClient.ts";
 import { elizaLogger } from "@elizaos/core";
 import { ClaraTaskType } from "./claraTypes.ts";
 

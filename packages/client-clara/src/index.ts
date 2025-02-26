@@ -1,5 +1,5 @@
 import { Client, elizaLogger, IAgentRuntime } from "@elizaos/core";
-import { ClaraClientBase } from "./ClaraClientBase.ts";
+import { ClaraClient } from "./ClaraClient.ts";
 import {
     validateAoConfig,
     validateStoryConfig,
@@ -8,11 +8,11 @@ import {
 import { ClaraTaskClient } from "./tasks/ClaraTaskClient.ts";
 
 class ClaraManager {
-    client: ClaraClientBase;
+    client: ClaraClient;
     tasks: ClaraTaskClient;
 
     constructor(runtime: IAgentRuntime, claraConfig: ClaraConfig) {
-        this.client = new ClaraClientBase(runtime, claraConfig);
+        this.client = new ClaraClient(runtime, claraConfig);
         this.tasks = new ClaraTaskClient(this.client, runtime);
     }
 }

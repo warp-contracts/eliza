@@ -5,7 +5,6 @@ import {
     storyMainnet,
 } from "redstone-clara-sdk";
 import { elizaLogger } from "@elizaos/core";
-import fs from "fs";
 import { ClaraConfig } from "../utils/environment";
 import { IClaraMarket } from "./IClaraMarket";
 import { Chain, parseEther, PrivateKeyAccount } from "viem";
@@ -28,17 +27,15 @@ export class StoryClaraMarket implements IClaraMarket {
         );
     }
 
-    async init() {
-        await this.connectProfile();
-    }
-
-    getProfile() {
-        if (!this.profile) this.connectProfile();
+    async getProfile() {
+        if (!this.profile) await this.connectProfile();
         return this.profile;
     }
+
     getMarket() {
         return this.market;
     }
+
     getWallet(): string {
         return JSON.stringify(this.account);
     }

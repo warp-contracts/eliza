@@ -1,4 +1,4 @@
-import { createWalletClient, defineChain, http, parseEther } from "viem";
+import { createWalletClient, http, parseEther } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import "dotenv/config";
 import { storyAeneid } from "redstone-clara-sdk";
