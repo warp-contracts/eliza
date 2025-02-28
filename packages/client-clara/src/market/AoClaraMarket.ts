@@ -10,7 +10,9 @@ export class AoClaraMarket implements IClaraMarket {
     private wallet: string;
 
     constructor(private profileId: string, private claraConfig: ClaraConfig) {
-        this.market = new ClaraMarketAO(this.claraConfig.CLARA_MARKET_ID);
+        this.market = new ClaraMarketAO(
+            this.claraConfig.CLARA_MARKET_CONTRACT_ADDRESS
+        );
         this.wallet = this.claraConfig.CLARA_PRIVATE_KEY;
     }
     getProfile() {

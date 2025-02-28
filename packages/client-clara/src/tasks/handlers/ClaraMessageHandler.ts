@@ -1,13 +1,13 @@
 import { elizaLogger, IAgentRuntime, stringToUuid, UUID } from "@elizaos/core";
 import { ClaraTaskType } from "../../utils/claraTypes";
-import { ClaraClientBase } from "../../ClaraClientBase";
+import { ClaraClient } from "../../ClaraClient";
 import { ClaraTaskHandler } from "./ClaraTaskHandler";
 import { ClaraTask } from "../ClaraTask";
 
 export class ClaraMessageHandler extends ClaraTask {
     private claraTaskHandler: ClaraTaskHandler;
     private claraMessage: ClaraTaskType;
-    constructor(runtime: IAgentRuntime, client: ClaraClientBase) {
+    constructor(runtime: IAgentRuntime, client: ClaraClient) {
         super(client, runtime);
         this.claraTaskHandler = new ClaraTaskHandler(this.client, this.runtime);
     }
@@ -17,46 +17,26 @@ export class ClaraMessageHandler extends ClaraTask {
         const { id, payload } = this.claraMessage;
         const claraMessageId = stringToUuid(id);
         const claraRoomId = stringToUuid(id + "-" + this.agentId);
-
         elizaLogger.info(`Started processing Clara message: ${id}.`);
-        const valid = await this.validate(claraMessageId);
+        const valid = await this.validate();
         if (!valid) {
-            this.updateLastCheckedMessage();
+            this.client.updateLastCheckedMessage(this.claraMessage);
             return;
         }
         if (!payload) {
             elizaLogger.log(`Skipping Clara message, could not locate prompt.`);
-            this.updateLastCheckedMessage();
+            this.client.updateLastCheckedMessage(this.claraMessage);
             return;
         }
-
         await this.claraTaskHandler.handle({
             claraMessage,
             claraMessageId,
             claraRoomId,
         });
-        this.updateLastCheckedMessage();
         elizaLogger.info(`Finished processing Clara message ${id}.`);
     }
 
-    private updateLastCheckedMessage() {
-        switch (this.client.claraConfig.CLARA_IMPL) {
-            case "ao":
-                this.client.lastCheckedMessage = this.claraMessage.timestamp;
-                break;
-            case "story":
-                this.client.lastCheckedMessage = Number(
-                    this.claraMessage.blockNumber
-                );
-                break;
-            default:
-                throw new Error(
-                    `Unknown Clara impl: ${this.client.claraConfig.CLARA_IMPL}`
-                );
-        }
-    }
-
-    private async validate(claraMessageId: UUID): Promise<boolean> {
+    private async validate(): Promise<boolean> {
         const { requester } = this.claraMessage;
         if (requester === this.walletId) {
             elizaLogger.log(
@@ -65,9 +45,20 @@ export class ClaraMessageHandler extends ClaraTask {
             return false;
         }
 
-        const existingResponse =
-            await this.runtime.messageManager.getMemoryById(claraMessageId);
-        if (existingResponse) {
+        let messageCursor: number;
+        switch (this.client.claraConfig.CLARA_IMPL) {
+            case "ao":
+                messageCursor = this.claraMessage.timestamp;
+                break;
+            case "story":
+                messageCursor = Number(this.claraMessage.blockNumber);
+                break;
+            default:
+                throw new Error(
+                    `Unknown Clara impl: ${this.client.claraConfig.CLARA_IMPL}`
+                );
+        }
+        if (this.client.lastCheckedMessage >= messageCursor) {
             elizaLogger.log(`Skipping Clara message, already processed task.`);
             return false;
         }

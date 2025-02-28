@@ -10,15 +10,15 @@ import {
     stringToUuid,
     UUID,
 } from "@elizaos/core";
-import { ClaraClientBase } from "../../ClaraClientBase";
+import { ClaraClient } from "../../ClaraClient";
 import { ClaraTaskType } from "../../utils/claraTypes";
-import { ClaraStateCompositionHandler } from "./ClaraStateCompositionHandler";
 import { wait } from "../../utils/utils";
 import { ClaraTask } from "../ClaraTask";
+import { ClaraStateCompositionHandler } from "./ClaraStateCompositionHandler";
 
 export class ClaraTaskHandler extends ClaraTask {
     private stateCompositionHandler: ClaraStateCompositionHandler;
-    constructor(client: ClaraClientBase, runtime: IAgentRuntime) {
+    constructor(client: ClaraClient, runtime: IAgentRuntime) {
         super(client, runtime);
         this.stateCompositionHandler = new ClaraStateCompositionHandler(
             this.runtime,
@@ -32,21 +32,6 @@ export class ClaraTaskHandler extends ClaraTask {
             elizaLogger.error(`Task id ${id}, invalid payload : `, payload);
             return;
         }
-
-        const prompt = payload;
-        elizaLogger.info(this.runtime.actions.map((a) => a.name.toLowerCase()));
-        elizaLogger.info(this.runtime.actions.map((a) => a.similes));
-        elizaLogger.info(
-            "is it true?",
-            JSON.stringify(
-                this.runtime.actions.find((action: Action) =>
-                    action.similes.find(
-                        (simly: any) =>
-                            simly.toLowerCase() == topic.toLowerCase()
-                    )
-                )
-            )
-        );
         if (
             !this.runtime.actions.find(
                 (a: Action) => a.name.toLowerCase() == topic.toLowerCase()
@@ -70,18 +55,11 @@ export class ClaraTaskHandler extends ClaraTask {
             requester,
             "clara"
         );
-        const memory = this.buildMemory(prompt, claraRoomId, userIdUUID);
+        const memory = this.buildMemory(payload, claraRoomId, userIdUUID);
         const state = await this.stateCompositionHandler.handle(
             claraMessage,
-            prompt,
+            payload,
             memory
-        );
-        await this.saveClaraTaskIfNeeded(
-            claraMessage,
-            claraRoomId,
-            claraMessageId,
-            prompt,
-            state
         );
         await this.processTaskInActions(
             state,
@@ -89,40 +67,10 @@ export class ClaraTaskHandler extends ClaraTask {
             claraMessage,
             claraRoomId,
             claraMessageId,
-            prompt,
+            payload,
             topic,
             id
         );
-    }
-
-    private async saveClaraTaskIfNeeded(
-        claraMessage: ClaraTaskType,
-        roomId: UUID,
-        messageId: UUID,
-        prompt: string,
-        state: State
-    ) {
-        const { timestamp, requester } = claraMessage;
-        const claraMessageExists =
-            await this.runtime.messageManager.getMemoryById(messageId);
-
-        if (!claraMessageExists) {
-            elizaLogger.log("Clara message does not exist, saving");
-            const userIdUUID = stringToUuid(requester);
-
-            const message = {
-                id: messageId,
-                agentId: this.runtime.agentId,
-                content: {
-                    text: prompt,
-                    url: "",
-                },
-                userId: userIdUUID,
-                roomId,
-                createdAt: timestamp,
-            };
-            this.client.saveRequestMessage(message, state);
-        }
     }
 
     private async processTaskInActions(
@@ -138,7 +86,14 @@ export class ClaraTaskHandler extends ClaraTask {
         const self = this;
         try {
             const callback: HandlerCallback = async (content: Content) => {
-                await self.client.claraClient.sendTaskResult(taskId, content);
+                if (!content.text) {
+                    elizaLogger.log(
+                        `Could not send result, no content generated.`
+                    );
+                    return [];
+                }
+                self.client.updateLastCheckedMessage(claraMessage);
+                await self.client.sendTaskResult(taskId, content);
                 return [];
             };
             const responseMessage: Memory = {
@@ -150,10 +105,6 @@ export class ClaraTaskHandler extends ClaraTask {
                     text: prompt,
                     action: task,
                     source: "Clara",
-                    // url: `https://www.ao.link/#/message/${id}`,
-                    // inReplyTo: stringToUuid(
-                    //     id + "-" + this.client.runtime.agentId
-                    // ),
                 },
                 embedding: getEmbeddingZeroVector(),
                 roomId,
